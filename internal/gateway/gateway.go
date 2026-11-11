@@ -6126,18 +6126,18 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		req.Header.Set(provider.ConversationHeader, conversationID(in, body))
 		// the session and subagent the agent named, for a plugin that
 		// keeps state per conversation (plugins#620)
-		req.Header.Del(provider.SessionToPluginHeader)
-		req.Header.Del(provider.SubagentToPluginHeader)
+		provider.DelPlugin(req.Header, provider.SessionToPluginHeader)
+		provider.DelPlugin(req.Header, provider.SubagentToPluginHeader)
 		if v := sessionOf(in); v != "" {
-			req.Header.Set(provider.SessionToPluginHeader, v)
+			provider.SetPlugin(req.Header, provider.SessionToPluginHeader, v)
 		}
 		if v := subOf(in); v != "" {
-			req.Header.Set(provider.SubagentToPluginHeader, v)
+			provider.SetPlugin(req.Header, provider.SubagentToPluginHeader, v)
 		}
 		tellWorkPlace(req.Header, to, body)
-		req.Header.Del(provider.FallbackHeader)
+		provider.DelPlugin(req.Header, provider.FallbackHeader)
 		if hasFallback(ctx) {
-			req.Header.Set(provider.FallbackHeader, "1")
+			provider.SetPlugin(req.Header, provider.FallbackHeader, "1")
 		}
 	}
 	if p.IsRemoteJianmu() {

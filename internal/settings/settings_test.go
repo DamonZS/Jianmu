@@ -163,6 +163,38 @@ func TestMigrate(t *testing.T) {
 	}
 }
 
+// A user coming from the magpie-named build keeps their files: the old
+// folder is copied, not moved, and wins over an older dial folder.
+func TestMigrateFromMagpie(t *testing.T) {
+	cfg, cache := t.TempDir(), t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", cfg)
+	t.Setenv("XDG_CACHE_HOME", cache)
+	for dir, body := range map[string]string{"magpie": "from-magpie", "dial": "from-dial"} {
+		if err := os.MkdirAll(filepath.Join(cfg, dir), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(cfg, dir, "providers.json"), []byte(body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.MkdirAll(filepath.Join(cache, "magpie"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(cache, "magpie", "c"), []byte("c"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	Migrate()
+	if b, _ := os.ReadFile(filepath.Join(cfg, "jianmu", "providers.json")); string(b) != "from-magpie" {
+		t.Fatalf("jianmu has %q, want the magpie folder's file", b)
+	}
+	if _, err := os.Stat(filepath.Join(cfg, "magpie", "providers.json")); err != nil {
+		t.Fatal("the magpie folder must stay")
+	}
+	if _, err := os.Stat(filepath.Join(cache, "jianmu", "c")); err != nil {
+		t.Fatal("the magpie cache was not carried")
+	}
+}
+
 func TestArrange(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	s := Settings{AgentOrder: []string{"codex", "gone", "claude", "codex"}, AgentsHidden: []string{"crush"}}

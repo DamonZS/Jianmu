@@ -78,6 +78,23 @@ const (
 	SubagentToPluginHeader = "X-Magpie-Subagent"
 )
 
+// Twin is the X-Jianmu-* name a plugin-facing X-Magpie-* header also goes
+// out under: jianmu's own standard is X-Jianmu-*, while the community's
+// plugins read X-Magpie-*, so both are written and neither is dropped.
+func Twin(name string) string { return "X-Jianmu-" + strings.TrimPrefix(name, "X-Magpie-") }
+
+// SetPlugin sets name and its twin to v.
+func SetPlugin(h http.Header, name, v string) {
+	h.Set(name, v)
+	h.Set(Twin(name), v)
+}
+
+// DelPlugin removes name and its twin.
+func DelPlugin(h http.Header, name string) {
+	h.Del(name)
+	h.Del(Twin(name))
+}
+
 // warmPlugin starts p's plugin host and runs its account's loader, which
 // may renew the sign-in, under ctx and through the account's proxy: what
 // a plugin's first fetch waits for besides its vendor. A failure is left
