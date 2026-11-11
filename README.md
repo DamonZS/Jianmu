@@ -1,68 +1,97 @@
+<div align="center">
+
 # Jianmu
 
-一个本地网关，把每个 Agent 的模型、供应商、额度和路由收在一个地方管。
+### Every agent's model. One place.
 
-Jianmu 是一个本地网关，把每个 Agent 的模型、供应商、额度和路由收在一个地方管。兼容 `@magpie-community/*` 社区插件。
+**One local gateway for every agent's models, providers, quotas and routing.**<br>
+Point Claude Code, Codex, Gemini CLI and more at any model you can reach,<br>
+and when a quota runs out, it quietly moves on to your next account.
 
-## 它能做什么
+[![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 
-- **供应商与账号**：多密钥、多账号、订阅桥接、额度读取与自动切换。
-- **网关路由**：路由组、回退、九种路由策略、请求中间件与会话聚合。
-- **Agent 接线**：按各 Agent 自己的配置格式写入网关地址，支持漂移检测、断开与 WSL。
-- **Library**：指令、MCP 服务器、Skills 统一维护，一次写进所有 Agent。
-- **插件**：内置插件可关停；社区插件在独立的 Bun 宿主里运行，工具以 MCP 形式提供给所有 Agent。
-- **共享记忆**：跨 Agent 的短文本记忆，通过 MCP 读写。
-- **同步与备份**：口令加密的配置包，可存到 WebDAV、S3 或 GitHub。
-- **四种形态**：桌面窗口与托盘、`jianmu web`（浏览器/手机）、`jianmu tui`、`jianmu serve`（纯网关）。
+**[Download](https://github.com/DamonZS/Jianmu/releases)** &nbsp;·&nbsp; **[Website](https://toporeduce.cn)** &nbsp;·&nbsp; **[Reference](docs/reference.md)** &nbsp;·&nbsp; **[Plugins](https://github.com/DamonZS/jianmu-commonity)** &nbsp;·&nbsp; **English** · [简体中文](README.zh-CN.md)
 
-## 安装
+</div>
 
-Windows、macOS、Linux 的发布产物见 [Releases](https://github.com/DamonZS/Jianmu/releases)。
+<br>
 
-## 构建与发布
+## Is Jianmu for you?
 
-需要 Go 1.26.8 或更高。
+Each agent keeps its model in its own file, in its own format, with its own keys and base URLs. A subscription you pay for works in one agent and nowhere else. Jianmu puts all of that behind one app and one local gateway:
 
-```bash
-make build            # 桌面版（本机平台）
-make cli              # 无界面版，可交叉编译
-make build-release    # 桌面版，前端资源打包成 zip 内嵌
-make assets-pack      # 单独打包前端资源为 internal/gui/assets.zip
-make test             # vet + 全部测试（-tags "$(TAGS)"）
-make test-ui          # 浏览器回归测试（node --test，需 Playwright 的 Chromium/WebKit）
-make icons            # 重新生成托盘与应用图标
+- **Pick any model for any agent** from one list. Jianmu writes the agent's own config in its own format.
+- **Use one provider everywhere**: an API key, a local model, or a subscription you are signed in to.
+- **Keep going when a quota runs out**: the next account takes over, and a routing group can move on to another model or provider.
+- **Keep one source of truth**: instructions, MCP servers and skills are written once and put into every agent.
+
+It is for you if you use more than one agent, more than one provider, or more than one account. If one agent on its vendor's own plan is enough, you don't need it.
+
+## Quick start
+
+**1 · Install.** Download the build for your system from [Releases](https://github.com/DamonZS/Jianmu/releases).
+
+**2 · Add a provider.** Open Jianmu, go to Providers and add one. Pick a preset and paste a key, or sign in with a subscription. Our own relay, `https://api.toporeduce.cn`, is listed first.
+
+**3 · Pick a model** for each agent on the Agents page. A new session is on the new model.
+
+Anything else that takes a base URL can use the gateway too:
+
+```sh
+export OPENAI_BASE_URL=http://127.0.0.1:3425/v1
+export ANTHROPIC_BASE_URL=http://127.0.0.1:3425
 ```
 
-Linux 桌面版用 cgo 链接 GTK 3 与 WebKitGTK 4.1，只能在本机原生构建（Debian/Ubuntu：`libgtk-3-dev libwebkit2gtk-4.1-dev libwayland-dev libfontconfig1-dev`）；Windows 桌面版走系统 WebView2，不需要 cgo，可以交叉编译。
+## What it does
 
-Windows 桌面版的完整发布产物：
+| | |
+| :-- | :-- |
+| **Providers and accounts** | Many keys, many accounts, subscription bridges, quota reading and automatic switching |
+| **Gateway routing** | Routing groups, fallbacks, nine routing strategies, request middleware and session aggregation |
+| **Agent wiring** | Writes the gateway address into each agent's own config format, detects drift, disconnects cleanly, and supports WSL |
+| **Library** | Instructions, MCP servers and skills maintained in one place and written to every agent |
+| **Plugins** | Built-in plugins can be switched off. Community plugins run in an isolated Bun host and offer their tools to every agent over MCP |
+| **Shared memory** | Short notes shared across agents, read and written over MCP |
+| **Sync and backup** | Passphrase-encrypted config bundles stored on WebDAV, S3 or GitHub |
+| **Four forms** | Desktop window and tray, `jianmu web` (browser or phone), `jianmu tui`, and `jianmu serve` (gateway only) |
 
-```bash
-make release-windows  # 生成 dist/jianmu-windows-<arch>.exe
+The gateway at `127.0.0.1:3425` speaks OpenAI Chat, OpenAI Responses, Anthropic Messages and Gemini, and translates between them.
+
+## Build from source
+
+Requires Go 1.26.8 or newer.
+
+```sh
+make build            # desktop build for this platform
+make cli              # headless build, can be cross-compiled
+make build-release    # desktop build with the UI assets packed into a zip
+make test             # go vet and all tests
+make test-ui          # browser regression tests (node --test, needs Playwright)
+make icons            # regenerate tray and app icons
 ```
 
-它先用 `go build ./internal/update/launcher` 产出 `internal/update/launcher-<arch>.com`（`jianmu.com` 的载荷），再链接带 `comlauncher` 标签的主程序。
+The Linux desktop build links GTK 3 and WebKitGTK 4.1 through cgo and must be built natively (Debian or Ubuntu: `libgtk-3-dev libwebkit2gtk-4.1-dev libwayland-dev libfontconfig1-dev`). The Windows desktop build uses the system WebView2, needs no cgo, and can be cross-compiled with `make release-windows`.
 
-### CI
+## Releases and CI
 
-| 工作流 | 触发 | 做什么 |
+| Workflow | Trigger | What it does |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | push 到 `main`、pull request | 装 GTK/WebKitGTK/Xvfb，跑 `make test`（`go vet` + `go test ./...`，用 Makefile 的 tags） |
-| `.github/workflows/release.yml` | 推送 `v*` 标签 | 矩阵构建 Windows 桌面版（amd64/arm64）与全平台 CLI 版，生成 `SHA256SUMS`，上传到 GitHub Release |
+| `ci.yml` | push to `main`, pull request | Runs `make test` (`go vet` and `go test ./...`) |
+| `docker.yml` | push to `main` | Builds a multi-arch image (amd64 and arm64) for `ghcr.io/damonzs/jianmu` |
+| `release.yml` | push to `main`, `v*` tags | Picks the next version, writes the update notes from the commits, builds every target, writes `SHA256SUMS` and publishes the GitHub release |
 
-发布 workflow 只用 Makefile 已有的目标（`release-windows`、`release-cli`），并在构建前先跑 `assets-pack`。版本号从标签去掉前导 `v` 后注入 `-X main.version=`，与本地 `make release` 一致。
+Release assets:
 
-macOS 桌面版（`jianmu-darwin-<arch>.zip`，已签名并公证）不在 CI 里构建，需要 Mac 与 Apple 签名密钥；Linux 桌面版同理不做交叉构建，CI 不产出 `jianmu-linux-<arch>`，Linux 用户默认拿 CLI 版。
+- `jianmu-windows-x64.exe`, `jianmu-windows-arm64.exe`
+- `jianmu-macos-x64.dmg`, `jianmu-macos-arm64.dmg` (not notarized)
+- `jianmu-linux-x64`, `jianmu-linux-arm64`
+- Source code (zip) and Source code (tar.gz)
 
-发布资源的文件名必须与更新器一致（`internal/update/update.go` 的 `BinaryAsset` / `AppAsset`）：
+Asset names must match what the updater expects (`BinaryAsset` and `AppAsset` in `internal/update/update.go`).
 
-- 桌面版：`jianmu-windows-x64.exe`、`jianmu-windows-arm64.exe`、`jianmu-darwin-arm64.zip`
-- Linux：`jianmu-linux-x64`、`jianmu-linux-arm64`
-- CLI 版：`jianmu-cli-darwin-<arch>`、`jianmu-cli-windows-<arch>.exe`（x64 即 amd64）
+## Update feed
 
-## 更新源
-
-自更新通过 `https://toporeduce.cn/api/latest` 获取版本信息（可用 `JIANMU_UPDATE_FEED` 覆盖）。该接口需要返回：
+Self-update reads `https://toporeduce.cn/api/latest` (override with `JIANMU_UPDATE_FEED`). It must return:
 
 ```json
 {
@@ -75,14 +104,14 @@ macOS 桌面版（`jianmu-darwin-<arch>.zip`，已签名并公证）不在 CI �
 }
 ```
 
-`sha256` 是必需的，缺失会被拒绝安装。
+`sha256` is required; an asset without it is refused.
 
-## 文档
+## Documentation
 
-- `docs/subsystems/`：各子系统的设计与契约。
-- `docs/code-standards.md`：代码约定。
-- `docs/reference.md`：完整参考手册。
+- `docs/subsystems/`: design and contracts of each subsystem.
+- `docs/code-standards.md`: code conventions.
+- `docs/reference.md`: the full reference manual.
 
-## 许可
+## License
 
-MIT。见 [LICENSE](LICENSE)。第三方组件的许可见 `THIRD_PARTY_NOTICES`，构建产物在「设置 › 关于 › 开源许可」中显示同一份内容。
+[MIT](LICENSE). Copyright (c) Damon, [toporeduce.cn](https://toporeduce.cn). Third-party licenses are in `THIRD_PARTY_NOTICES`, shown as well in Settings › About › Open source licenses.
