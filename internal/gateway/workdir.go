@@ -123,8 +123,8 @@ func workPlace(req *Request) (dir, git string) {
 // off: unknown. Whether it is a git repository is the agent's word, else
 // looked at on disk.
 func tellWorkPlace(h http.Header, to provider.Protocol, body []byte) {
-	h.Del(provider.WorkDirHeader)
-	h.Del(provider.WorkGitHeader)
+	provider.DelPlugin(h, provider.WorkDirHeader)
+	provider.DelPlugin(h, provider.WorkGitHeader)
 	f := factsOf(to, body)
 	dir, git := f.dir, f.git
 	if dir == "" {
@@ -133,9 +133,9 @@ func tellWorkPlace(h http.Header, to provider.Protocol, body []byte) {
 	if git == "" {
 		git = provider.GitOnDisk(dir)
 	}
-	h.Set(provider.WorkDirHeader, url.PathEscape(dir))
+	provider.SetPlugin(h, provider.WorkDirHeader, url.PathEscape(dir))
 	if git != "" {
-		h.Set(provider.WorkGitHeader, git)
+		provider.SetPlugin(h, provider.WorkGitHeader, git)
 	}
 }
 

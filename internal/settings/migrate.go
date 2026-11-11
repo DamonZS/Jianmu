@@ -18,12 +18,17 @@ func Migrate() {
 	if Portable() != "" {
 		return
 	}
+	// magpie first: it is the newer of the two, and copyTree leaves a
+	// folder that exists alone, so dial then fills nothing when it was
+	// carried.
+	copyTree(filepath.Join(filepath.Dir(Dir()), "magpie"), Dir())
 	copyTree(filepath.Join(filepath.Dir(Dir()), "dial"), Dir())
 	cache := appdir.Getenv("XDG_CACHE_HOME")
 	if cache == "" {
 		home, _ := os.UserHomeDir()
 		cache = filepath.Join(home, ".cache")
 	}
+	copyTree(filepath.Join(cache, "magpie"), filepath.Join(cache, "jianmu"))
 	copyTree(filepath.Join(cache, "dial"), filepath.Join(cache, "jianmu"))
 }
 
