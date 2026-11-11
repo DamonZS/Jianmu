@@ -79,7 +79,9 @@
 .rt-node .rt-ic .ic img, .rt-node .rt-ic .ic svg { width: 26px; height: 26px; }
 .rt-node b { font-size: 13px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rt-node small { font-size: 11px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rt-hub { border-color: var(--fg); box-shadow: 0 0 0 4px var(--card-2); }
+.rt-hub { min-height: 96px; justify-content: center; border-radius: 26px 26px 12px 12px; border-color: color-mix(in srgb, var(--fg) 55%, #8a6a3a); background: linear-gradient(180deg, var(--card) 0%, color-mix(in srgb, #8a6a3a 14%, var(--card)) 100%); box-shadow: 0 0 0 4px var(--card-2), 0 0 18px color-mix(in srgb, #ED9834 28%, transparent); animation: rttrunk 2.4s ease-in-out infinite; }
+@keyframes rttrunk { 50% { box-shadow: 0 0 0 4px var(--card-2), 0 0 28px color-mix(in srgb, #66C2CE 45%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .rt-hub { animation: none; } }
 .rt-hub i { font-style: normal; font-size: 10.5px; font-weight: 560; margin-top: 5px; padding: 1px 8px; border-radius: 999px; background: var(--fg); color: var(--card); }
 .rt-hub.tick, .rt-src.tick { animation: rttick .4s ease-out; }
 @keyframes rttick { 40% { transform: scale(1.04); } }
