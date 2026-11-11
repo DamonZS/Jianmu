@@ -458,8 +458,10 @@ type settingsJSON struct {
 	Web           bool `json:"web,omitempty"`
 	// the proxy vendor requests go through now, and where it came from:
 	// settings, environment, system, off or none
-	ProxyNow    string `json:"proxyNow"`
-	ProxySource string `json:"proxySource"`
+	// SavedProxies are the named proxies, without their passwords
+	SavedProxies []savedProxyJSON `json:"proxies"`
+	ProxyNow     string           `json:"proxyNow"`
+	ProxySource  string           `json:"proxySource"`
 	// whether jianmu opens at login: the system's record, not a setting;
 	// LoginAllow, the record is there but the user switched it off in
 	// System Settings › Login Items, which is where it's allowed again
@@ -864,6 +866,7 @@ func settingsState() settingsJSON {
 		s.NotifyProblem = notifyProblem()
 	}
 	s.ProxyNow, s.ProxySource = netproxy.Describe()
+	s.Settings.Proxies, s.SavedProxies = nil, savedProxies() // passwords stay on disk
 	s.NoAccountsEnv = settings.AccountDiscoveryOff() && !s.NoAccountDiscovery
 	for _, name := range []string{"JIANMU_OTEL_ENABLED", "JIANMU_OTEL_ENDPOINT", "JIANMU_OTEL_HEADERS", "JIANMU_OTEL_METRICS", "JIANMU_OTEL_BODIES", "JIANMU_OTEL_BODIES_WHOLE", "JIANMU_OTEL_SESSIONS"} {
 		if _, ok := os.LookupEnv(name); ok {
@@ -1898,6 +1901,20 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
+	// whether that longest context also holds a window the user set
+	// (settings.ContextCapAll)
+	mux.HandleFunc("POST /api/settings/context-cap-mode", func(rw http.ResponseWriter, r *http.Request) {
+		var in struct{ All bool }
+		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+			fail(rw, err)
+			return
+		}
+		if err := provider.SetContextCapAll(in.All); err != nil {
+			fail(rw, err)
+			return
+		}
+		writeJSON(rw, settingsState())
+	})
 	// an agent's own Long conversations (settings.AgentCompacts): Own
 	// false follows the one for every agent again
 	mux.HandleFunc("POST /api/settings/agent-compact", func(rw http.ResponseWriter, r *http.Request) {
@@ -2036,6 +2053,8 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 	// Settings › Proxy's Test (#2076): the address Cloudflare sees a request
 	// from through the proxy in force, and without it
 	mux.HandleFunc("POST /api/proxy/check", handleProxyCheck)
+	proxyRoutes(mux)
+	mux.HandleFunc("POST /api/pipelines/check", handlePipelineCheck)
 	mux.HandleFunc("POST /api/settings/codex-titles", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Model string }
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -3484,6 +3503,11 @@ func fail(rw http.ResponseWriter, err error) {
 	if errors.As(err, &bun) {
 		out["code"], out["bun"], out["bunWhy"] = "bun_unstartable", bun.Bun, bun.Why
 		out["said"] = bunSaid[bun.Why]
+	}
+	// a proxy's web page inside the text: its title, said in the reader's
+	// language, never the markup
+	if what, ok := webPageSaid(out["error"]); ok && out["said"] == "" {
+		out["error"], out["said"], out["what"] = "A proxy in front of jianmu answered, not jianmu ("+what+")", "A proxy in front of jianmu answered, not jianmu ({what})", what
 	}
 	_ = json.NewEncoder(rw).Encode(out)
 }

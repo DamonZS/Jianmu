@@ -1946,7 +1946,7 @@ jianmu lists what Copilot’s `/models` gives the account: chat models only, wit
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
 
 ---
 
@@ -3498,7 +3498,292 @@ Yes. The CLI and the desktop app read the same config, so both use the model on 
 
 Yes. jianmu sets up a Goose in a WSL distro too, with the gateway’s address as the distro reaches it.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Cline on any model](https://usejianmu.ai/docs/cline). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Cline on any model](https://usejianmu.ai/docs/cline) and [Droid on any model](https://usejianmu.ai/docs/droid). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+
+---
+
+Source: https://usejianmu.ai/docs/droid
+
+# Droid on any model
+
+Droid, Factory’s coding agent, can run on custom models of your own. jianmu adds the models you have in jianmu to Droid as custom models, so droid can run on DeepSeek, Kimi, GLM, Qwen, an OpenAI key, or a ChatGPT or Copilot subscription, with no key pasted into Droid.
+
+Droid keeps its settings in `~/.factory/settings.json` (under `$FACTORY_HOME_OVERRIDE` when set). jianmu adds one entry to its `customModels` per model in jianmu, with the gateway’s address and a key of Droid’s own, and sets `sessionDefaultSettings.model`, the model sessions start on. Each model goes on the API its provider speaks, Anthropic Messages, OpenAI Responses or Chat Completions, so the gateway relays it as it is. A droid in WSL is set up the same way, reaching the gateway as the distro sees it.
+
+## Connect Droid
+
+1. **Add providers in jianmu.** In the Providers tab, add an API key or sign in to a subscription.
+2. **Pick a model on Droid’s row.** In the Agents tab, choose a model on Droid’s row.
+3. **Restart droid.** Droid reads its settings as it starts: open sessions keep what they have, so start droid again.
+
+```
+jianmu droid deepseek/deepseek-v4-pro    # Droid on DeepSeek
+jianmu droid                             # what Droid runs on now
+```
+
+## Models and thinking levels
+
+jianmu’s models are in droid’s `/model` picker too, under Custom models, so you can switch inside a session. A model that reasons is given a starting effort, so the picker offers its levels (off, low, medium and high); one that is a model Droid has built in takes Droid’s own levels and default. A model whose name Droid reads as OpenAI’s or Claude’s is written on the API Droid expects for it, so Droid doesn’t warn at each session start.
+
+## Your own models
+
+Custom models you added yourself stay as they were, ahead of jianmu’s, so their ids don’t move. If you change a field of one of jianmu’s entries in settings.json, such as its name or effort, jianmu keeps your value; only the address and key are put back at each sync. The older `~/.factory/config.json` is left alone.
+
+## Switch back
+
+Take Droid’s row off jianmu, or run `jianmu droid default`. jianmu removes its custom models and puts back the default model you had.
+
+## FAQ
+
+### Can Droid use my ChatGPT subscription?
+
+Yes. Sign in to ChatGPT in jianmu and pick a GPT model on Droid’s row. droid sends its requests to jianmu, which uses the subscription.
+
+### I changed the model but droid still uses the old one.
+
+Droid reads its settings as it starts. Restart droid, or switch with /model inside the session.
+
+### Why does /model show no thinking levels for a model?
+
+That model doesn’t reason. For one that does, jianmu gives it a starting effort, and droid then offers its levels.
+
+### Will jianmu touch my own BYOK models?
+
+No. Your custom models stay as they were and in front of jianmu’s.
+
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Goose on any model](https://usejianmu.ai/docs/goose) and [Zed on any model](https://usejianmu.ai/docs/zed). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+
+---
+
+Source: https://usejianmu.ai/docs/zed
+
+# Zed on any model
+
+Zed’s agent panel runs on the language model provider in its settings. jianmu adds itself to Zed as an OpenAI-compatible provider, so Zed’s agent can run on any model you have in jianmu: DeepSeek, Kimi, GLM, Qwen, an OpenAI key, or a ChatGPT or Copilot subscription, with no key pasted into Zed.
+
+Zed keeps its settings in `~/.config/zed/settings.json` on macOS and Linux (under `$XDG_CONFIG_HOME` if set) and in `%APPDATA%\Zed` on Windows. jianmu adds `language_models.openai_compatible.jianmu`, with the gateway’s address and jianmu’s models, and sets `agent.default_model` to the model you pick. Zed reads the change as it runs. The gateway translates each request for the model’s provider, tool calls and reasoning included.
+
+## Connect Zed
+
+1. **Add providers in jianmu.** In the Providers tab, add an API key or sign in to a subscription.
+2. **Pick a model on Zed’s row.** In the Agents tab, choose a model on Zed’s row.
+3. **Open Zed’s agent panel.** The model is the panel’s default, and jianmu’s models are in its model picker under jianmu.
+
+```
+jianmu zed deepseek/deepseek-v4-pro    # Zed's agent on DeepSeek
+jianmu zed                             # what Zed runs on now
+```
+
+## The API key
+
+Zed keeps an OpenAI-compatible provider’s key in the system’s credential store, keyed by the provider’s address, not in settings.json. jianmu saves a key of Zed’s own there for you: in the Keychain on macOS, in the Secret Service on Linux and in the Credential Manager on Windows. If Zed still asks for an API key, restart Zed.
+
+## Models and thinking
+
+Each model carries its context window and reply limit, so Zed knows when to compact, and whether it takes images. A model that thinks is written with `reasoning_effort` high, or the strongest level it has, so Zed shows its thinking switch and levels. A level you set on a model in settings.json yourself, `none` included, stays when jianmu rewrites the list. If Zed reaches the gateway through a proxy of yours, jianmu keeps that address.
+
+## Switch back
+
+Pick one of Zed’s own models on its row, take the row off jianmu, or run `jianmu zed default`. jianmu puts back the default model, and the provider entry, you had before.
+
+## FAQ
+
+### Can Zed use my ChatGPT subscription?
+
+Yes. Sign in to ChatGPT in jianmu and pick a GPT model on Zed’s row. Zed sends its requests to jianmu, which uses the subscription.
+
+### Zed asks for an API key for jianmu.
+
+jianmu saved the key in the system credential store. Restart Zed so it reads it.
+
+### Why doesn’t Zed show a thinking switch for a model?
+
+That model doesn’t think. For one that does, jianmu sets reasoning_effort, and Zed then shows the switch.
+
+### Does this change Zed’s edit predictions?
+
+No. jianmu sets the agent panel’s default model and adds a provider; edit predictions are left as they were.
+
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Droid on any model](https://usejianmu.ai/docs/droid) and [Crush on any model](https://usejianmu.ai/docs/crush). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+
+---
+
+Source: https://usejianmu.ai/docs/crush
+
+# Crush on any model
+
+Crush, Charm’s coding agent for the terminal, runs on the providers in its config. jianmu adds itself to Crush as a provider, so Crush can run on any model you have in jianmu: DeepSeek, Kimi, GLM, Qwen, an OpenAI key, or a ChatGPT or Copilot subscription, with no key pasted into Crush.
+
+Crush’s config is `~/.config/crush/crush.json` (under `$XDG_CONFIG_HOME` if set; `%LOCALAPPDATA%\crush` on Windows). jianmu adds `providers.jianmu` there, with the gateway’s address, a key of Crush’s own and jianmu’s models, and sets the models Crush runs on. The gateway translates each request for the model’s provider, tool calls and reasoning included. A Crush in WSL is set up the same way, reaching the gateway as the distro sees it.
+
+## Connect Crush
+
+1. **Add providers in jianmu.** In the Providers tab, add an API key or sign in to a subscription.
+2. **Pick a model on Crush’s row.** In the Agents tab, choose Crush’s large model, and its small one if you like.
+3. **Start crush.** jianmu’s models are in Crush’s own model picker too, under jianmu.
+
+```
+jianmu crush deepseek/deepseek-v4-pro     # Crush's large model on DeepSeek
+jianmu crush small deepseek/deepseek-v4-flash
+jianmu crush                              # what Crush runs on now
+```
+
+## Large, small and effort
+
+Crush has two model slots: `large` for the work and `small` for lighter tasks. Each can be any model, jianmu’s or one of your own providers’. The row also sets the large model’s `reasoning_effort`: low, medium or high.
+
+```
+jianmu crush effort high
+jianmu crush effort default    # back to Crush's own
+```
+
+## The two files
+
+Crush saves the models its own picker chooses to a data file, `~/.local/share/crush/crush.json` (under `$XDG_DATA_HOME` if set), which wins over the config. So jianmu writes the picks there too, where Crush writes them, and its provider stays in the config. When jianmu picks a model, settings Crush’s picker saved for the previous model, such as its `max_tokens`, are dropped, so a limit meant for one model doesn’t reach another. Keys you added to jianmu’s provider yourself stay when jianmu rewrites the models.
+
+## Switch back
+
+Pick one of your own providers’ models for both slots, take the row off jianmu, or run `jianmu crush default`. Once neither slot uses a model of jianmu’s, jianmu removes its provider from crush.json.
+
+## FAQ
+
+### Can Crush use my ChatGPT subscription?
+
+Yes. Sign in to ChatGPT in jianmu and pick a GPT model on Crush’s row. Crush sends its requests to jianmu, which uses the subscription.
+
+### Which wins, a pick in jianmu or one in Crush?
+
+The latest. Both are saved to Crush’s data file, so the last model picked, on Crush’s row or in Crush’s own picker, is the one Crush uses.
+
+### What is Crush’s small model for?
+
+Lighter tasks next to the main work. Set it on Crush’s row as small, to any model.
+
+### Does it work with Crush in WSL?
+
+Yes. jianmu sets up a Crush in a WSL distro too, with the gateway’s address as the distro reaches it.
+
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Zed on any model](https://usejianmu.ai/docs/zed) and [Raycast on any model](https://usejianmu.ai/docs/raycast). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+
+---
+
+Source: https://usejianmu.ai/docs/raycast
+
+# Raycast on any model
+
+Raycast AI takes models of your own as custom providers (Raycast Pro, on Mac and Windows). jianmu adds itself to Raycast as one, so Quick AI, AI Chat and AI Commands can run on any model you have in jianmu: DeepSeek, Kimi, GLM, Qwen, an OpenAI key, or a ChatGPT or Copilot subscription, with no key pasted into Raycast.
+
+Raycast reads its custom providers from `~/.config/raycast/ai/providers.yaml` in your user folder, on Mac and on Windows. jianmu adds one entry to its `providers` list, with the id `jianmu`: the gateway’s OpenAI-compatible address, a key of Raycast’s own and jianmu’s models. Raycast watches the file, so the models show up without a restart. The gateway translates each request for the model’s provider, tool calls and reasoning included.
+
+## Connect Raycast
+
+1. **Add providers in jianmu.** In the Providers tab, add an API key or sign in to a subscription.
+2. **Put jianmu on Raycast’s row.** In the Agents tab, set Raycast’s provider to jianmu.
+3. **Pick a model in Raycast.** Open Raycast’s model picker in Quick AI, AI Chat or an AI Command. jianmu’s models are listed under jianmu.
+
+```
+jianmu raycast jianmu     # jianmu's models in Raycast AI's picker
+jianmu raycast            # what Raycast is set to now
+```
+
+On Windows, Raycast makes its config folder when you open Reveal Providers Config in its settings; jianmu finds Raycast by that folder there.
+
+## Which models it lists
+
+The model is picked in Raycast, not in a file, so Raycast’s picker lists the models picked for Raycast on the Agents page. Hide one there and it leaves Raycast’s list. Each model comes with its name, context window and abilities, all spelled out, because Raycast assumes tools and vision off when they aren’t:
+
+- **Tools.** on for every model, so AI Extensions work.
+- **Vision.** on for a model that takes images.
+- **Reasoning effort.** on for a model with effort levels.
+- **Temperature.** off for a model that refuses it.
+
+## Your providers.yaml
+
+jianmu writes only its own entry. Your other providers, the top-level `tools` block and your comments stay. So do keys you add to jianmu’s entry yourself, such as `include_user_email`, `additional_parameters` or a model’s `description`. The file is written only when jianmu’s entry would change.
+
+## Switch back
+
+Take Raycast’s row off jianmu, or run `jianmu raycast default`. jianmu removes its entry, the `providers` list too if it was the only one, and the file if nothing else is left in it.
+
+## FAQ
+
+### Do I need Raycast Pro?
+
+Yes. Custom providers are a Raycast Pro feature, so jianmu’s models show in Raycast’s picker on a Pro plan.
+
+### Can Raycast use my ChatGPT subscription?
+
+Yes. Sign in to ChatGPT in jianmu and put jianmu on Raycast’s row, then pick a GPT model in Raycast. Raycast sends its requests to jianmu, which uses the subscription.
+
+### Do I need to restart Raycast?
+
+No. Raycast watches providers.yaml and picks up jianmu’s entry when it changes.
+
+### Do AI Extensions work?
+
+Yes. Every model is listed with tools on, and the gateway carries tool calls to each model’s provider.
+
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Crush on any model](https://usejianmu.ai/docs/crush) and [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+
+---
+
+Source: https://usejianmu.ai/docs/copilot-cli
+
+# Copilot CLI on any model
+
+GitHub Copilot CLI can run on model providers of your own (bring your own key), which needs no GitHub sign-in. jianmu adds itself to Copilot CLI as one, so `copilot` can run on any model you have in jianmu: DeepSeek, Kimi, GLM, Qwen, an OpenAI key, or a ChatGPT subscription, with no key pasted into Copilot.
+
+Copilot CLI keeps its folder in `~/.copilot` (or `$COPILOT_HOME`). Its own providers are in `providers.json` there (or `$COPILOT_PROVIDERS_CONFIG`). jianmu adds a provider named `jianmu` to that file, OpenAI-compatible, with the gateway’s address and a key of Copilot’s own, and adds jianmu’s models beside it, each with its name, context window and output limit. Then it sets `model` in `settings.json` to `jianmu/<model>`. The gateway translates each request for the model’s provider, tool calls and reasoning included.
+
+## Connect Copilot CLI
+
+1. **Add providers in jianmu.** In the Providers tab, add an API key or sign in to a subscription.
+2. **Pick a model on Copilot CLI’s row.** In the Agents tab, choose a model under jianmu.
+3. **Start copilot.** It runs on that model. Copilot’s own `/model` lists jianmu’s models too.
+
+```
+jianmu copilot deepseek/deepseek-v4-pro    # settings.json: jianmu/deepseek/deepseek-v4-pro
+jianmu copilot                             # what Copilot CLI runs on now
+```
+
+The row also lists Copilot’s own models and `auto`, Copilot’s own choice, for when you want GitHub’s models back.
+
+## Effort
+
+The row sets `effortLevel`, which Copilot saves beside the model: the model’s own levels, or low, medium, high and xhigh when Copilot’s list doesn’t name them. Copilot clears it when its own `/model` changes the model.
+
+```
+jianmu copilot effort high
+jianmu copilot effort default
+```
+
+## Your providers.json
+
+jianmu owns only the provider named jianmu and the models that name it. Your other providers, their models and any other key in the file stay where they are, and so does a key you add to jianmu’s provider yourself. A providers.json that isn’t valid JSON is left alone, never written over. When jianmu’s models change, jianmu brings its entries up to date, and writes the file only when they would change.
+
+## Switch back
+
+Pick one of Copilot’s own models on the row, or run `jianmu copilot default`. That removes `model` from settings.json and takes jianmu’s provider and models out of providers.json, leaving the rest.
+
+## FAQ
+
+### Do I need a GitHub Copilot subscription?
+
+No. Copilot CLI’s own providers need no GitHub sign-in, so jianmu’s models work without a Copilot plan.
+
+### Can Copilot CLI use my ChatGPT subscription?
+
+Yes. Sign in to ChatGPT in jianmu and pick a GPT model under jianmu on Copilot CLI’s row. Copilot sends its requests to jianmu, which uses the subscription.
+
+### Why does settings.json say jianmu/deepseek/…?
+
+Copilot names a model of one of its providers as provider/model, and jianmu’s provider is called jianmu. On the command line you can leave the jianmu/ out.
+
+### Can I keep my own BYOK providers?
+
+Yes. jianmu only touches its own provider and models in providers.json; yours stay as they are.
+
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Raycast on any model](https://usejianmu.ai/docs/raycast). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
 
 ---
 

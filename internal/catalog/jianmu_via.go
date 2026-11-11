@@ -67,7 +67,18 @@ func loops(via []string) bool {
 	if len(via) > MaxVia {
 		return true
 	}
-	return len(via) > 1 && slices.Contains(via, Self())
+	if len(via) > 1 && slices.Contains(via, Self()) {
+		return true
+	}
+	// a jianmu twice on one way is a loop through jianmus this one may
+	// not know by name (this jianmu restarted since, so its old name is
+	// no longer Self)
+	for i, v := range via {
+		if slices.Contains(via[:i], v) {
+			return true
+		}
+	}
+	return false
 }
 
 // Loops reports whether what another jianmu passes on by way of via (a

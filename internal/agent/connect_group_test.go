@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/DamonZS/Jianmu/internal/edit"
 	"github.com/DamonZS/Jianmu/internal/provider"
 	"github.com/DamonZS/Jianmu/internal/settings"
 )
@@ -31,7 +30,7 @@ func TestConnectOnARoutingGroupAlone(t *testing.T) {
 	if err := c.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if m, _ := edit.GetJSON(path, "model"); m != "group/folia-1" {
+	if m := writtenModel(path); m != "group/folia-1" {
 		t.Fatalf("connected on %q:\n%s", m, readFile(path))
 	}
 }

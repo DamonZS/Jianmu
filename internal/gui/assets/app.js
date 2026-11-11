@@ -288,11 +288,6 @@ const PENCIL = "M3.5 12.5l.5-2.5 6.8-6.8a1.2 1.2 0 0 1 1.7 0l.3.3a1.2 1.2 0 0 1 
 const PUZZLE = "M6.2 2.8h2.3a1.3 1.3 0 1 1 2.5 0h2.2V5a1.3 1.3 0 1 0 0 2.6v5.6H3V7.6a1.3 1.3 0 1 1 0-2.6V2.8z";
 
 // A brand icon: colour logos are images, mono logos take the text colour.
-// Nothing is ever invented: a model with no known vendor keeps the slot
-// empty, and a custom provider shows a plain outline ("generic").
-// A page redrawn whole (the Providers page, as a dialog opens or closes)
-// hands its icons to keptIcons first and the new rows take them back: a
-// logo made afresh loads its picture again and blinks out for a moment.
 let keptIcons = null;
 function keepIcons(...roots) {
   keptIcons = new Map();
@@ -501,7 +496,7 @@ function renderAgents() {
     const row = el("div", "row agent");
     row.dataset.id = a.id;
     row.title = a.path;
-    row.oncontextmenu = (ev) => { ev.preventDefault(); openAgentMenu(row.querySelector(".ag-handle"), a, inFold); };
+    row.oncontextmenu = (ev) => { ev.preventDefault(); openAgentMenu(row.querySelector(".ag-handle"), a, inFold, { x: ev.clientX, y: ev.clientY }); };
     const who = el("div", "who");
     who.append(el("div", "name", a.name));
     // the model picker takes the wide column, everything else the narrow one,
@@ -1188,14 +1183,21 @@ function connectedSaid(a, c) {
   return CONNECTED_HOW[c?.how] && model ? t(CONNECTED_HOW[c.how], { agent: a.name, model }) : plain;
 }
 
+// menuOf: b opens a menu, closed now
+const menuOf = (b) => (b.setAttribute("aria-haspopup", "menu"), b.setAttribute("aria-expanded", "false"));
+// libSwitch: a lib-switch button, on or not, named label
+function libSwitch(cls, on, label) {
+  const b = el("button", "lib-switch " + cls + (on ? " on" : ""));
+  b.type = "button";
+  b.setAttribute("role", "switch");
+  b.setAttribute("aria-checked", String(!!on));
+  if (label) b.setAttribute("aria-label", label);
+  b.append(el("i"));
+  return b;
+}
 function connectSwitch(a) {
-  const s = el("button", "lib-switch ag-conn" + (a.wired ? " on" : ""));
-  s.type = "button";
-  s.setAttribute("role", "switch");
-  s.setAttribute("aria-checked", a.wired ? "true" : "false");
-  s.setAttribute("aria-label", t("Connect {agent} to jianmu", { agent: a.name }));
+  const s = libSwitch("ag-conn", a.wired, t("Connect {agent} to jianmu", { agent: a.name }));
   s.title = a.wired ? t("Connected · switch off to put back what {agent} had before jianmu", { agent: a.name }) : t("Switch on and {agent}'s model list gets jianmu's models", { agent: a.name });
-  s.append(el("i"));
   // the list opened from a failed connect, drawn again while it is open
   if (!a.wired) holdAgentModels(a, s);
   s.onclick = async (e) => {
@@ -1572,14 +1574,9 @@ function connectRow(a, row, who, { fields, extras, fieldBtn, sw, kind }) {
     const add = el("button", "ag-add", t("Add a provider"));
     add.type = "button";
     add.onclick = (e) => { e.stopPropagation(); addProviderFromAgents(); };
-    const off = el("button", "lib-switch ag-conn");
-    off.type = "button";
+    const off = libSwitch("ag-conn", false, t("Connect {agent} to jianmu", { agent: a.name }));
     off.disabled = true;
-    off.setAttribute("role", "switch");
-    off.setAttribute("aria-checked", "false");
-    off.setAttribute("aria-label", t("Connect {agent} to jianmu", { agent: a.name }));
     off.title = t("Add a key or a subscription first; then there are models to connect");
-    off.append(el("i"));
     row.append(add, off);
   } else if (kind === "link") {
     // its link where a model stands, the switch's room kept (the owner)
@@ -1939,12 +1936,7 @@ async function addProviderFromAgents() {
 // Claude Jianmu app; go posts the new value and says what came of it
 function agSwitchLine(cls, on, say, hint, go) {
   const l = el("label", "ag-vl " + cls);
-  const b = el("button", "lib-switch use-credits" + (on ? " on" : ""));
-  b.type = "button";
-  b.setAttribute("role", "switch");
-  b.setAttribute("aria-checked", String(on));
-  b.setAttribute("aria-label", say);
-  b.append(el("i"));
+  const b = libSwitch("use-credits", on, say);
   l.append(b, el("span", cls + "-say", say), el("span", "ag-hint", hint));
   b.onclick = async (e) => {
     e.stopPropagation();
@@ -2686,9 +2678,6 @@ function updatedSay() {
 // ---------- installing the agents not here (#727) ----------
 // Under the list, the agents jianmu knows that aren't on this machine, each
 // with its vendor's install commands to copy into a terminal: the vendor's
-// installer first, then Homebrew's or npm's. jianmu doesn't run them — a
-// new computer may have no Node.js for npm yet, and an installer may ask
-// for things in the terminal. Folded unless no agent is here at all.
 
 let installInfo = []; // [{ id, name, icon, commands: [{ via, command }] }]
 
@@ -2864,10 +2853,6 @@ const isHidden = (a) => hiddenIds().includes(a.id);
 
 // unhideCleared: a hidden agent whose settings change so that nothing is set
 // on it any more goes under Not set up, its hiding dropped (Hu9956, #842):
-// put back to its defaults it kept Hidden and its Show until the switch was
-// turned on and off. One hidden while nothing was set on it stays hidden
-// until something on it changes. True when the arrangement is saved, which
-// renders the list again.
 const agentSeen = new Map(); // each agent's settings when last rendered
 const agentSig = (a) => JSON.stringify([!!a.wired, !!a.added, !!a.drift, a.fields.filter((f) => !tweak(f)).map((f) => [f.key, f.value || ""])]);
 function unhideCleared() {
@@ -3367,13 +3352,8 @@ async function openAgentModels(a, anchor, ev) {
   // picker beside jianmu's or left out (MizuIro-H, #1642): not in the list
   // below, which is jianmu's catalog, so a switch of their own
   const ownBox = el("label", "am-own");
-  const ownSw = el("button", "lib-switch use-credits" + (ownHidden ? "" : " on"));
-  ownSw.type = "button";
-  ownSw.setAttribute("role", "switch");
-  ownSw.setAttribute("aria-checked", String(!ownHidden));
-  ownSw.append(el("i"));
   const ownSay = el("span", "", t("Show {agent}'s own models", { agent: a.name }));
-  ownSw.setAttribute("aria-label", ownSay.textContent);
+  const ownSw = libSwitch("use-credits", !ownHidden, ownSay.textContent);
   ownBox.title = t("The models {agent} reaches itself, not through jianmu. Off: its model picker offers jianmu's alone; the one it is set to stays", { agent: a.name });
   ownBox.append(ownSw, ownSay);
   if (own) head.append(ownBox);
@@ -3403,13 +3383,8 @@ async function openAgentModels(a, anchor, ev) {
   // whether a model that comes later is shown, or stays off until ticked:
   // the agent's own switch, not every agent's (nianlee-official, #1337)
   const onlyBox = el("label", "am-only");
-  const onlySw = el("button", "lib-switch use-credits" + (only ? " on" : ""));
-  onlySw.type = "button";
-  onlySw.setAttribute("role", "switch");
-  onlySw.setAttribute("aria-checked", String(only));
-  onlySw.append(el("i"));
   const onlySay = el("span", "", t("Only models I pick"));
-  onlySw.setAttribute("aria-label", onlySay.textContent);
+  const onlySw = libSwitch("use-credits", only, onlySay.textContent);
   onlyBox.title = t("Off: new models are shown. On: only the models ticked here are shown, and a model added later, of any provider, stays off until you tick it");
   onlyBox.append(onlySw, onlySay);
   // takes back a first click on Hide all or Show all (twice, below)
@@ -3821,7 +3796,7 @@ function closeAgentMenu() {
   removeEventListener("resize", closeAgentMenu);
   agentMenu = null;
 }
-function openAgentMenu(anchor, a, inFold) {
+function openAgentMenu(anchor, a, inFold, at) {
   if (!anchor) return;
   const again = agentMenu?.anchor === anchor;
   closeAgentMenu();
@@ -3851,11 +3826,11 @@ function openAgentMenu(anchor, a, inFold) {
         { name: "Hide", icon: EYE_OFF, sep: true, run: () => setAgentHidden(a, true) },
         ...jianmu.actions?.("agent", { agent: { id: a.id, name: a.name } }) || [],
       ];
-  openRowMenu(anchor, acts);
+  openRowMenu(anchor, acts, at);
 }
 // openRowMenu: a small menu of acts under anchor, the one an agent row's
 // right-click opens, and a model chip's
-function openRowMenu(anchor, acts) {
+function openRowMenu(anchor, acts, at) {
   const box = el("div", "pop row-menu");
   box.setAttribute("role", "menu");
   const items = [];
@@ -3879,7 +3854,7 @@ function openRowMenu(anchor, acts) {
     if (!o.off) items.push(b);
   }
   document.body.append(box);
-  placeMenu(box, anchor, "left", -4);
+  placeMenu(box, anchor, "left", -4, at);
   anchor.classList.add("open");
   const outside = (e) => { if (!box.contains(e.target) && !anchor.contains(e.target)) closeAgentMenu(); };
   // a long menu scrolls inside itself; only a scroll outside it closes it
@@ -4261,12 +4236,8 @@ async function load(again) {
     // the panel's allowances asked beside the state, not after it (#3134)
     const early = mode === "panel" && !load.done;
     if (early) panelQuotasNow(again);
-    // the first load draws the state jianmu kept from its last read while
-    // the fresh one is read (#1519, fatkun): reading every agent's config,
-    // and a WSL distro's through \\wsl.localhost, took seconds after a
-    // start or after light mode let the window go. The fresh state
-    // replaces it the moment it is in, so an agent leaves the list only
-    // once that says it is gone.
+    // the first load draws the state kept from the last read while the
+    // fresh one (seconds, #1519) is read; an agent leaves only once that says so
     let relang = false, shown = null;
     if (!load.done) {
       const last = await Promise.race([api("state?last=1").catch(() => null), asked.then(() => null, () => null)]);
@@ -4536,11 +4507,8 @@ function updateStuck(u) {
 }
 
 // ---------- what's new ----------
-// After an update the window (or jianmu web's page) shows what changed in
-// every release since the one last run, once (a Discord user: to see if
-// their issue was fixed). Not in the tray's panel, where a dialog has no
-// room; Settings' version row opens it again, and with an update waiting,
-// that one's notes first.
+// After an update the window (or jianmu web) shows each release's changes
+// since the one last run, once; Settings' version row opens it again.
 const ISSUES = "https://github.com/DamonZS/Jianmu/issues/";
 let whatsNewAsked = false;
 // cliBehindOnce: the terminal's jianmu is a copy, not the installer's
@@ -4628,9 +4596,6 @@ function score(q, o) {
 // popTop is the highest a popover's top edge may go, pad under the window's
 // own chrome: on a Mac window the traffic lights are drawn over the page's
 // header.top, so a list that opens upward in a short window stops under it
-// rather than over them (#1573, lyston11). Elsewhere the header is the
-// page's own row and the edge is pad, as it always was. The header's
-// measured bottom already counts the text size (--zoom).
 function popTop(pad) {
   const b = document.body.classList;
   if (!b.contains("window") || !b.contains("mac")) return pad;
@@ -5436,10 +5401,8 @@ function renderList() {
 
 // fastToggle: a model with a fast mode (a ChatGPT account's GPT, Cursor's
 // -fast, …) is sent in it, or not, for the agent the picker is of (#954),
-// switched by the model as a routing group's member is; the pick itself
-// stays as it is. Where an account offers it Ultrafast too (ultraOk,
-// #1954), a click steps usual → Fast → Ultrafast → usual, as a camera's
-// flash button steps its modes
+// switched by the model as a routing group's member is. Where ultraOk
+// (#1954), a click steps usual → Fast → Ultrafast → usual
 const BOLT = "M9.25 1.75 3.75 9h4l-1 5.25L12.25 7h-4z";
 function fastToggle(o) {
   const b = el("button", "fast" + (o.fast ? " on" : "") + (o.fast && o.ultra ? " ultra" : ""));
@@ -6124,6 +6087,7 @@ function renderProviders(quiet) {
     if (p.off) name.append(el("span", "badge off", t("Switched off")));
     if (p.self) name.append(Object.assign(el("span", "badge" + (p.keepSelf ? "" : " off"), t("This jianmu")), { title: selfNote(p) }));
     if (p.move && p.move.state !== "plugin") name.append(deprecatedBadge());
+    if (p.proxyGone) name.append(Object.assign(el("span", "badge off", t("Proxy missing: {name}", { name: p.proxyGone })), { title: t("This provider's proxy isn't on this computer, so its requests fail until another is picked") }));
     const n = p.models.filter((m) => m.on).length;
     // rate windows: what it bills at now (#2463)
     if (p.rateNow > 0) {
@@ -6185,7 +6149,7 @@ function renderProviders(quiet) {
     // (#499): its logo is the handle, as an agent row's is
     row.append(p.off ? icon(p.icon || "generic") : providerHandle(p, row), who, uses, key, providerSwitch(p), chev);
     // right-click: Move to Top, Move Up, Move Down, Move to Bottom (#1614)
-    if (!p.off) row.oncontextmenu = (ev) => { ev.preventDefault(); openProviderMenu(row.querySelector(".pv-handle"), p); };
+    if (!p.off) row.oncontextmenu = (ev) => { ev.preventDefault(); openProviderMenu(row.querySelector(".pv-handle"), p, { x: ev.clientX, y: ev.clientY }); };
     row.onclick = async () => {
       if (providerDirty() && !(await confirmDiscard())) return;
       // a list drawn before the fresh one is in (#1519) leaves out what the
@@ -6256,7 +6220,7 @@ function stepProvider(id, by, keyboard) {
 }
 
 // openProviderMenu: a row's right-click (#1614), Use first, Never a fallback
-function openProviderMenu(anchor, p) {
+function openProviderMenu(anchor, p, at) {
   if (!anchor) return;
   const again = agentMenu?.anchor === anchor;
   closeAgentMenu();
@@ -6272,7 +6236,7 @@ function openProviderMenu(anchor, p) {
     { name: "Use first", icon: p.useFirst ? CHECK : "", sep: !0, run: () => accountAction("provider/usefirst", { id: p.id, useFirst: !p.useFirst }, t(p.useFirst ? "{name} takes its turn with the others" : "{name} is used first", { name: p.name })) },
     { name: "Never a fallback", icon: p.noStandIn ? CHECK : "", run: () => accountAction("provider/standin", { id: p.id, noStandIn: !p.noStandIn }, t(p.noStandIn ? "{name} can be a fallback again" : "{name} is never a fallback for another model", { name: p.name })) },
     ...jianmu.actions?.("provider", { provider: { id: p.id, name: p.name } }) || [],
-  ]);
+  ], at);
 }
 
 // Providers' search (#1614): the rows saying every word, on and off, by their
@@ -6371,12 +6335,8 @@ let providerArrangeSeq = 0;
 // goes to it (a key out of quota, say), without removing it.
 function providerSwitch(p) {
   const on = !p.off;
-  const s = el("button", "lib-switch pswitch" + (on ? " on" : ""));
-  s.setAttribute("role", "switch");
-  s.setAttribute("aria-checked", on ? "true" : "false");
-  s.setAttribute("aria-label", t("Use {name}", { name: p.name }));
+  const s = libSwitch("pswitch", on, t("Use {name}", { name: p.name }));
   s.title = on ? t("On · switch it off and agents no longer get its models; its keys and settings are kept") : t("Off · switch it on and agents get its models again");
-  s.append(el("i"));
   s.onclick = (e) => { e.stopPropagation(); switchProvider(p, !on, s); };
   return s;
 }
@@ -7187,9 +7147,6 @@ function renderAdd() {
     // one moved onto its plugin stays where it was, signing in through it;
     // a deprecated one whose plugin is installed is that plugin's row alone
     // (ARNO on Discord: Qoder CN twice), and one with no account isn't
-    // offered at all: it is the Plugins page's, installed from there
-    // (yetone: 对于新用户来说，这里应该只显示内置的 provider), unless it is
-    // signing in now. A search naming one finds it there.
     const named = (x) => !f || x.name.toLowerCase().includes(f) || x.agent.includes(f) || "subscription".includes(f);
     const subs = SUBS.filter((x) => !(replacedSub(x.agent) || unusedSub(x.agent)) || signing?.agent === x.agent).map((x) => subOf(x.agent)).filter(named);
     const inPlugins = f && SUBS.some((x) => unusedSub(x.agent) && signing?.agent !== x.agent && named(subOf(x.agent)));
@@ -7578,11 +7535,9 @@ function providerDirty() {
     (active?.matches(".editor .mprice input") && active.value !== active.defaultValue));
 }
 // backdropClick(el, on) says whether a click on el is one on its backdrop:
-// pressed and let go both where on(e) says the backdrop is. A press inside
-// the dialog let go out over the backdrop, a selection dragged out of a
-// field (#1373), clicks the two's nearest shared ancestor, the backdrop, so
-// the click's own target can't tell it apart. Every dialog that closes from
-// its backdrop asks this.
+// pressed and let go both where on(e) says the backdrop is: a selection
+// dragged out of a field (#1373) clicks the backdrop too. Every dialog that
+// closes from its backdrop asks this.
 function backdropClick(el, on = (e) => e.target === el) {
   let down = false, up = false;
   el.addEventListener("pointerdown", (e) => { down = on(e); up = false; }, true);
@@ -7702,7 +7657,39 @@ const PROXY_HINT = {
   "": "Follows the proxy in Settings",
   direct: "Requests to it go direct, whatever the proxy in Settings",
   custom: "Requests to it go through this proxy: http://, https:// or socks5://",
+  saved: "Requests to it go through this saved proxy, kept in Settings",
 };
+// the named proxies of Settings › Network, chosen as "@id" wherever a proxy can be
+function savedProxyList() { return prefs?.proxies || []; }
+function savedProxyName(ref) {
+  const p = savedProxyList().find((x) => x.id === String(ref || "").slice(1));
+  return p ? p.name : t("A proxy that is gone");
+}
+// a Saved mode beside the others, once a proxy is saved (or one is chosen)
+function withSavedMode(modes, saved) {
+  return savedProxyList().length || saved ? [...modes, ["saved", t("Saved")]] : modes;
+}
+function firstSavedRef() {
+  const p = savedProxyList()[0];
+  return p ? "@" + p.id : "";
+}
+// savedProxyButton: the saved proxy chosen, a menu of the others
+function savedProxyButton(ref, onPick) {
+  const b = el("button", "text proxy-saved", ref ? savedProxyName(ref) : t("Choose a proxy"));
+  b.type = "button";
+  b.setAttribute("aria-haspopup", "menu");
+  b.title = b.textContent;
+  b.onclick = (e) => {
+    e.stopPropagation();
+    const opts = savedProxyList().map((x) => ({ v: "@" + x.id, name: x.name, literalName: true }));
+    openProtoMenu(b, opts, ref || "", (v) => {
+      ref = v;
+      b.textContent = b.title = savedProxyName(v);
+      onPick(v);
+    }, "Choose a proxy");
+  };
+  return b;
+}
 function proxyPicker() {
   const box = el("div", "stack proxy-pick");
   const hint = el("div", "hint", t(PROXY_HINT[draft.proxyMode || ""]));
@@ -7710,16 +7697,28 @@ function proxyPicker() {
   addr.className = "proxy-url";
   addr.classList.toggle("off", draft.proxyMode !== "custom");
   const login = proxyLoginRow(addr, (v) => { draft.proxyURL = v; });
-  const seg = segs([["", t("Global proxy")], ["direct", t("Direct")], ["custom", t("Custom")]], draft.proxyMode || "", (v) => {
-    draft.proxyMode = v;
+  const saved = savedProxyButton(draft.proxyRef, (v) => { draft.proxyRef = v; });
+  const place = (v) => {
     addr.classList.toggle("off", v !== "custom");
+    addr.classList.toggle("gone", v === "saved");
     login.classList.toggle("off", v !== "custom");
+    login.classList.toggle("gone", v === "saved");
+    saved.hidden = v !== "saved";
+  };
+  const seg = segs(withSavedMode([["", t("Global proxy")], ["direct", t("Direct")], ["custom", t("Custom")]], draft.proxyMode === "saved"), draft.proxyMode || "", (v) => {
+    draft.proxyMode = v;
+    if (v === "saved" && !draft.proxyRef) {
+      draft.proxyRef = firstSavedRef();
+      saved.textContent = saved.title = savedProxyName(draft.proxyRef);
+    }
+    place(v);
     hint.textContent = t(PROXY_HINT[v]);
   });
   seg.classList.add("proxy-mode");
+  place(draft.proxyMode || "");
   // its room kept while not asked for: a pick never moves the dialog
   const row = el("div", "proxy-row");
-  row.append(seg, addr);
+  row.append(seg, addr, saved);
   box.append(row, login, hint);
   return box;
 }
@@ -7975,8 +7974,11 @@ function proxyDraft(p) {
   const v = (p?.proxy || "").trim();
   // each account's own (accountProxies), by its name in lower case
   const accountProxies = {};
-  for (const [u, x] of Object.entries(p?.accountProxies || {})) accountProxies[u] = { mode: x === "direct" ? "direct" : "custom", url: x === "direct" ? "" : x };
-  return { proxyMode: !v ? "" : v === "direct" ? "direct" : "custom", proxyURL: v && v !== "direct" ? v : "", accountProxies };
+  for (const [u, x] of Object.entries(p?.accountProxies || {})) {
+    accountProxies[u] = x === "direct" ? { mode: "direct", url: "" } : x.startsWith("@") ? { mode: "saved", url: "", ref: x } : { mode: "custom", url: x };
+  }
+  const ref = v.startsWith("@");
+  return { proxyMode: !v ? "" : v === "direct" ? "direct" : ref ? "saved" : "custom", proxyURL: v && v !== "direct" && !ref ? v : "", proxyRef: ref ? v : "", accountProxies };
 }
 // asTyped: the editor's form as it stands, for Refresh and the Tests to
 // ask with before a Save — a key just pasted over the saved one is the one
@@ -8013,6 +8015,7 @@ const CERT_FIELDS = ["clientCert", "clientKey", "serverCA"];
 // has no address yet.
 function proxyOfDraft() {
   if (draft.proxyMode === "direct") return "direct";
+  if (draft.proxyMode === "saved") return draft.proxyRef || null;
   if (draft.proxyMode !== "custom") return "";
   return (draft.proxyURL || "").trim() || null;
 }
@@ -8020,9 +8023,6 @@ function proxyOfDraft() {
 // accountProxyPicker: one proxy per account of a subscription holding
 // several (gakki: one Codex account through one proxy, another through
 // another) — the provider's own (the row above), none, or its own address.
-// Each account is a line of its name over the same row as the provider's,
-// the address's room kept while it isn't asked for, so a pick moves
-// nothing. null for a subscription with one account: the row above is its.
 const ACCOUNT_PROXY_HINT = "Each account can go through a proxy of its own; Provider's proxy is the one above";
 function accountProxyPicker(a, p) {
   const ls = [...(a?.logins || [])];
@@ -8100,14 +8100,27 @@ function proxyLine(it) {
   addr.className = "proxy-url";
   addr.classList.toggle("off", cur.mode !== "custom");
   const login = proxyLoginRow(addr, (v) => { draft.accountProxies[k] = { ...(draft.accountProxies[k] || { mode: "custom" }), url: v }; });
-  const seg = segs([["", t("Provider's proxy")], ["direct", t("Direct")], ["custom", t("Custom")]], cur.mode || "", (v) => {
-    draft.accountProxies[k] = { ...(draft.accountProxies[k] || {}), mode: v };
+  const saved = savedProxyButton(cur.ref, (v) => { draft.accountProxies[k] = { ...(draft.accountProxies[k] || {}), ref: v }; });
+  const place = (v) => {
     addr.classList.toggle("off", v !== "custom");
+    addr.classList.toggle("gone", v === "saved");
     login.classList.toggle("off", v !== "custom");
+    login.classList.toggle("gone", v === "saved");
+    saved.hidden = v !== "saved";
+  };
+  const seg = segs(withSavedMode([["", t("Provider's proxy")], ["direct", t("Direct")], ["custom", t("Custom")]], cur.mode === "saved"), cur.mode || "", (v) => {
+    const now = { ...(draft.accountProxies[k] || {}), mode: v };
+    if (v === "saved" && !now.ref) {
+      now.ref = firstSavedRef();
+      saved.textContent = saved.title = savedProxyName(now.ref);
+    }
+    draft.accountProxies[k] = now;
+    place(v);
   });
   seg.classList.add("proxy-mode");
+  place(cur.mode || "");
   const row = el("div", "proxy-row");
-  row.append(seg, addr);
+  row.append(seg, addr, saved);
   line.append(who, row, login);
   return line;
 }
@@ -8118,6 +8131,7 @@ function accountProxiesOfDraft() {
   const out = {};
   for (const [u, x] of Object.entries(draft.accountProxies || {})) {
     if (x.mode === "direct") out[u] = "direct";
+    else if (x.mode === "saved" && x.ref) out[u] = x.ref;
     else if (x.mode === "custom") {
       const v = (x.url || "").trim();
       if (!v) return { missing: u };
@@ -8395,8 +8409,7 @@ function iconPicker(ed) {
     // the site's icon, a picture's address or the name's letters (usrname1833)
     const base = () => draft[apiField[draft.api]] || draft.chat || draft.responses || draft.anthropic || "";
     const site = el("button", "text", t("Get icon"));
-    site.setAttribute("aria-haspopup", "menu");
-    site.setAttribute("aria-expanded", "false");
+    menuOf(site);
     site.append(svg(CHEV, 11, 1.7));
     // true when the picture is the icon now (hoobnn)
     const get = async (path, body) => {
@@ -8514,9 +8527,6 @@ const BIRD = `<svg viewBox="0 0 44 44"><use href="#bird"/></svg>`;
 // what is loading, with jianmu's bird on it (the owner, after the plugin
 // page's README): skeletons still up after a moment, as on a slow page, get
 // the bird. It drops onto one, hops from bar to bar, each bar giving under
-// its feet, and flies off once none is left. One bird for the window, over
-// whatever page or dialog shows them; a quick load never sees it, and with
-// reduced motion the bars stand still and no bird comes.
 const SKEL = ".skeleton, .pm-card.ghost .sk";
 // the skeletons a reader sees now: on screen, big enough to stand on, and
 // not under a dialog or out of their scroller
@@ -11343,7 +11353,7 @@ function renderModels(p) {
         const k = kindNow(id);
         acts.push({ name: k ? t("Makes: {kind}…", { kind: t(KIND_NAMES[k]) }) : t("Makes: Auto…"), icon: "M2.5 4h11v8h-11zM6.5 6.25v3.5L9.5 8z", tip: t("Say this model makes images or videos, when the provider's model list doesn't"), run: () => pickKind(c, id) });
       }
-      openRowMenu(c, acts);
+      openRowMenu(c, acts, { x: e.clientX, y: e.clientY });
     };
     // the API it is asked on, when one is picked (or staged)
     const now = apis.length && (!decidesModel(p, id) || apiNow(id) === "decide") ? apiNow(id) : "";
@@ -11600,7 +11610,6 @@ function renderModels(p) {
       same.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") same.blur(); else if (e.key === "Escape") { same.value = sameNow(); same.blur(); } };
       sameBox.append(el("span", "", t("Same as")), same);
       row.append(sameBox);
-      // its models.dev picker, in modellimits.js
       window.modelSamePick ? modelSamePick(sameBox, same) : import("./modellimits.js").then(() => modelSamePick(sameBox, same), () => {});
       // the id it is listed by here, asked for by its own (zeewell on X)
       const savedID = m.vendor ? m.id : "";
@@ -12195,6 +12204,17 @@ function routingOfDraft(p) {
   if (draft?.sink !== undefined && draft.sink !== !!p.sink) out.sink = draft.sink;
   return out;
 }
+// how jianmu moves the agent's sign-in (provider.SignInMovesOf)
+function signInMovesLine(p, agent) {
+  const m = p.signInMoves;
+  if (!m) return "";
+  if (m.mode === "gateway") return t("{agent}'s requests go through jianmu, which sends each one to an account with room; its own sign-in stays where you put it.", { agent });
+  if (m.mode !== "moves") return "";
+  const on = m.share >= 100
+    ? t("When the account {agent} is signed in to is used up, jianmu signs it in to the next ticked account with room.", { agent })
+    : t("When the account {agent} is signed in to reaches {share}%, jianmu signs it in to the next ticked account with room.", { agent, share: m.share });
+  return on + (locale === "zh" || locale === "zh-TW" || locale === "ja" ? "" : " ") + (m.back ? t("It goes back to the first once that has room again.") : t("It stays on that one till it runs low too."));
+}
 function renderRouting(p) {
   const routingNow = () => draft.routing ?? (p.routing || "");
   const affinityNow = () => draft.affinity ?? (p.affinity || "");
@@ -12206,7 +12226,9 @@ function renderRouting(p) {
   const a = p.account;
   // — at 98%, In order once used up (#530), never when kept on the first (#524)
   const own = (routing) => !a || (a.agent !== "codex" && a.agent !== "claude") ? ""
-    : " " + (keptLogin(p)
+    : " " + (p.signInMoves?.mode === "gateway" && !keptLogin(p) && !p.keepLogin
+      ? signInMovesLine(p, a.agentName)
+      : keptLogin(p)
       ? t("Routing picks the account for each request through jianmu, in the accounts' order; {agent} on its own stays signed in to {user}, whatever it has left.", { agent: a.agentName, user: keptLogin(p) })
       : p.keepLogin && !p.switchOnly
       ? t("Routing picks the account for each request through jianmu; {agent} on its own stays signed in to the first account, whatever it has left.", { agent: a.agentName })
@@ -12818,6 +12840,7 @@ function cancelSignIn() {
 // A sign-in goes through its account's proxy (#1663); another can be
 // picked. proxyShown hides the name and password.
 function proxyShown(u) {
+  if (String(u || "").startsWith("@")) return savedProxyName(u);
   return String(u || "").replace(/^([a-z][a-z0-9+.-]*:\/\/)[^@/]*@/i, "$1");
 }
 function proxyName(v) {
@@ -12851,6 +12874,7 @@ function signInProxyChoices(sub) {
   opts.push({ v: "direct", name: "Direct", note: "Through no proxy" });
   if (own) add(own, t("{name}'s proxy", { name: sub.name }));
   for (const [u, v] of Object.entries(p?.accountProxies || {})) add((v || "").trim(), t("{user}'s proxy", { user: u }));
+  for (const x of savedProxyList()) add("@" + x.id, "");
   if (signing.proxy) add(signing.proxy, "");
   opts.push({ v: "\x01", name: "Custom…", note: "http://, https:// or socks5://" });
   return opts;
@@ -13521,42 +13545,55 @@ function renderAccounts(a, p) {
     if (amBox) row.append(amBox);
     list.append(row);
   }
-  // one account (#209, #408, #524)
-  if ((a.agent === "codex" || a.agent === "claude") && several && p && !p.switchOnly) {
-    const box = el("div", "keep-login");
-    const [keep, cb] = tick(t("Keep {agent} signed in to", { agent: a.agentName }), !!p.keepLogin);
-    keep.title = t("{agent} stays on this account even when it runs low. Requests through jianmu still follow Routing.", { agent: a.agentName });
+  // the owner, 11-11; off: the account kept (#524)
+  if ((a.agent === "codex" || a.agent === "claude") && several && p) {
+    const box = el("div", "auto-switch"), on = !!p.switchOnly || !p.keepLogin;
+    const head = el("label", "as-head");
+    const name = el("span", "as-name", t("Switch {agent}'s account automatically", { agent: a.agentName }));
+    const sw = libSwitch("use-credits", on, name.textContent);
+    if (p.switchOnly) {
+      sw.disabled = true;
+      sw.title = t("Always on while jianmu only switches {agent}'s sign-in", { agent: a.agentName });
+    }
+    head.append(name, sw);
+    box.append(head);
+    import("./autoswitchtip.js").then(() => autoSwitchTip(box, head, p), () => {});
     let keepAs = kept;
-    const opts = [{ v: "", name: t("the first account"), note: "", literalName: true }];
-    for (const l of ls) if (!l.lapsed && !l.accessOnly) opts.push({ v: l.user, name: l.user, note: "", literalName: true });
-    const as = el("button", "sess-pick keep-as" + (keepAs ? " set" : ""));
-    as.type = "button";
-    as.title = t("The account {agent} stays signed in to", { agent: a.agentName });
-    as.dataset.value = keepAs;
-    as.setAttribute("aria-haspopup", "menu");
-    as.setAttribute("aria-expanded", "false");
-    as.append(el("span", "", keepAs || t("the first account")), svg(CHEV, 11, 1.6));
     const post = (keepLogin) => {
       const body = { id: p.id, keepLogin };
       if (keepLogin && keepAs) body.keepLoginAs = keepAs;
       accountAction("provider/keeplogin", body, !keepLogin ? t("jianmu moves {agent} to an account with room again", { agent: a.agentName })
         : keepAs ? t("{agent} stays signed in to {user}", { agent: a.agentName, user: keepAs }) : t("{agent} stays signed in to the first account", { agent: a.agentName }));
     };
-    cb.onchange = () => post(cb.checked);
-    as.onclick = (e) => {
-      e.stopPropagation();
-      if (as.classList.contains("open")) return closeProtoMenu();
-      openProtoMenu(as, opts, keepAs, (v) => {
-        if (v === keepAs && cb.checked) return;
-        keepAs = v;
-        as.dataset.value = v;
-        as.classList.toggle("set", !!v);
-        as.firstChild.textContent = v || t("the first account");
-        cb.checked = true;
-        post(true);
-      }, "Account to stay signed in to", "sess-menu");
-    };
-    box.append(keep, as);
+    sw.onclick = () => { sw.disabled = true; post(on); };
+    if (on) {
+      const say = signInMovesLine(p, a.agentName);
+      if (say) box.append(el("div", "sign-in-moves", say));
+    } else {
+      const opts = [{ v: "", name: t("the first account"), note: "", literalName: true }];
+      for (const l of ls) if (!l.lapsed && !l.accessOnly) opts.push({ v: l.user, name: l.user, note: "", literalName: true });
+      const as = el("button", "sess-pick keep-as" + (keepAs ? " set" : ""));
+      as.type = "button";
+      as.title = t("The account {agent} stays signed in to", { agent: a.agentName });
+      as.dataset.value = keepAs;
+      menuOf(as);
+      as.append(el("span", "", keepAs || t("the first account")), svg(CHEV, 11, 1.6));
+      as.onclick = (e) => {
+        e.stopPropagation();
+        if (as.classList.contains("open")) return closeProtoMenu();
+        openProtoMenu(as, opts, keepAs, (v) => {
+          if (v === keepAs) return;
+          keepAs = v;
+          as.dataset.value = v;
+          as.classList.toggle("set", !!v);
+          as.firstChild.textContent = v || t("the first account");
+          post(true);
+        }, "Account to stay signed in to", "sess-menu");
+      };
+      const keepRow = el("div", "as-keep");
+      keepRow.append(el("span", "", t("Keep {agent} signed in to", { agent: a.agentName })), as);
+      box.append(keepRow);
+    }
     list.append(box);
   }
   const cx = a.agent === "codex", ag = { agent: a.agentName };
@@ -13592,6 +13629,7 @@ function renderAccounts(a, p) {
   const pv = a.agent === "codex" ? providers || {} : {};
   if (pv.codexDaemon) list.append(renderCodexDaemon(pv.codexDaemon));
   if (pv.codexApp) list.append(renderCodexApp(pv.codexApp));
+  if (pv.codexProjects) import("./codexprojects.js").then(() => list.append(codexProjectsNote(codexNote, accountAction)), () => {});
   if (signing?.agent === a.agent) list.append(renderSigning(sub));
   else {
     list.append(addRow(t(sub.single && sub.plugin ? "Sign in again" : sub.single ? "Sign in to another {name} account" : "Add another {name} account", { name: sub.name }), () => startSignIn(a.agent)));
@@ -14282,17 +14320,16 @@ function windowCapMeter(m, p, user, w) {
   };
   return b;
 }
-function accountCapPill(p, user, cap, direct) {
+function accountCapPill(p, user, cap, direct, forKey) {
   // with no cap of its own but some windows', it says so
   const byWindow = !cap && windowCapsOf(p, user) > 0;
   const pill = el("button", "acap" + (cap || byWindow ? " set" : ""), cap ? t("Cap {n}%", { n: cap }) : byWindow ? t("Caps by window") : t("No cap"));
   pill.type = "button";
   pill.title = (cap ? t("Stops at {n}% of each usage window: once jianmu reads a window at {n}% or past it, it counts this account as used up and sends it nothing more until the window renews. A turn already under way can still take it past {n}%, so the cap doesn't promise the rest is left. Click to change", { n: cap })
     : t("Used to 100% of its usage windows. Click to cap it at a share of each, so jianmu goes on to the other accounts past it"))
-    + "\n" + t("A window can have a cap of its own: click its meter below")
+    + (forKey ? "" : "\n" + t("A window can have a cap of its own: click its meter below"))
     + (direct ? "\n\n" + directNote(direct) : "");
-  pill.setAttribute("aria-haspopup", "menu");
-  pill.setAttribute("aria-expanded", "false");
+  menuOf(pill);
   const set = (v) => accountAction("provider/accountcap", { id: p.id, account: user, cap: v },
     v ? t("{who} stops at {n}% of each window", { who: user, n: v }) : t("{who} has no usage cap", { who: user }));
   // a share of the user's own, typed where the pill was
@@ -14350,8 +14387,7 @@ function laneLimitPill(p, ref, who, name) {
   pill.dataset.provider = p.id;
   pill.dataset.ref = ref;
   pill.dataset.who = who;
-  pill.setAttribute("aria-haspopup", "menu");
-  pill.setAttribute("aria-expanded", "false");
+  menuOf(pill);
   laneText(pill);
   const own = laneOwnOf(p, ref);
   const set = (v) => accountAction("provider/accountconcurrency", { id: p.id, account: ref, limit: v },
@@ -15211,8 +15247,9 @@ function scrollCloses(box, e) {
 // in turn, menu kept open; live: choose after each tick).
 // placeMenu puts an app menu under its anchor, or over it, or where there
 // is more room, scrolling inside itself (#1437)
-function placeMenu(box, anchor, align = "left", dx = 0) {
-  const r = anchor.getBoundingClientRect(), h = box.offsetHeight, pad = 8, top = popTop(pad);
+function placeMenu(box, anchor, align = "left", dx = 0, at) {
+  // at: a right-click's pointer, the menu opens there (mmmg_btc on X)
+  const r = at ? { left: at.x, right: at.x, top: at.y, bottom: at.y - 3 } : anchor.getBoundingClientRect(), h = box.offsetHeight, pad = 8, top = popTop(pad);
   let y = r.bottom + 5;
   const below = innerHeight - pad - y, above = r.top - 5 - top;
   if (h > below && above >= h) { y = r.top - 5 - h; box.classList.add("up"); }
@@ -15233,7 +15270,8 @@ function openProtoMenu(anchor, opts, value, choose, head = "Protocol this key sp
   const multi = Array.isArray(value);
   let picked = multi ? [...value] : null;
   // an item with its own ticked (true or false) is a setting beside the pick
-  const isOn = (v, o) => typeof o?.ticked === "boolean" ? o.ticked : !multi ? v === value : v === "" ? !picked.length : picked.includes(v);
+  // a group heading (o.group, its values) is ticked when all of them are
+  const isOn = (v, o) => o?.group ? o.group.every((g) => picked.includes(g)) : typeof o?.ticked === "boolean" ? o.ticked : !multi ? v === value : v === "" ? !picked.length : picked.includes(v);
   const box = el("div", "pop proto-menu" + (cls ? " " + cls : ""));
   box.setAttribute("role", "menu");
   box.append(el("div", "pm-head", t(head)));
@@ -15248,14 +15286,15 @@ function openProtoMenu(anchor, opts, value, choose, head = "Protocol this key sp
   }
   const tick = (b, o) => {
     b.classList.toggle("on", isOn(o.v, o));
+    if (o.group) b.classList.toggle("mixed", !isOn(o.v, o) && o.group.some((g) => picked.includes(g)));
     b.setAttribute("aria-checked", isOn(o.v, o));
     b.firstChild.replaceChildren(...(isOn(o.v, o) ? [svg(CHECK, 12, 1.9)] : []));
   };
   const items = opts.map((o) => {
-    const b = el("button", "pm-item");
+    const b = el("button", "pm-item" + (o.group ? " pm-group" : ""));
     b.type = "button";
     if (o.title) b.title = o.title;
-    b.setAttribute("role", multi && o.v && o.v !== "\x00" || typeof o.ticked === "boolean" ? "menuitemcheckbox" : "menuitemradio");
+    b.setAttribute("role", o.group || multi && o.v && o.v !== "\x00" || typeof o.ticked === "boolean" ? "menuitemcheckbox" : "menuitemradio");
     const words = el("span", "pm-words");
     words.append(el("span", "pm-name", o.literalName ? o.name : t(o.name)), el("span", "pm-note", t(o.note)));
     b.append(el("span", "pm-tick"), words);
@@ -15263,6 +15302,12 @@ function openProtoMenu(anchor, opts, value, choose, head = "Protocol this key sp
     b.onclick = (e) => {
       e.stopPropagation();
       if (!multi) { closeProtoMenu(); choose(o.v, e); return; }
+      if (o.group) {
+        picked = isOn(o.v, o) ? picked.filter((v) => !o.group.includes(v)) : [...new Set([...picked, ...o.group])];
+        items.forEach((it, i) => tick(it, opts[i]));
+        if (live) choose(opts.map((o) => o.v).filter((v) => picked.includes(v)));
+        return;
+      }
       if (o.v === "\x00") return;
       if (!o.v) { picked = []; closeProtoMenu(); if (live) choose([]); return; }
       picked = picked.includes(o.v) ? picked.filter((v) => v !== o.v) : [...picked, o.v];
@@ -15279,7 +15324,8 @@ function openProtoMenu(anchor, opts, value, choose, head = "Protocol this key sp
   bareTicks(box, items);
   if (filter) filter.oninput = () => {
     const q = filter.value.trim().toLocaleLowerCase();
-    items.forEach((b, i) => { b.hidden = !opts[i].always && !(opts[i].name + " " + (opts[i].find || "")).toLocaleLowerCase().includes(q); });
+    items.forEach((b, i) => { if (!opts[i].group) b.hidden = !opts[i].always && !(opts[i].name + " " + (opts[i].find || "")).toLocaleLowerCase().includes(q); });
+    items.forEach((b, i) => { if (opts[i].group) b.hidden = !opts[i].group.some((v) => items.some((m, j) => opts[j].v === v && !m.hidden)); });
   };
   document.body.append(box);
   placeMenu(box, anchor, align);
@@ -15297,7 +15343,7 @@ function openProtoMenu(anchor, opts, value, choose, head = "Protocol this key sp
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       stepFocus(e, shown, i);
     } else if (filter && e.key === "Enter" && document.activeElement === filter) {
-      const first = shown.find((b) => !opts[items.indexOf(b)].always);
+      const first = shown.find((b) => !opts[items.indexOf(b)].always && !opts[items.indexOf(b)].group);
       if (first) { e.preventDefault(); first.click(); }
     } else if (filter && (e.key === "Home" || e.key === "End") && i >= 0) {
       e.preventDefault();
@@ -15337,9 +15383,6 @@ const urlHint = (api) => api === "anthropic" ? "https://…" : api === "gemini" 
 // respellURL turns a base URL into the one protocol api is asked at: the
 // root for Anthropic, which adds /v1 itself, …/v1 for OpenAI's two,
 // …/v1beta for Gemini's (as Google's SDKs add it).
-// WORKSPACE stands for a Bailian workspace's id in a decision API's
-// address (provider.WorkspaceID); workspaceOf is the id url has in its
-// place in tmpl ("" for none), or null when url isn't at tmpl's host.
 const WORKSPACE = "{WorkspaceId}";
 function workspaceOf(tmpl, url) {
   if (!tmpl || !url) return null;
@@ -15764,9 +15807,6 @@ function unrollSheet(view, sheet, e) {
 // unrollInView: the agents' scroll unrolls under the button clicked for it,
 // and in a view with no more room below (the panel at its tallest, the
 // window scrolled to its end) the view goes down with it, led by the scroll's
-// foot frame by frame, so what unrolls comes into sight — but never so far
-// that the button goes out of it at the top. The reader scrolling meanwhile
-// has the view from then on.
 function unrollInView(fold, button, e) {
   const v = fold.closest(".view");
   if (!v || !scrollOnPurpose(e, UNROLL.ms + 400)) return;
@@ -15820,9 +15860,6 @@ let quotaHist = []; // each account's windows over time, for the curves (#651)
 // quotasOpened: the reader opened what shows the allowances (the Usage
 // page's Overview, the tray panel's Allowances tab, a menu bar cell, either
 // brought back to the front): an asked read (#1588, #1518), which reads
-// every account again, so opening within QUOTAS_OPEN_GAP of the last one
-// (tabs, focus and visibility both firing) asks nothing. Refresh always
-// asks, saved Claude accounts too ("all", #5380).
 const QUOTAS_OPEN_GAP = 30e3;
 let quotasAskedAt = -Infinity;
 function quotasOpened() {
@@ -17603,8 +17640,7 @@ function panelFirstMenu(qs, f) {
   b.type = "button";
   b.title = t("{n} accounts", { n: qs.length });
   b.setAttribute("aria-label", b.title);
-  b.setAttribute("aria-haspopup", "menu");
-  b.setAttribute("aria-expanded", "false");
+  menuOf(b);
   b.append(el("span", "", String(qs.length)), svg(CHEV, 9, 1.8));
   b.onclick = (e) => { e.stopPropagation(); if (b.classList.contains("open")) return closeProtoMenu(); import("./panelfirst.js").then(() => panelFirstOpen(b, qs, f), statusErr); };
   return b;
@@ -17988,14 +18024,9 @@ function autoResetBrief(q) {
 // autoResetButton: a switch; with c, that time alone, else both (the brief's).
 function autoResetButton(q, c) {
   const on = c ? autoResetWhen(q)[c.id] : autoResetOn(q);
-  const b = el("button", "lib-switch auto-reset" + (on ? " on" : ""));
-  b.type = "button";
-  b.setAttribute("role", "switch");
-  b.setAttribute("aria-checked", String(on));
-  b.setAttribute("aria-label", t("Auto-use resets") + (c ? " · " + t(c.say) : ""));
+  const b = libSwitch("auto-reset", on, t("Auto-use resets") + (c ? " · " + t(c.say) : ""));
   b.title = c ? t(on ? c.on : c.off, resetLeadVars()) : autoResetTitle(on);
   if (c) b.dataset.case = c.id;
-  b.append(el("i"));
   b.onclick = async (e) => {
     e.stopPropagation();
     if (b.disabled) return;
@@ -18065,13 +18096,8 @@ function creditsButton(q) {
   return creditsSwitch(q, "use-credits", on, creditsTitle(on), { on: !on }, t("Use credits"), on ? "{who} no longer spends its credits: held when a window runs out" : "{who} spends its credits when its windows run out");
 }
 function creditsSwitch(q, cls, on, title, body, label, said) {
-  const b = el("button", "lib-switch " + cls + (on ? " on" : ""));
-  b.type = "button";
-  b.setAttribute("role", "switch");
-  b.setAttribute("aria-checked", String(on));
-  b.setAttribute("aria-label", label);
+  const b = libSwitch(cls, on, label);
   b.title = title;
-  b.append(el("i"));
   b.onclick = async (e) => {
     e.stopPropagation();
     if (b.disabled) return;
@@ -19838,9 +19864,6 @@ function searchSettings(q) {
 // Settings' Command line (PAMI on Discord): whether `jianmu` in a terminal
 // opened now runs this app, in each shell, and a button that puts it there
 // — a link in a folder already on PATH, on Windows the app's folder first
-// in the user's PATH. A shell's profile is written only from that shell's
-// own button, with the file it names. Asked once a load and again after
-// half a minute: each shell is run to read its PATH.
 let cliView = null, cliAt = 0, cliAsk = null;
 const exeName = (p) => String(p || "").split(/[\\/]/).pop();
 function renderCLI(r) {
@@ -20051,9 +20074,11 @@ function renderSettings() {
   renderPluginCheckins(s);
   renderTrayUsage(s, keep);
   renderProxy(s, keep);
+  window.renderSavedProxies ? renderSavedProxies(s) : import("./proxies.js").then(() => renderSavedProxies(s), () => {});
   renderGitHubToken(s);
   renderImages(s, keep);
   renderSearch(s, keep);
+  window.pipeCheckFill ? pipeCheckFill() : import("./pipecheck.js").then(() => pipeCheckFill(), () => {});
   renderReplies(s, keep);
   renderDisabledModels(s);
   renderRedact(s, keep);
@@ -20263,12 +20288,13 @@ async function renderSync(v) {
   };
   const btn = (label, fn, cls = "text") => { const b = el("button", cls, label); b.onclick = fn; return b; };
   const toggle = (id) => () => { syncOpen = syncOpen === id ? "" : id; renderSync(); };
-  const parts = (ps) => ps.map((p) => t({ providers: "providers", settings: "settings", profiles: "profiles", agents: "agents' models", library: "library", usage: "usage", signins: "sign-ins" }[p])).join(t(", "));
+  const parts = (ps) => ps.map((p) => t({ providers: "providers", settings: "settings", profiles: "profiles", agents: "agents' models", library: "library", memory: "memory", usage: "usage", signins: "sign-ins" }[p])).join(t(", "));
 
   // off: what it would keep the same, from the view's toggles (none: all on)
   const goes = ["settings", "profiles"];
   if (v.agents !== false) goes.push("agents");
   if (v.library !== false) goes.push("library");
+  if (v.memory !== false) goes.push("memory");
   if (v.usage) goes.push("usage");
   if (v.signIns) goes.push("signins");
   let line = t("Keeps {parts} the same on every computer", {
@@ -20723,7 +20749,7 @@ function proxyDisplay(value) {
   return (value || "").replace(/^(\w+:\/\/)?[^/?#]*@/, "$1");
 }
 function renderProxy(s, keep) {
-  const cur = !s.proxy ? "auto" : s.proxy === "direct" ? "off" : "custom";
+  const cur = !s.proxy ? "auto" : s.proxy === "direct" ? "off" : s.proxy.startsWith("@") ? "saved" : "custom";
   const sub = $("#proxySub");
   sub.textContent = {
     settings: t("Requests to vendors without a proxy of their own, and update checks, go through {proxy}", { proxy: proxyDisplay(s.proxyNow) }),
@@ -20734,7 +20760,7 @@ function renderProxy(s, keep) {
   }[s.proxySource] || "";
   const row = proxyRow(s, keep, {
     key: "proxy", box: $("#proxySegs"), cur, state: proxyState,
-    modes: [["auto", t("Auto")], ["off", t("Off")], ["custom", t("Custom")]],
+    modes: withSavedMode([["auto", t("Auto")], ["off", t("Off")], ["custom", t("Custom")]], cur === "saved"),
     again: () => renderProxy(s, keep),
   });
   renderProxyCheck(s, row);
@@ -20745,12 +20771,12 @@ const proxyState = { custom: false };
 const pluginProxyState = { custom: false };
 function renderPluginProxy(s, keep) {
   const v = (s.pluginProxy || "").trim();
-  const cur = !v ? "auto" : v === "direct" ? "off" : "custom";
+  const cur = !v ? "auto" : v === "direct" ? "off" : v.startsWith("@") ? "saved" : "custom";
   $("#pluginProxySub").textContent = cur === "auto" ? t("Plugins, npm and GitHub go through the proxy above")
-    : cur === "off" ? t("Plugins, npm and GitHub go direct") : t("Plugins, npm and GitHub go through {proxy}", { proxy: proxyDisplay(v) });
+    : cur === "off" ? t("Plugins, npm and GitHub go direct") : t("Plugins, npm and GitHub go through {proxy}", { proxy: v.startsWith("@") ? savedProxyName(v) : proxyDisplay(v) });
   proxyRow(s, keep, {
     key: "pluginProxy", box: $("#pluginProxySegs"), cur, state: pluginProxyState,
-    modes: [["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]],
+    modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], cur === "saved"),
     again: () => renderPluginProxy(s, keep),
   });
 }
@@ -20767,6 +20793,7 @@ function proxyRow(s, keep, o) {
     o.state.custom = id === "custom";
     if (id === "auto") savePrefs({ ...keep, [o.key]: "" });
     else if (id === "off") savePrefs({ ...keep, [o.key]: "direct" });
+    else if (id === "saved") savePrefs({ ...keep, [o.key]: firstSavedRef() });
     else o.again();
   };
   if (mode === "custom") {
@@ -20818,6 +20845,7 @@ function proxyRow(s, keep, o) {
     box.append(auth);
     if (o.state.custom) queueMicrotask(() => i.focus());
   }
+  if (mode === "saved") row.append(savedProxyButton(s[o.key], (v) => savePrefs({ ...keep, [o.key]: v })));
   const modes = segs(o.modes, mode, pick);
   // WebKit doesn't focus clicked buttons
   modes.onpointerdown = () => { picking = true; };
@@ -22731,11 +22759,9 @@ function prefsKeep(s) {
 }
 
 // savePrefs sends what the page was drawn with (prefsBase) and the choice
-// made on it. The saves go one after another, each with the choices before
-// it: two made quickly (a theme, then a language) each sent the page as it
-// was drawn, the second undoing the first, and their answers could come
-// back in either order. The page is painted and drawn again once the last
-// is in.
+// made on it. Saves go one after another, each with the choices before it:
+// two quick ones (a theme, then a language) undid each other. The page is
+// drawn again once the last is in.
 let prefsBase = {}, prefsQueue = Promise.resolve(), prefsQueued = 0;
 function savePrefs(body) {
   const change = Object.fromEntries(Object.entries(body).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(prefsBase[k])));
@@ -22764,13 +22790,6 @@ function savePrefs(body) {
 
 // ---------- where the reader is ----------
 // For every view (gui-shell.md, "A click never moves"):
-// - A view moves only for the reader (wheel, touch, scroll keys, Tab, a
-//   drag); any other scroll (a shorter redraw, WebKit centring a focused
-//   field, code) is put back before paint.
-// - What the reader clicks stays put on screen while the click redraws
-//   around it, till they scroll, click again or it settles. A shorter page
-//   keeps room at its foot; data-unrolls goes down with what it opens.
-// Code scrolls only with the reader's event: scrollOnPurpose(e).
 let purposeUntil = 0, held = null;
 // guardUntil is purposeUntil when the window is the click guard's own (a
 // field brought back into sight, backToReader): it lets that scroll stand,
@@ -22995,9 +23014,6 @@ const onScreen = (n, v) => n.getBoundingClientRect().top - v.getBoundingClientRe
 // Only a play that moves it counts: a colour or a fade easing in (the hover
 // of the button just clicked, its label fading to its new words) leaves it
 // where it is. Were those passed over too, the page would be held by
-// something further up while the button slid away, and snap back to the
-// button once its hover had faded — and a button slid out from under the
-// pointer and back fades its hover again, so the page swung between the two.
 const MOVES = /^(transform|translate|rotate|scale|top|bottom|left|right|inset|margin|offset-|position)/;
 const moving = (a) => a.playState === "running" && (a.transitionProperty ? MOVES.test(a.transitionProperty)
   : !a.effect?.getKeyframes || a.effect.getKeyframes().some((k) => Object.keys(k).some((p) => MOVES.test(p.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())))));
@@ -23047,9 +23063,6 @@ function standIn(h) {
 // where the held parts are in the page, and how tall it is: what the hold
 // left (h.lay), and a redraw changes, a scroll not. Only parts that scroll
 // with the page and are in it: one drawn again (the Usage page's tabs, the
-// agents' list under an agent opened or closed) or stuck to the view's edge
-// (Settings' tabs, sticky) read as moved at every scroll, and for the hold's
-// 4s every scroll was put back (issennknight on macOS 13)
 const scrolls = (n, v) => { for (; n && n !== v; n = n.parentElement) if (/sticky|fixed/.test(getComputedStyle(n).position)) return false; return !!n; };
 function laid(h) {
   const at = [];
@@ -23095,9 +23108,6 @@ let heldWidth = innerWidth;
 // It is the reader's place that is kept instead: where they were, or as far
 // down as the page goes, while it is laid out again. Crossing SIDE_AT, the
 // browser clamps the view to each layout it passes through (app.css's
-// side-nav rules before layoutNav has moved the tabs, then a part a few
-// pixels short of its new height), and the page ended short of its foot:
-// at the foot of Settings, 960 to 1440 wide in WebKit left it 6px up (#911).
 let relaidUntil = 0;
 const relaid = new ResizeObserver(() => {
   if (performance.now() > relaidUntil) { relaid.disconnect(); return; }
@@ -23321,12 +23331,7 @@ function renderBuiltins(box, list, done) {
     featWho[f.id]?.(line, f, who); // what it does now (plugins/search)
     featGo(line, f);
     if (line.childNodes.length) who.append(line);
-    const b = el("button", "lib-switch use-credits" + (f.on ? " on" : ""));
-    b.type = "button";
-    b.setAttribute("role", "switch");
-    b.setAttribute("aria-checked", String(f.on));
-    b.setAttribute("aria-label", t(f.name));
-    b.append(el("i"));
+    const b = libSwitch("use-credits", f.on, t(f.name));
     b.disabled = f.inUse > 0 || !!broken;
     if (f.inUse > 0) b.title = t("In use, so it stays on");
     b.onclick = async () => {
@@ -23850,9 +23855,7 @@ function navSubs() {
   navSubsAt = sig;
   let box = document.querySelector(".nav-sub:not(.leaving)");
   const want = side && at && items.length > 1;
-  // Settings' list is over its button, which stays put (jen_celeus on X)
   const above = at?.id === "prefs";
-  // another page's list folds away as this one's opens, both at once
   if (box && (!want || box.dataset.view !== view || (above ? box.nextElementSibling : box.previousElementSibling) !== at)) { navSubLeave(box); box = null; }
   if (want && !NAV_SUB_IC) import("./navicons.js").then(() => { navSubsAt = ""; navSubs(); }, () => {});
   if (want) {
@@ -23872,8 +23875,9 @@ function navSubs() {
       if (above) at.before(box); else at.after(box);
     }
     box.setAttribute("aria-label", (at.querySelector("span[data-t]") || at.querySelector("span"))?.textContent || "");
-    for (const s of box.querySelectorAll(".nav-s")) s.remove();
-    items.forEach((b, i) => {
+    for (const s of box.querySelectorAll(".nav-s, .nav-sl")) s.remove();
+    (window.navSections?.(view, items, t) || items.map((b, i) => [b, i])).forEach(([b, i, head]) => {
+      if (head) box.append(el("span", "nav-sl", head));
       const [name, n] = b.textContent.trim().split(" · ");
       const s = el("button", "nav-s");
       s.type = "button";
@@ -23894,7 +23898,6 @@ function navSubs() {
       s.onpointerdown = (e) => { if (e.button === 0) navSubGlide(box, s); };
       s.onpointercancel = () => navSubGlide(box, box.querySelector(".nav-s.cur"));
       s.onpointerleave = (e) => { if (e.buttons & 1) navSubGlide(box, box.querySelector(".nav-s.cur")); };
-      // the strip's tab is clicked at once; another tab opens at its top
       s.onclick = (e) => {
         navSubGlide(box, s);
         for (const o of box.querySelectorAll(".nav-s")) o.classList.toggle("cur", o === s);
@@ -24219,9 +24222,6 @@ setInterval(async () => {
 // the Usage head is made tight, as at a narrow window, wherever its sum
 // would be cut (#1599, sean908): between 640px and the width its tabs, its
 // periods with Custom named and the refresh need, the sum was the one
-// thing left to give way, and read ≈$0. for ≈$0.001. Tight, Custom is its
-// icon and the sum may go to a line of its own, whole, in every language.
-// Decided on the next frame, as the class changes the head's height.
 {
   const head = $("#usageCost").parentElement;
   let frame = 0;

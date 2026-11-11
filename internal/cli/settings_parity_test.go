@@ -230,6 +230,7 @@ var cliForRoute = map[string]string{
 	"POST /api/update/check":               "jianmu update check",
 	"POST /api/settings/agent-compact":     "jianmu model compact",
 	"POST /api/settings/agent-suffix":      "jianmu model suffix",
+	"POST /api/settings/context-cap":       "jianmu model context-cap",
 	"POST /api/update/install":             "jianmu update",
 	"GET /api/model-price":                 "jianmu model price",
 	"POST /api/model-price":                "jianmu model price",
@@ -264,6 +265,9 @@ var notYet = map[string]string{
 	"POST /api/gateway/held/reveal":              W,  // api.go
 	"POST /api/profile/{action}":                 A,  // api.go
 	"POST /api/proxy/check":                      S2, // api.go
+	"POST /api/proxies/save":                     S2, // proxies.go: Settings › Network's saved proxies
+	"POST /api/proxies/delete":                   S2, // proxies.go
+	"POST /api/proxies/test":                     S2, // proxies.go
 	"POST /api/set":                              S2, // api.go
 	"POST /api/settings/agent-telemetry":         A,  // api.go
 	"POST /api/settings/bark":                    S2, // api.go: Bark server, key and daily time
@@ -332,6 +336,7 @@ var notYet = map[string]string{
 	"GET /api/plugins/builtin":                   P,  // builtins.go
 	"POST /api/plugins/builtin":                  P,  // builtins.go
 	"GET /api/plugins/counts":                    P,  // plugins_counts.go: Discover's installs and likes
+	"GET /api/catalog/models":                    P,  // catalog_models.go: the model editor's Same as picker
 	"POST /api/plugins/like":                     P,  // plugins_counts.go
 	"GET /api/library/browser":                   L,  // browser.go
 	"POST /api/library/browser/setup":            L,  // browser.go
