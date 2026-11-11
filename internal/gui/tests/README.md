@@ -2535,7 +2535,7 @@ node --test internal/gui/tests/cli-path.test.cjs
 ```
 
 `update-mirror.test.cjs` checks Settings › About › Download source (#893):
-the row says updates come from usejianmu.ai, then GitHub; Use a mirror… opens an address field,
+the row says updates come from toporeduce.cn, then GitHub; Use a mirror… opens an address field,
 an http:// address is refused with the reason in red and the draft kept, an
 https:// one saved with Enter posts `/api/settings/update-mirror` and is
 shown, and Remove mirror posts an empty mirror. A download that failed through

@@ -32,7 +32,7 @@ import (
 
 // PartnersURL is where the list is kept; JIANMU_PARTNERS moves it, and
 // JIANMU_PARTNERS=off keeps to none.
-const PartnersURL = "https://usejianmu.ai/api/partners"
+const PartnersURL = "https://toporeduce.cn/api/partners"
 
 // KindPartner is a partner's Kind: the add sheet lists them apart.
 const KindPartner Kind = "partner"

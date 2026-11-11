@@ -187,7 +187,7 @@ const usage = `jianmu — one place to pick every agent's model
                                   wrote down (a service started with JIANMU_ADDR needs none of them); a restart waits at most 10
                                   minutes for requests in flight, --force restarts at once; --proxy: an
                                   http(s):// or socks5:// proxy for it; --mirror: a GitHub download mirror put
-                                  before the github.com URL (none unless given; still checked against usejianmu.ai's SHA-256)
+                                  before the github.com URL (none unless given; still checked against toporeduce.cn's SHA-256)
   jianmu update mirror [<prefix>|off]  the mirror every update, the app's own too, is downloaded through
   jianmu update channel [stable|every]  which versions updates offer: stable (one a week, an urgent one at
                                   once) or every version as it comes out (the default)

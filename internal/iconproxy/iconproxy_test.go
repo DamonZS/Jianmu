@@ -21,12 +21,12 @@ func TestURLCarriesThePictureWhole(t *testing.T) {
 	}
 }
 
-func TestURLLeavesUsejianmuAlone(t *testing.T) {
+func TestURLLeavesToporeduceAlone(t *testing.T) {
 	t.Setenv("JIANMU_ICON_PROXY", "")
 	for u, want := range map[string]string{
-		"https://usejianmu.ai/partners/x.png":     "https://usejianmu.ai/partners/x.png",
-		"https://usejianmu.ai.evil.example/x.png": Base + "?url=" + url.QueryEscape("https://usejianmu.ai.evil.example/x.png"),
-		"https://evil.example/?usejianmu.ai":      Base + "?url=" + url.QueryEscape("https://evil.example/?usejianmu.ai"),
+		"https://toporeduce.cn/partners/x.png":     "https://toporeduce.cn/partners/x.png",
+		"https://toporeduce.cn.evil.example/x.png": Base + "?url=" + url.QueryEscape("https://toporeduce.cn.evil.example/x.png"),
+		"https://evil.example/?toporeduce.cn":      Base + "?url=" + url.QueryEscape("https://evil.example/?toporeduce.cn"),
 	} {
 		if got := URL(u); got != want {
 			t.Errorf("URL(%q) = %q, want %q", u, got, want)

@@ -8,11 +8,11 @@ import (
 	"github.com/DamonZS/Jianmu/internal/provider"
 )
 
-// siteOrigins are the pages that may read the Omarchy theme: usejianmu.ai,
+// siteOrigins are the pages that may read the Omarchy theme: toporeduce.cn,
 // which on an Omarchy machine draws itself in that machine's theme
 // (site/public/omarchy.js) and asks the jianmu running there which one it
 // is; JIANMU_SITE_ORIGIN adds one (the site served locally to try it).
-var siteOrigins = map[string]bool{"https://usejianmu.ai": true, "https://www.usejianmu.ai": true}
+var siteOrigins = map[string]bool{"https://toporeduce.cn": true, "https://www.toporeduce.cn": true}
 
 func siteOrigin(o string) bool {
 	return siteOrigins[o] || o != "" && o == os.Getenv("JIANMU_SITE_ORIGIN")
@@ -23,8 +23,8 @@ var onOmarchy = omarchy.Detect()
 
 // omarchyTheme is Omarchy's current theme as jianmu's own windows draw it
 // (name, mode, stamp, CSS variables: palette, font, corners, border), for
-// usejianmu.ai's pages on the same machine. It answers this machine only,
-// and the browser lets only usejianmu.ai read it; a jianmu elsewhere says
+// toporeduce.cn's pages on the same machine. It answers this machine only,
+// and the browser lets only toporeduce.cn read it; a jianmu elsewhere says
 // 404.
 func (s *Server) omarchyTheme(w http.ResponseWriter, r *http.Request) {
 	if o := r.Header.Get("Origin"); siteOrigin(o) {

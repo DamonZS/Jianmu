@@ -16,7 +16,7 @@ import (
 
 // Discover's counts: how many computers use each plugin, and its likes.
 // With the day's event, unless the user turned off what jianmu is used
-// with, usejianmu.ai is told which plugins Discover lists are installed
+// with, toporeduce.cn is told which plugins Discover lists are installed
 // and on here (plugin.Public: never a private repository, a folder or a
 // package no list names), under the same random id; it counts the
 // computers that said so in the last seven days. A like is the user's
@@ -34,7 +34,7 @@ func Site() string {
 // publicPlugins is plugin.Public; tests put their own.
 var publicPlugins = plugin.Public
 
-// sendPlugins tells usejianmu.ai the plugins installed here Discover
+// sendPlugins tells toporeduce.cn the plugins installed here Discover
 // lists; nothing when there are none.
 func sendPlugins(ctx context.Context, id string) error {
 	names := publicPlugins(ctx)
@@ -47,14 +47,14 @@ func sendPlugins(ctx context.Context, id string) error {
 	return post(ctx, "/api/plugins/report", map[string]any{"id": id, "plugins": names}, nil)
 }
 
-// Counts is what usejianmu.ai says of each plugin: the computers that
+// Counts is what toporeduce.cn says of each plugin: the computers that
 // had it in the last seven days, and its likes.
 type Counts struct {
 	Users int `json:"users,omitempty"`
 	Likes int `json:"likes,omitempty"`
 }
 
-// PluginCounts asks usejianmu.ai each plugin's counts, by Discover's key.
+// PluginCounts asks toporeduce.cn each plugin's counts, by Discover's key.
 func PluginCounts(ctx context.Context) (map[string]Counts, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -115,9 +115,9 @@ func post(ctx context.Context, path string, in any, out any) error {
 		var e struct{ Error string }
 		_ = json.NewDecoder(http.MaxBytesReader(nil, res.Body, 64<<10)).Decode(&e)
 		if e.Error != "" {
-			return fmt.Errorf("usejianmu.ai: %s", e.Error)
+			return fmt.Errorf("toporeduce.cn: %s", e.Error)
 		}
-		return fmt.Errorf("usejianmu.ai: %s", res.Status)
+		return fmt.Errorf("toporeduce.cn: %s", res.Status)
 	}
 	if out != nil {
 		return json.NewDecoder(http.MaxBytesReader(nil, res.Body, 64<<10)).Decode(out)

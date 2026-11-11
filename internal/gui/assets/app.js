@@ -7151,7 +7151,7 @@ function renderAdd() {
     const subs = SUBS.filter((x) => !(replacedSub(x.agent) || unusedSub(x.agent)) || signing?.agent === x.agent).map((x) => subOf(x.agent)).filter(named);
     const inPlugins = f && SUBS.some((x) => unusedSub(x.agent) && signing?.agent !== x.agent && named(subOf(x.agent)));
     // partners pay to be listed first, under a heading that says so; who
-    // they are comes from usejianmu.ai (internal/provider/partners.go), and
+    // they are comes from toporeduce.cn (internal/provider/partners.go), and
     // each may name the languages it is shown in
     const partners = providers.presets.filter((p) => p.kind === "partner" && partnerShown(p) && (hit(p) || partnerNote(p).toLowerCase().includes(f)));
     if (partners.length) {
@@ -19924,7 +19924,7 @@ function renderCLI(r) {
 }
 
 // Settings' Download source (#893): a GitHub mirror before github.com, as
-// `jianmu update mirror` writes; the feed and SHA-256 stay usejianmu.ai's
+// `jianmu update mirror` writes; the feed and SHA-256 stay toporeduce.cn's
 let mirrorEditing = false, mirrorDraft = "", mirrorErr = "";
 function setUpdateMirror(mirror) {
   return writingPrefs(api("settings/update-mirror", { mirror }))
@@ -19938,10 +19938,10 @@ function renderUpdateMirror(r, s) {
   const sub = el("div", "sub");
   who.append(sub);
   const m = s.updateMirror || "";
-  sub.textContent = mirrorErr || (m ? t("Updates are downloaded from usejianmu.ai, and through this mirror when that fails, each checked against usejianmu.ai's checksum")
-    : t("Updates are downloaded from usejianmu.ai, and from GitHub when that fails; a mirror can stand in for GitHub where it is slow"));
+  sub.textContent = mirrorErr || (m ? t("Updates are downloaded from toporeduce.cn, and through this mirror when that fails, each checked against toporeduce.cn's checksum")
+    : t("Updates are downloaded from toporeduce.cn, and from GitHub when that fails; a mirror can stand in for GitHub where it is slow"));
   sub.classList.toggle("err", !!mirrorErr);
-  sub.title = t("The update and its checksum always come from usejianmu.ai; a file from the mirror that doesn't match it is not installed.");
+  sub.title = t("The update and its checksum always come from toporeduce.cn; a file from the mirror that doesn't match it is not installed.");
   if (!mirrorEditing) {
     if (m) {
       const official = el("button", "text", t("Remove mirror"));
@@ -19952,7 +19952,7 @@ function renderUpdateMirror(r, s) {
     } else {
       const add = el("button", "text", t("Use a mirror…"));
       add.onclick = () => { mirrorEditing = true; mirrorDraft = ""; renderUpdateMirror(r, s); };
-      val.append(el("code", "", "usejianmu.ai"), add);
+      val.append(el("code", "", "toporeduce.cn"), add);
     }
     return;
   }
@@ -21939,7 +21939,7 @@ function renderRedact(s, keep) {
     }, settingsErr))).id = "agentTelemetryAllRow";
   rowIn(share, t("Count me as a user"), t("Once a day, a random id for this computer with jianmu's version and system"),
     onOff(!s.noStats, (on) => savePrefs({ ...keep, noStats: !on })));
-  if (!s.noStats) rowIn(share, t("Share the agents, providers, models and plugins I use"), t("Sent with that event, by jianmu's own ids, with how many of each, and how often each partner was shown, opened and added; a provider you added yourself is only “custom”. Which of Discover's plugins are installed goes to usejianmu.ai for its counts. No names, addresses, accounts, keys or usage"),
+  if (!s.noStats) rowIn(share, t("Share the agents, providers, models and plugins I use"), t("Sent with that event, by jianmu's own ids, with how many of each, and how often each partner was shown, opened and added; a provider you added yourself is only “custom”. Which of Discover's plugins are installed goes to toporeduce.cn for its counts. No names, addresses, accounts, keys or usage"),
     onOff(!s.noUsageStats, (on) => savePrefs({ ...keep, noUsageStats: !on })));
   if (!featureHides($('#nav button[data-view="masking"]'))) {
     const open = el("button", "", t("Open"));

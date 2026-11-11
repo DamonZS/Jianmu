@@ -46,11 +46,11 @@ function server(lang) {
 }
 
 const L = {
-  en: { installed: "Installed", subs: "Subscriptions", tls: "Tools for agents", pgs: "Pages", tool: "Tools", page: "Page", provider: "Provider", write: "Write a plugin", docs: "https://usejianmu.ai/docs/plugins" },
-  zh: { installed: "已安装", subs: "订阅", tls: "给 Agent 的工具", pgs: "页面", tool: "工具", page: "页面", provider: "供应商", write: "编写插件", docs: "https://usejianmu.ai/docs/zh/plugins" },
-  "zh-TW": { installed: "已安裝", subs: "訂閱", tls: "給 Agent 的工具", pgs: "頁面", tool: "工具", page: "頁面", write: "編寫外掛", docs: "https://usejianmu.ai/docs/zh/plugins" },
-  ja: { installed: "インストール済み", subs: "サブスクリプション", tls: "エージェント向けツール", pgs: "ページ", tool: "ツール", page: "ページ", write: "プラグインを書く", docs: "https://usejianmu.ai/docs/ja/plugins" },
-  de: { installed: "Installiert", subs: "Abos", tls: "Werkzeuge für Agenten", pgs: "Seiten", tool: "Tools", page: "Seite", write: "Eine Erweiterung schreiben", docs: "https://usejianmu.ai/docs/plugins" },
+  en: { installed: "Installed", subs: "Subscriptions", tls: "Tools for agents", pgs: "Pages", tool: "Tools", page: "Page", provider: "Provider", write: "Write a plugin", docs: "https://toporeduce.cn/docs/plugins" },
+  zh: { installed: "已安装", subs: "订阅", tls: "给 Agent 的工具", pgs: "页面", tool: "工具", page: "页面", provider: "供应商", write: "编写插件", docs: "https://toporeduce.cn/docs/zh/plugins" },
+  "zh-TW": { installed: "已安裝", subs: "訂閱", tls: "給 Agent 的工具", pgs: "頁面", tool: "工具", page: "頁面", write: "編寫外掛", docs: "https://toporeduce.cn/docs/zh/plugins" },
+  ja: { installed: "インストール済み", subs: "サブスクリプション", tls: "エージェント向けツール", pgs: "ページ", tool: "ツール", page: "ページ", write: "プラグインを書く", docs: "https://toporeduce.cn/docs/ja/plugins" },
+  de: { installed: "Installiert", subs: "Abos", tls: "Werkzeuge für Agenten", pgs: "Seiten", tool: "Tools", page: "Seite", write: "Eine Erweiterung schreiben", docs: "https://toporeduce.cn/docs/plugins" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

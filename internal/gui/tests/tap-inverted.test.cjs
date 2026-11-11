@@ -29,7 +29,7 @@ function server(lang, web) {
     dir: `${HOME}/.jianmu/library`, backups: `${HOME}/.jianmu/backups`, home: HOME,
     agents: ["claude:Claude Code","codex:Codex","gemini:Gemini CLI","cursor:Cursor","opencode:OpenCode","kimi:Kimi Code","droid:Droid","amp:Amp","qwen:Qwen Code","crush:Crush","pi:Pi","zed:Zed","trae:Trae","iflow:iFlow","goose:Goose","cline:Cline","roo:Roo","kilo:Kilo","aider:Aider","warp:Warp"].map((x) => agent(...x.split(":"))), mcpHub: true, hubPath: "/mcp",
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
-    servers: [{ name: "jianmu-web-search", transport: "stdio", command: "/Applications/jianmu.app/Contents/MacOS/jianmu", args: ["mcp", "search"], env: {}, icon: "https://usejianmu.ai/favicon.png", agents: ["claude", "codex", "gemini"] }],
+    servers: [{ name: "jianmu-web-search", transport: "stdio", command: "/Applications/jianmu.app/Contents/MacOS/jianmu", args: ["mcp", "search"], env: {}, icon: "https://toporeduce.cn/favicon.png", agents: ["claude", "codex", "gemini"] }],
   };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -43,7 +43,7 @@ function server(lang, web) {
     if (url.pathname === "/api/groups") return route.fulfill({ json: { groups: [] } });
     if (url.pathname === "/api/providers") return route.fulfill({ json: { providers: [], gateway: { running: true } } });
     if (url.pathname.startsWith("/api/")) return route.fulfill({ json: {} });
-    if (url.hostname === "usejianmu.ai") {
+    if (url.hostname === "toporeduce.cn") {
       return route.fulfill({ body: await fs.readFile(path.join(assets, "favicon.png")).catch(() => Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64")), contentType: "image/png" });
     }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);

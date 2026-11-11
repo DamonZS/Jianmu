@@ -4,7 +4,7 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart } = require("./reader.cjs");
 
-// Settings › About had Discord and GitHub but no link to usejianmu.ai (the
+// Settings › About had Discord and GitHub but no link to toporeduce.cn (the
 // owner). Its Website row names the site and opens it, in every language and
 // at the tray panel's width.
 const words = {

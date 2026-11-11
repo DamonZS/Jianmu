@@ -179,7 +179,7 @@ const selfServerName = "jianmu-image"
 // in the project. It costs what the model does, so it is given only to the
 // agents picked for it.
 func selfServer() MarketServer {
-	m := localServer(selfServerName, "Jianmu Image", "Jianmu", "https://usejianmu.ai/favicon.png", "https://usejianmu.ai",
+	m := localServer(selfServerName, "Jianmu Image", "Jianmu", "https://toporeduce.cn/favicon.png", "https://toporeduce.cn",
 		"Generate and edit images with the image model set in Jianmu (Settings → Models → Images), and make short videos with a video model set up in Jianmu (Grok Imagine, Seedance), saved in the project.", jianmuCommand, []string{"mcp", "image"})
 	m.OptIn = true
 	return m
@@ -193,7 +193,7 @@ const browserServerName = "jianmu-browser"
 // sets up (gateway/browser.go). It acts as the user wherever they are
 // signed in, so it is given only to the agents picked for it.
 func browserServer() MarketServer {
-	m := localServer(browserServerName, "Jianmu Browser", "Jianmu", "https://usejianmu.ai/favicon.png", "https://usejianmu.ai",
+	m := localServer(browserServerName, "Jianmu Browser", "Jianmu", "https://toporeduce.cn/favicon.png", "https://toporeduce.cn",
 		"Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the Jianmu Browser extension.", jianmuCommand, []string{"mcp", "browser"})
 	m.OptIn = true
 	return m
@@ -211,7 +211,7 @@ const searchServerName = "jianmu-web-search"
 // or the search API it asks charges, and an agent mostly has a search of
 // its own, so it is given only to the agents picked for it.
 func searchServer() MarketServer {
-	m := localServer(searchServerName, "Jianmu Web Search", "Jianmu", "https://usejianmu.ai/favicon.png", "https://usejianmu.ai",
+	m := localServer(searchServerName, "Jianmu Web Search", "Jianmu", "https://toporeduce.cn/favicon.png", "https://toporeduce.cn",
 		"Search the web with the search set in Jianmu (Settings → Models → Web search), and read a page by its URL.", jianmuCommand, []string{"mcp", "search"})
 	m.OptIn = true
 	return m
@@ -231,7 +231,7 @@ const visionServerName = "jianmu-vision"
 // most agents' models see for themselves, so it is given only to the
 // agents picked for it.
 func visionServer() MarketServer {
-	m := localServer(visionServerName, "Jianmu Image Recognition", "Jianmu", "https://usejianmu.ai/favicon.png", "https://usejianmu.ai",
+	m := localServer(visionServerName, "Jianmu Image Recognition", "Jianmu", "https://toporeduce.cn/favicon.png", "https://toporeduce.cn",
 		"Read an image (a file, a URL, a screenshot) with the image recognition model set in Jianmu (Settings → Models → Images), for a model that can't see.", jianmuCommand, []string{"mcp", "vision"})
 	m.OptIn = true
 	return m
@@ -248,7 +248,7 @@ const memoryServerName = "jianmu-memory"
 // shared and costs nothing, so, unlike jianmu's other servers, it is given
 // to every agent that can take it.
 func memoryServer() MarketServer {
-	return localServer(memoryServerName, "Jianmu Memory", "Jianmu", "https://usejianmu.ai/favicon.png", "https://usejianmu.ai",
+	return localServer(memoryServerName, "Jianmu Memory", "Jianmu", "https://toporeduce.cn/favicon.png", "https://toporeduce.cn",
 		"Memory shared by every agent: your preferences, rules and what each project needs, kept in Jianmu. Agents search it before asking again, and save what you ask them to remember.", jianmuCommand, []string{"mcp", "memory"})
 }
 
@@ -1313,7 +1313,7 @@ func offered(u string) bool {
 	return false
 }
 
-// fetchImage downloads an icon through usejianmu.ai's icon proxy, so the
+// fetchImage downloads an icon through toporeduce.cn's icon proxy, so the
 // host a server's author picked never sees the user's IP.
 func fetchImage(u string) ([]byte, string, error) {
 	b, err := get(iconproxy.URL(u), "image/*", 1<<20)

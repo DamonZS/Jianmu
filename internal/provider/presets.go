@@ -32,7 +32,7 @@ type PresetDef struct {
 	Decide    string   `json:"decide,omitempty"` // a decision API: the provider only routes (see decide.go)
 	Catalog   string   `json:"catalog,omitempty"`
 	Website   string   `json:"website,omitempty"`
-	SiteHost  string   `json:"siteHost,omitempty"` // a partner's: the host its usejianmu.ai/go Website sends the browser to, which the editor's link reads
+	SiteHost  string   `json:"siteHost,omitempty"` // a partner's: the host its toporeduce.cn/go Website sends the browser to, which the editor's link reads
 	KeysURL   string   `json:"keysUrl,omitempty"`
 	NoKey     bool     `json:"noKey,omitempty"`     // local servers: a key is optional
 	KeyHint   string   `json:"keyHint,omitempty"`   // the key field's placeholder, when it says more than NoKey's

@@ -1,5 +1,5 @@
 // Discover's counts (plugins.js): how many use each plugin and how many
-// like it, from usejianmu.ai through /api/plugins/counts, and the like on
+// like it, from toporeduce.cn through /api/plugins/counts, and the like on
 // a plugin's page. Loaded when the Plugins page loads, not with the core.
 // A like comes only from a computer that has the plugin installed.
 (() => {

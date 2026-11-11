@@ -12,7 +12,7 @@ import (
 	"github.com/DamonZS/Jianmu/internal/settings"
 )
 
-// The day's plugins go to usejianmu.ai with the day's event, under its
+// The day's plugins go to toporeduce.cn with the day's event, under its
 // id, as plugin.Public has them; not when the user turned off what jianmu
 // is used with, nor when stats are off, nor with no plugin to name. A like
 // goes under the same id.

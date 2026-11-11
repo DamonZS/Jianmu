@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// usejianmu.ai on an Omarchy machine asks the jianmu there for the theme it
+// toporeduce.cn on an Omarchy machine asks the jianmu there for the theme it
 // draws itself in: only from this machine, only readable by the site.
 func TestOmarchyThemeForTheSite(t *testing.T) {
 	fresh(t)
@@ -41,13 +41,13 @@ func TestOmarchyThemeForTheSite(t *testing.T) {
 	}
 
 	onOmarchy = false
-	if w := call("GET", "127.0.0.1:5000", "https://usejianmu.ai"); w.Code != http.StatusNotFound {
+	if w := call("GET", "127.0.0.1:5000", "https://toporeduce.cn"); w.Code != http.StatusNotFound {
 		t.Fatal("not on Omarchy:", w.Code, w.Body)
 	}
 
 	onOmarchy = true
-	w := call("GET", "127.0.0.1:5000", "https://usejianmu.ai")
-	if w.Code != 200 || w.Header().Get("Access-Control-Allow-Origin") != "https://usejianmu.ai" {
+	w := call("GET", "127.0.0.1:5000", "https://toporeduce.cn")
+	if w.Code != 200 || w.Header().Get("Access-Control-Allow-Origin") != "https://toporeduce.cn" {
 		t.Fatal("the site, on this machine:", w.Code, w.Header(), w.Body)
 	}
 	var th struct {
@@ -70,7 +70,7 @@ func TestOmarchyThemeForTheSite(t *testing.T) {
 	if w := call("GET", "192.168.1.9:5000", ""); w.Code == 200 {
 		t.Fatal("another machine got it:", w.Code)
 	}
-	w = call("OPTIONS", "127.0.0.1:5000", "https://usejianmu.ai")
+	w = call("OPTIONS", "127.0.0.1:5000", "https://toporeduce.cn")
 	if w.Code != http.StatusNoContent || w.Header().Get("Access-Control-Allow-Private-Network") != "true" {
 		t.Fatal("preflight:", w.Code, w.Header())
 	}

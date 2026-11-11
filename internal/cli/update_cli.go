@@ -78,7 +78,7 @@ func updateAutoCmd(args []string) error {
 }
 
 // updateMirrorCmd is `jianmu update mirror [<prefix>|off]`: the GitHub
-// download mirror an update goes through when usejianmu.ai's file fails, the app's own among them
+// download mirror an update goes through when toporeduce.cn's file fails, the app's own among them
 // (settings.UpdateMirror). With nothing, it says which.
 func updateMirrorCmd(args []string) error {
 	s := settings.Load()
@@ -100,10 +100,10 @@ func updateMirrorCmd(args []string) error {
 		}
 	}
 	if s.UpdateMirror == "" {
-		fmt.Println("updates are downloaded from usejianmu.ai, and from GitHub when that fails", muted.Render("· jianmu update mirror <prefix> has GitHub's come through a mirror; the checksum is still usejianmu.ai's"))
+		fmt.Println("updates are downloaded from toporeduce.cn, and from GitHub when that fails", muted.Render("· jianmu update mirror <prefix> has GitHub's come through a mirror; the checksum is still toporeduce.cn's"))
 		return nil
 	}
-	fmt.Println("updates are downloaded from usejianmu.ai, and through", bold.Render(s.UpdateMirror), "when that fails", muted.Render("· each is checked against usejianmu.ai's checksum · jianmu update mirror off goes back to GitHub"))
+	fmt.Println("updates are downloaded from toporeduce.cn, and through", bold.Render(s.UpdateMirror), "when that fails", muted.Render("· each is checked against toporeduce.cn's checksum · jianmu update mirror off goes back to GitHub"))
 	return nil
 }
 

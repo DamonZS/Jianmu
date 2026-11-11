@@ -3,7 +3,7 @@
 // version and system, and, unless the user turned that part off, which
 // agents, providers and models it is used with, by their built-in ids
 // (Usage): a provider of the user's own is only "custom". No names, URLs,
-// accounts, keys, prompts or usage go. With that part, usejianmu.ai is
+// accounts, keys, prompts or usage go. With that part, toporeduce.cn is
 // told which of the plugins Discover lists are installed here, for
 // Discover's counts (plugins.go). Settings → Privacy turns it off,
 // and so do DO_NOT_TRACK=1 and JIANMU_NO_STATS=1; a build from source
