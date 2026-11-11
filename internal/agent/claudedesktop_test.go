@@ -29,6 +29,9 @@ func desktopSandbox(t *testing.T) (string, desktopPaths) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
 	p := desktopPathsOf(desktopDirs(runtime.GOOS, home, os.Getenv))
+	// the signed-in userData's config.json, where jianmu reads the language
+	// from: Roaming\Claude on Windows, not the Local one deploymentMode is in
+	p.app = desktopUsualSets(runtime.GOOS, home, os.Getenv)[0].app
 	return home, p
 }
 
@@ -183,6 +186,25 @@ func TestClaudeDesktopFresh(t *testing.T) {
 	}
 	if after := desktopTree(t, p); !reflect.DeepEqual(after, before) {
 		t.Fatalf("second off: %v", after)
+	}
+}
+
+// An entry an earlier build wired under another name is renamed, and only
+// that one: the user's own stay as they are.
+func TestClaudeDesktopRenamesEarlierEntry(t *testing.T) {
+	home, p := desktopSandbox(t)
+	desktopWrite(t, p.meta, `{"appliedId":"`+desktopProfileID+`","entries":[{"id":"mine","name":"Mine"},{"id":"`+desktopProfileID+`","name":"magpie"}]}`)
+	desktopWrite(t, p.prof, `{"inferenceProvider":"gateway"}`)
+
+	if err := claudeDesktop(home).Field("provider").Set("jianmu"); err != nil {
+		t.Fatal(err)
+	}
+	entries, _ := desktopJSON(t, p.meta)["entries"].([]any)
+	if len(entries) != 2 ||
+		entries[0].(map[string]any)["name"] != "Mine" ||
+		entries[1].(map[string]any)["id"] != desktopProfileID ||
+		entries[1].(map[string]any)["name"] != "jianmu" {
+		t.Errorf("entries: %v", entries)
 	}
 }
 

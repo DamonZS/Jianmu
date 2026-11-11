@@ -732,9 +732,22 @@ func desktopOn(p desktopPaths) error {
 	}
 
 	// _meta.json: jianmu's entry (where it was, if it was), applied
+	changed := !wired
 	if !wired {
 		entry, _ := json.Marshal(map[string]string{"id": desktopProfileID, "name": "jianmu"})
 		entries = append(entries, entry)
+	} else {
+		// an entry an earlier build named differently is renamed
+		for i, raw := range entries {
+			var m map[string]any
+			if desktopOurs(raw) && json.Unmarshal(raw, &m) == nil && m["name"] != "jianmu" {
+				m["name"] = "jianmu"
+				entries[i], _ = json.Marshal(m)
+				changed = true
+			}
+		}
+	}
+	if changed {
 		if err := edit.SetJSON(p.meta, edit.KV{Path: "entries", Value: entries}); err != nil {
 			return err
 		}
