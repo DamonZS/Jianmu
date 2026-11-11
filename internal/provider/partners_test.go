@@ -47,7 +47,7 @@ func partnerIDs(ps []Partner) string {
 	return strings.Join(ids, ",")
 }
 
-// The add sheet's Partners are what usejianmu.ai lists, checked: an entry
+// The add sheet's Partners are what toporeduce.cn lists, checked: an entry
 // that would send a key over http, take a built-in preset's id or set
 // what only jianmu's own presets may is left out, and one outside its
 // window isn't listed.
@@ -70,7 +70,7 @@ func TestPartnersFromTheFeed(t *testing.T) {
 	var body atomic.Value
 	body.Store(`{"partners":[
 		{"id":"acme","name":"Acme AI","chat":"https://api.acme.example/v1","keysUrl":"https://acme.example/keys?ref=jianmu",
-		 "website":"https://usejianmu.ai/go/acme/site","siteHost":"www.acme.example",
+		 "website":"https://toporeduce.cn/go/acme/site","siteHost":"www.acme.example",
 		 "iconUrl":"https://acme.example/logo.png","notes":{"en":"Fast relay","zh":"快速中转"},"langs":["zh"],
 		 "decide":"https://api.acme.example/decide","noKey":true},
 		{"id":"plain","name":"Plain","chat":"http://api.plain.example/v1"},
@@ -79,7 +79,7 @@ func TestPartnersFromTheFeed(t *testing.T) {
 		{"id":"noname","chat":"https://x.example/v1"},
 		{"id":"later","name":"Later","chat":"https://later.example/v1","from":"` + future + `"},
 		{"id":"gone","name":"Gone","chat":"https://gone.example/v1","until":"` + past + `"},
-		{"id":"regioned","name":"Regioned","regions":[{"id":"cn","name":"China","chat":"https://cn.regioned.example/v1","website":"https://usejianmu.ai/go/regioned/site/cn","siteHost":"cn.regioned.example"}]},
+		{"id":"regioned","name":"Regioned","regions":[{"id":"cn","name":"China","chat":"https://cn.regioned.example/v1","website":"https://toporeduce.cn/go/regioned/site/cn","siteHost":"cn.regioned.example"}]},
 		{"id":"acme","name":"Acme twice","chat":"https://twice.example/v1"}
 	]}`)
 	t.Setenv("JIANMU_PARTNERS", partnerFeedServer(t, &body).URL)
