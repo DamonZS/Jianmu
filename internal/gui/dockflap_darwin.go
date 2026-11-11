@@ -333,7 +333,9 @@ func dockFlap() {
 	if !dockReady("") {
 		return
 	}
-	n := int(flapSecs/flapEvery + 0.5)
+	// variables: 0.9/0.03 + 0.5 as a constant is 30.5, which Go won't convert to int
+	secs, every := flapSecs, flapEvery
+	n := int(secs/every + 0.5)
 	start := time.Now()
 	for f := 1; f < n; f++ {
 		C.mpDockShow(C.double(markAt(float64(f) / float64(n))))
