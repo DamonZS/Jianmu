@@ -1,11 +1,9 @@
-# Checks on every push to main and every pull request: vet, then the tests,
-# with the tags a release is built with. A break is caught here instead of by
-# the tag that publishes it.
+# Checks on every pull request: vet, then the tests, with the tags a release
+# is built with. A break is caught here instead of by the tag that publishes
+# it. Not run on push to main, where Release and Docker build it.
 name: ci
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 permissions:
