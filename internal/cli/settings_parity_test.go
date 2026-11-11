@@ -405,6 +405,11 @@ var notYet = map[string]string{
 	"POST /api/memory/digest":                    L,  // memory.go
 	"POST /api/memory/remove":                    L,  // memory.go
 	"POST /api/memory/status":                    L,  // memory.go
+	"POST /api/memory/promote":                   L,  // memory.go
+	"POST /api/memory/skill":                     L,  // memory.go
+	"POST /api/memory/decline":                   L,  // memory.go
+	"POST /api/pipelines/check":                  A,  // api.go
+	"POST /api/settings/context-cap-mode":        S2, // api.go
 	"GET /api/memory/distill":                    L,  // memory_distill.go
 	"POST /api/memory/distill":                   L,  // memory_distill.go
 	"POST /api/memory/distill/run":               L,  // memory_distill.go

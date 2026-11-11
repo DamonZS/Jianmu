@@ -3,7 +3,7 @@
 //
 //   node site/credits-cli.mjs thanks <from>..<to>
 //     the thanks line for a release's notes: English on the first line,
-//     Chinese on the second, nothing when no one is credited. yetone/
+//     Chinese on the second, nothing when no one is credited. DamonZS/
 //     jianmu-releases' release run calls it for the commits since the last
 //     tag.
 //   node site/credits-cli.mjs wall [out]

@@ -8,8 +8,8 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const names = (subject, opts) => credit([{ subject, author: "yetone", email: "yetoneful@gmail.com" }], opts)[0].map((p) => p.name);
-const via = (subject) => credit([{ subject, author: "yetone", email: "yetoneful@gmail.com" }])[0].map((p) => `${p.name}/${p.via.join("+")}`);
+const names = (subject, opts) => credit([{ subject, author: "DamonZS", email: "owner@example.com" }], opts)[0].map((p) => p.name);
+const via = (subject) => credit([{ subject, author: "DamonZS", email: "owner@example.com" }])[0].map((p) => `${p.name}/${p.via.join("+")}`);
 
 test("a reporter named on Discord or X is credited, with where", () => {
   assert.deepEqual(via("library: an MCP router says which computer it is, so an agent can pick between two (packinggoodsllc_07668 on Discord)"), ["packinggoodsllc_07668/Discord"]);
@@ -68,7 +68,7 @@ test("issue and PR numbers are kept for their authors, in either repository", ()
   assert.deepEqual(parse("provider: WorkBuddy's mover asks for opencode-workbuddy-auth 0.2.9, whose declared models take images (plugins #572)").refs, [{ repo: "magpie-community/plugins", n: 572 }]);
   const s = "redact: Codex's tool server names, stream_options and snake_case words go as written (#3143, #3144)";
   const issueAuthors = { "DamonZS/Jianmu#3143": "hhh2210", "DamonZS/Jianmu#3144": "dependabot[bot]" };
-  const got = credit([{ subject: s, author: "yetone" }], { issueAuthors })[0];
+  const got = credit([{ subject: s, author: "DamonZS" }], { issueAuthors })[0];
   assert.deepEqual(got.map((p) => [p.name, p.github]), [["hhh2210", "hhh2210"]]);
   // a name and an issue in one bracket: both
   assert.deepEqual(names("provider: a Max output kept for a model no longer listed doesn't block the editor's Save (#3305, LoKi)", { issueAuthors: { "DamonZS/Jianmu#3305": "LoKi" } }), ["LoKi"]);
@@ -79,7 +79,7 @@ test("commit authors and co-authors are credited, agents and machines not, and n
   const per = credit([
     { subject: "gui: a group's Save no longer leaves the Routing page blank (#884)", author: "wizzy-yang", email: "244719629+wizzy-yang@users.noreply.github.com", coauthors: [{ name: "jianmu-fix", email: "fix@localhost" }] },
     { subject: "gateway: count usage from multiline and final SSE events (#94)", author: "Charan Rathore", email: "charan-rathore@users.noreply.github.com", coauthors: [{ name: "Instinct Agent", email: "agent@instinct.com" }, { name: "Claude Opus 5.5", email: "noreply@anthropic.com" }] },
-    { subject: "docker: a server image and a multi-arch build workflow (#245)", author: "Shelken", email: "shelken@example.com", coauthors: [{ name: "glm-5.3-flash", email: "hakase@ooooo.space" }, { name: "yetone", email: "yetoneful@gmail.com" }] },
+    { subject: "docker: a server image and a multi-arch build workflow (#245)", author: "Shelken", email: "shelken@example.com", coauthors: [{ name: "glm-5.3-flash", email: "hakase@ooooo.space" }, { name: "yetone", email: "owner@example.com" }] },
     { subject: "Merge pull request #1 from someone/branch", author: "ggbdpq", email: "x@y", parents: 2 },
   ]);
   assert.deepEqual(per.map((l) => l.map((p) => p.name)), [["wizzy-yang"], ["Charan Rathore"], ["Shelken"], []]);

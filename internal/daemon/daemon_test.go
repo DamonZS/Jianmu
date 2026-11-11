@@ -320,7 +320,9 @@ func TestLaunchdInstall(t *testing.T) {
 // is not left running beside this one's: installing takes it out of
 // launchd and off disk, so login doesn't start two gateways on one port.
 func TestLaunchdHandsOverTheEarlierLabel(t *testing.T) {
-	log, _ := fakes(t, "darwin")
+	log, dir := fakes(t, "darwin")
+	// the new label isn't loaded yet, as in TestLaunchdInstall
+	write(t, filepath.Join(dir, "launchctl.print.fail"), "Could not find service")
 	old := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.yetone.jianmu.serve.plist")
 	os.MkdirAll(filepath.Dir(old), 0o755)
 	write(t, old, plist("/Applications/jianmu.app/Contents/MacOS/jianmu", []string{"serve"}, nil))
