@@ -73,7 +73,7 @@ jobs:
           VERSION: ${{ needs.trigger-release.outputs.version }}
         run: |
           v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
-          make release-cli VERSION="$v" TARGETS="darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64 windows/arm64"
+          make release-cli VERSION="$v" TARGETS="linux/amd64 linux/arm64"
           make release-windows VERSION="$v"
       - uses: actions/upload-artifact@v4
         with:
