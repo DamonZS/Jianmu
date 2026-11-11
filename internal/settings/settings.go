@@ -139,7 +139,14 @@ type Settings struct {
 	PluginProxy string `json:"pluginProxy,omitempty"`
 	// PluginProxyCustom is PluginProxy's ProxyCustom.
 	PluginProxyCustom string `json:"pluginProxyCustom,omitempty"`
-	OTel              OTel   `json:"otel,omitempty"`
+	// Proxies are the proxies kept by name (NamedProxy); a proxy choice
+	// "@"+id anywhere (Proxy, PluginProxy, a provider's, a key's, an
+	// account's) uses one. This computer's own (KeepOwn).
+	Proxies []NamedProxy `json:"proxies,omitempty"`
+	// ProxyNames remembers each saved proxy's name by id, so a choice that
+	// outlives its proxy can still say which one it was. This computer's own.
+	ProxyNames map[string]string `json:"proxyNames,omitempty"`
+	OTel       OTel              `json:"otel,omitempty"`
 	// GitHubToken is a GitHub token the library's requests to GitHub's
 	// API carry, raising its rate limit from 60 requests an hour to 5,000.
 	// It is a secret: the Settings page is told only a masked one, and a
@@ -860,6 +867,10 @@ type Settings struct {
 	// each model's (WJaunita45604 on X). 0 is no cap. It only lowers: a
 	// model whose window is shorter, or not known, is told what it was.
 	ContextCap int `json:"contextCap,omitempty"`
+	// ContextCapAll makes ContextCap hold a window the user set themselves
+	// too (a model's, or its provider's "*"): the shorter of the two is
+	// told. Off, the user's own window wins even when it is longer.
+	ContextCapAll bool `json:"contextCapAll,omitempty"`
 	// AgentCompacts is Long conversations of an agent's own, by its kind
 	// (CompactAgents), over CompactAt and FullContext for that agent alone
 	// (molianyin4227 on Discord: models differ, so one size for every
@@ -1495,6 +1506,15 @@ func (s Settings) Capped(n int) int {
 	return n
 }
 
+// CappedOwn is a window n the user set themselves under ContextCap: as it
+// was unless ContextCapAll, then no longer than the cap.
+func (s Settings) CappedOwn(n int) int {
+	if s.ContextCapAll {
+		return s.Capped(n)
+	}
+	return n
+}
+
 // Working is the context window an agent is told for a model with one of
 // n tokens (see FullContext).
 func (s Settings) Working(n int) int {
@@ -1558,7 +1578,7 @@ func (s *Settings) KeepOwn(cur Settings) {
 	s.UIFont, s.CodeFont = cur.UIFont, cur.CodeFont
 	s.Window, s.Proxy, s.Port, s.Dock, s.DockWindow, s.Lightweight = cur.Window, cur.Proxy, cur.Port, cur.Dock, cur.DockWindow, cur.Lightweight
 	s.DockNever, s.DockSettled = cur.DockNever, cur.DockSettled
-	s.ProxyCustom = cur.ProxyCustom
+	s.ProxyCustom, s.Proxies, s.ProxyNames = cur.ProxyCustom, cur.Proxies, cur.ProxyNames
 	s.PluginProxy, s.PluginProxyCustom = cur.PluginProxy, cur.PluginProxyCustom
 	s.WindowMaximised, s.KeepAwake, s.KeepAwakeDisplay = cur.WindowMaximised, cur.KeepAwake, cur.KeepAwakeDisplay
 	s.WindowAt = cur.WindowAt
@@ -1957,6 +1977,10 @@ func CheckProxy(p string) error {
 	p = strings.TrimSpace(p)
 	if p == "" || p == "direct" {
 		return nil
+	}
+	if IsProxyRef(p) {
+		// a saved proxy: one that is there now
+		return CheckProxyIn(p, Load().Proxies)
 	}
 	raw := p
 	if !strings.Contains(raw, "://") {
@@ -2398,18 +2422,22 @@ func saveOwn(s Settings, recording, reads bool) error {
 	if err := s.OTel.Check(); err != nil {
 		return err
 	}
-	s.Proxy = strings.TrimSpace(s.Proxy)
-	if err := CheckProxy(s.Proxy); err != nil {
+	if err := checkProxies(s.Proxies); err != nil {
 		return err
 	}
-	if s.Proxy != "" && s.Proxy != "direct" {
+	s.ProxyNames = rememberProxyNames(s.ProxyNames, s.Proxies)
+	s.Proxy = strings.TrimSpace(s.Proxy)
+	if err := CheckProxyIn(s.Proxy, s.Proxies); err != nil {
+		return err
+	}
+	if s.Proxy != "" && s.Proxy != "direct" && !IsProxyRef(s.Proxy) {
 		s.ProxyCustom = s.Proxy
 	}
 	s.PluginProxy = strings.TrimSpace(s.PluginProxy)
-	if err := CheckProxy(s.PluginProxy); err != nil {
+	if err := CheckProxyIn(s.PluginProxy, s.Proxies); err != nil {
 		return fmt.Errorf("plugin downloads: %w", err)
 	}
-	if s.PluginProxy != "" && s.PluginProxy != "direct" {
+	if s.PluginProxy != "" && s.PluginProxy != "direct" && !IsProxyRef(s.PluginProxy) {
 		s.PluginProxyCustom = s.PluginProxy
 	}
 	s.Vision = strings.TrimSpace(s.Vision)

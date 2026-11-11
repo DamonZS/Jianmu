@@ -8,7 +8,7 @@ Key facts:
 
 - Website: https://usejianmu.ai/ (English), https://usejianmu.ai/zh/ (中文), https://usejianmu.ai/ja/ (日本語), https://usejianmu.ai/de/ (Deutsch)
 - Source code: https://github.com/DamonZS/Jianmu
-- Downloads: https://github.com/DamonZS/Jianmu/releases/latest
+- Downloads: https://github.com/DamonZS/Jianmu-releases/releases/latest
 - Install from a terminal (macOS, Linux): `curl -fsSL https://usejianmu.ai/install.sh | sh`
 - Community: Discord, linked from the website
 - Price: free
@@ -65,6 +65,11 @@ DeepSeek, Kimi (Moonshot), GLM (Zhipu), Qwen, MiniMax, Anthropic (Claude), OpenA
 - [Hermes Agent on any model](https://usejianmu.ai/docs/hermes): run Nous Research's Hermes Agent and each of its bots on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription; what jianmu writes in config.yaml, model and reasoning effort, profiles, WSL and switching back.
 - [Cline on any model](https://usejianmu.ai/docs/cline): run Cline's CLI, VS Code extension and desktop app on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription through Cline's built-in OpenAI-compatible provider; model and reasoning effort, new sessions, VS Code's reload and switching back.
 - [Goose on any model](https://usejianmu.ai/docs/goose): run Block's Goose, its CLI and desktop app, on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription through a custom provider jianmu adds; context windows, thinking effort, restarting Goose and switching back.
+- [Droid on any model](https://usejianmu.ai/docs/droid): run Factory's Droid CLI on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription through custom models jianmu adds to settings.json; the /model picker, thinking levels, your own BYOK models kept, restarting droid and switching back.
+- [Zed on any model](https://usejianmu.ai/docs/zed): run the Zed editor's agent panel on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription through an OpenAI-compatible provider jianmu adds to settings.json; the key in the system credential store, context windows, thinking levels and switching back.
+- [Crush on any model](https://usejianmu.ai/docs/crush): run Charm's Crush on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription through a provider jianmu adds to crush.json; the large and small models, reasoning effort, Crush's data file and switching back.
+- [Raycast on any model](https://usejianmu.ai/docs/raycast): use DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription in Raycast AI's Quick AI, AI Chat and AI Commands through a custom provider jianmu adds to providers.yaml (Raycast Pro); which models the picker lists, tools, vision and reasoning, and switching back.
+- [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli): run GitHub Copilot CLI on DeepSeek, Kimi, GLM, Qwen, GPT or a ChatGPT subscription through a BYOK provider jianmu adds to providers.json, with no GitHub sign-in; the jianmu/ model in settings.json, effortLevel, your own providers kept and switching back.
 - [Cherry Studio](https://usejianmu.ai/docs/cherry-studio): add jianmu to Cherry Studio as one OpenAI-compatible provider in one click, confirmed in Cherry Studio, and use every jianmu model there, Claude, ChatGPT and Copilot subscriptions included; model list, status and usage.
 - [Fixing common errors](https://usejianmu.ai/docs/troubleshooting): what the gateway's errors mean and the fix: 401 and 403, 429 and rest periods, 502 and 504, model not found, an agent that doesn't show a model, port 3425 in use, agents in WSL, use from another computer and subscriptions moved to plugins.
 - [Library](https://usejianmu.ai/docs/library): instructions, MCP servers, skills, hooks and subagents for each agent.

@@ -181,10 +181,11 @@ const usage = `jianmu — one place to pick every agent's model
   jianmu agents                   list every supported agent
   jianmu settings [list|get <key>|set <key> <value>|reset <key>] [--json]
                                   every setting the window's Settings page saves, read and set as it saves them (jianmu settings help)
-  jianmu update [check] [--proxy <url>] [--mirror <prefix>] [--addr host:port]
+  jianmu update [check] [--proxy <url>] [--mirror <prefix>] [--addr host:port] [--force]
                                   install the newest release (check: only say if there is one); the running
                                   jianmu is restarted into it, found by --addr, JIANMU_ADDR or the address it
-                                  wrote down (a service started with JIANMU_ADDR needs none of them); --proxy: an
+                                  wrote down (a service started with JIANMU_ADDR needs none of them); a restart waits at most 10
+                                  minutes for requests in flight, --force restarts at once; --proxy: an
                                   http(s):// or socks5:// proxy for it; --mirror: a GitHub download mirror put
                                   before the github.com URL (none unless given; still checked against usejianmu.ai's SHA-256)
   jianmu update mirror [<prefix>|off]  the mirror every update, the app's own too, is downloaded through
