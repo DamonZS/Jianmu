@@ -80,12 +80,18 @@ func TestPluginToldTheSession(t *testing.T) {
 			}
 			for _, h := range sent {
 				for _, k := range []string{provider.SessionToPluginHeader, provider.SubagentToPluginHeader} {
-					if v := h.Values(k); len(v) > 0 {
-						t.Errorf("%s: the vendor got %s: %q", tc.name, k, v)
+					for _, name := range []string{k, provider.Twin(k)} {
+						if v := h.Values(name); len(v) > 0 {
+							t.Errorf("%s: the vendor got %s: %q", tc.name, name, v)
+						}
 					}
 				}
 				if s, a := h.Get("X-Saw-Session"), h.Get("X-Saw-Subagent"); s != tc.session || a != tc.subagent {
 					t.Errorf("%s: the plugin was told session %q, subagent %q; want %q, %q", tc.name, s, a, tc.session, tc.subagent)
+				}
+				// the X-Jianmu-* twins reach the plugin too, with the same values
+				if s, a := h.Get("X-Saw-Jm-Session"), h.Get("X-Saw-Jm-Subagent"); s != tc.session || a != tc.subagent {
+					t.Errorf("%s: the plugin was told twin session %q, subagent %q; want %q, %q", tc.name, s, a, tc.session, tc.subagent)
 				}
 			}
 		}

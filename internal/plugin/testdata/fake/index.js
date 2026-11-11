@@ -261,6 +261,8 @@ export const FakePlugin = async ({ client }) => ({
         // headers go on too, as a plugin that sends on what it got sends
         // them, for the host to take off
         for (const k of ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent", "x-magpie-effort"]) if (h.has(k)) h.set("x-saw-" + k.slice(9), h.get(k))
+        // the X-Jianmu-* twins, echoed as x-saw-jm-<name>
+        for (const k of ["x-jianmu-work-dir", "x-jianmu-work-git", "x-jianmu-fallback", "x-jianmu-session", "x-jianmu-subagent", "x-jianmu-effort"]) if (h.has(k)) h.set("x-saw-jm-" + k.slice(9), h.get(k))
         // $FAKE_QUEUE: that model is queued at the vendor, as Qoder's free
         // models are: waited out (here until jianmu gives up) unless jianmu
         // said it needn't be, then said at once with the queue's 503
