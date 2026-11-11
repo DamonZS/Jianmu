@@ -21,8 +21,8 @@ jianmu.plugin("redact", (ctx) => {
   <section class="msk-demo" id="maskDemo" data-no-pii>
     <button type="button" class="md-row" id="mdRow" aria-expanded="false" aria-controls="mdBody">
       <span class="md-thumb" aria-hidden="true"></span>
-      <span class="md-words"><span class="md-name" data-t>How masking works</span><span class="md-sub" data-t>Jianmu walks one request through: passwords become placeholders before it leaves, and come back on your computer with the answer</span></span>
-      <span class="md-len">0:27</span>
+      <span class="md-words"><span class="md-name" data-t>How masking works</span><span class="md-sub" data-t>The masking gateway reads each request on your computer: private values become placeholders before they cross the wire, and are put back in each answer</span></span>
+      <span class="md-len">0:18</span>
       <svg class="md-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
     <div class="md-body" id="mdBody" hidden></div>
