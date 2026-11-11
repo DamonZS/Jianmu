@@ -7,7 +7,7 @@ Renamed a project folder? See [relocating Claude Code sessions](session-relocati
 One place to pick every agent's model: Codex on DeepSeek, Claude Code
 on Kimi, Gemini CLI on GLM, from the menu bar. [usejianmu.ai](https://usejianmu.ai)
 
-[![Discord](https://img.shields.io/badge/Discord-join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF)
+
 
 `jianmu` is a single screen that lists each AI agent on your machine and
 the model it is set to. Click a value, pick a model. That is the whole app.
@@ -4313,7 +4313,7 @@ and `icon` in [site/worker.js](../site/worker.js).
 ## Community
 
 Questions, setups worth sharing, ideas, bugs: come talk to us and other
-jianmu users on [Discord](https://discord.gg/vGSnD3ZKQF). Issues and pull
+jianmu users on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues). Issues and pull
 requests are welcome here too.
 
 ## License

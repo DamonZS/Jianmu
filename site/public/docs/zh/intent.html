@@ -373,7 +373,7 @@ The number of its kind (0 for none):</pre>
     <h3>用真实模型测过吗？</h3>
     <p>测过。我们把 20 条真实的编程消息（中英文都有：简单提问、写测试/修测试、普通编码任务，还有 “Fix the bug in parseTokens and add a test for it” 这种混合的）发给一个带两条意图规则的分组。DeepSeek V4 Flash、GLM-5.3 Flash、MiMo v2.6 Flash 作为判断模型都是 20/20 全对，判断耗时中位数分别是 0.75 秒、1.3 秒、1.9 秒。某家中转上的 Gemini 3.8 Flash 即使用 <code>low</code> 推理档位也要 11 秒，每一轮都超时，于是都按没有意图规则的方式路由，路由记录每次都写明了原因。这也说明：判断模型选得不好，损失的只是路由效果，不会让这一轮失败。</p>
 
-    <p style="margin-top:48px">有问题，或者有值得分享的配置？欢迎到 <a href="https://discord.gg/vGSnD3ZKQF">Discord</a> 交流。路由组的基础用法见<a href="/docs/zh/start#routing">快速上手</a>。</p>
+    <p style="margin-top:48px">有问题，或者有值得分享的配置？欢迎到 <a href="https://github.com/DamonZS/Jianmu/issues">GitHub Issues</a> 交流。路由组的基础用法见<a href="/docs/zh/start#routing">快速上手</a>。</p>
   </article>
 </main>
 

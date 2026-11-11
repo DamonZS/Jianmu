@@ -312,7 +312,7 @@ Users report that this works. Trae keeps custom models in your Trae account, on 
 
 The model id is jianmu’s (`jianmu models`). Sharing lets other computers on your network in with a gateway key; see [Remote jianmu](https://usejianmu.ai/docs/remote#share).
 
-An error from the gateway? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting). Stuck, or have a setup worth sharing? Ask on [Discord](https://discord.gg/vGSnD3ZKQF). Chatting in Cherry Studio? See [Every model in Cherry Studio](https://usejianmu.ai/docs/cherry-studio). Vendors who want to hand their users a ready-made provider: see [Add to jianmu](https://usejianmu.ai/docs/import).
+An error from the gateway? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting). Stuck, or have a setup worth sharing? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues). Chatting in Cherry Studio? See [Every model in Cherry Studio](https://usejianmu.ai/docs/cherry-studio). Vendors who want to hand their users a ready-made provider: see [Add to jianmu](https://usejianmu.ai/docs/import).
 
 ---
 
@@ -449,7 +449,7 @@ Yes. Sign in to Claude in jianmu and its models are `claude/…` in the same pic
 
 Pick one of Claude Code’s own models in jianmu, or run `jianmu claude default`. What jianmu wrote comes out, and what it replaced comes back.
 
-Using Codex too? See [Use any model in Codex](https://usejianmu.ai/docs/codex-models). On Claude Desktop? See [Claude Desktop on any model](https://usejianmu.ai/docs/claude-desktop). Stuck? Ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Using Codex too? See [Use any model in Codex](https://usejianmu.ai/docs/codex-models). On Claude Desktop? See [Claude Desktop on any model](https://usejianmu.ai/docs/claude-desktop). Stuck? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -581,7 +581,7 @@ Yes, while Codex is on a model through jianmu: the gateway runs with the app. `j
 
 Pick one of Codex’s own models in jianmu, or run `jianmu codex default`. jianmu’s keys come out, and your provider and model come back.
 
-Using Claude Code too? See [Use any model in Claude Code](https://usejianmu.ai/docs/claude-code-models). Stuck? Ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Using Claude Code too? See [Use any model in Claude Code](https://usejianmu.ai/docs/claude-code-models). Stuck? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -698,7 +698,7 @@ Yes. jianmu sets up Gemini CLI inside a WSL distro the same way, writing the gat
 
 Pick one of Gemini CLI’s own models in jianmu, or run `jianmu gemini default`. What jianmu wrote comes out, and your own key, sign-in choice and model come back.
 
-Using Claude Code or Codex too? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Models in Codex](https://usejianmu.ai/docs/codex-models). Stuck? Ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Using Claude Code or Codex too? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Models in Codex](https://usejianmu.ai/docs/codex-models). Stuck? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -792,7 +792,7 @@ No. The gateway runs on your computer. Your prompts, replies, keys and accounts 
 
 No. Subscriptions are added in jianmu, not by signing in inside another agent. One sign-in serves every agent you point at it.
 
-Using a key instead? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Models in Codex](https://usejianmu.ai/docs/codex-models). Stuck? Ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Using a key instead? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Models in Codex](https://usejianmu.ai/docs/codex-models). Stuck? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -918,7 +918,7 @@ Run `jianmu claude default`, or pick one of Claude Code’s own models on its ro
 
 No. The gateway runs on your computer. Requests go from it to OpenAI; jianmu has no server of its own in that path.
 
-Using an API key instead? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Using an API key instead? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -1028,7 +1028,7 @@ It assumes a model it doesn’t know takes 200K. Set the real Context window on 
 
 Pick one of the agent’s own models in jianmu, or run `jianmu claude default` or `jianmu codex default`. What jianmu wrote comes out, and what it replaced comes back.
 
-Looking for cloud models? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Models in Codex](https://usejianmu.ai/docs/codex-models). Stuck? Ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Looking for cloud models? See [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Models in Codex](https://usejianmu.ai/docs/codex-models). Stuck? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -1153,7 +1153,7 @@ OpenCode’s config in ~/.config/opencode (or $OPENCODE_CONFIG_DIR): the first o
 
 Pick one of OpenCode’s own models on its row in jianmu, or run `jianmu opencode default`. It puts back the model and `small_model` you had and removes jianmu’s provider.
 
-Other agents: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [OpenClaw on any model](https://usejianmu.ai/docs/openclaw). Stuck? Ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Other agents: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [OpenClaw on any model](https://usejianmu.ai/docs/openclaw). Stuck? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -1224,7 +1224,7 @@ Yes, jianmu runs a local gateway too. It speaks OpenAI Chat Completions, OpenAI 
 
 Yes. jianmu, CC Switch and Claude Code Router are each released under the MIT license.
 
-Guides: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Subscriptions in any agent](https://usejianmu.ai/docs/subscriptions). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Guides: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Subscriptions in any agent](https://usejianmu.ai/docs/subscriptions). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1309,7 +1309,7 @@ DeepSeek thinks at three levels, low, high and max, set in `output_config.effort
 
 Yes. Add them all to the DeepSeek provider and tick each one. jianmu spreads requests over them, keeps a conversation on one key so its prompt cache is reused, and moves on when a key runs out of balance.
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1394,7 +1394,7 @@ Kimi Code’s model list prices its models at $0, so jianmu prices each call at 
 
 Yes. A Kimi Code key searches the web through the membership’s own search endpoint, so a Kimi Code model that can’t search by itself is given jianmu’s search on your plan.
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1481,7 +1481,7 @@ The one that issued your key: Zhipu GLM for a key from open.bigmodel.cn, Z.ai fo
 
 GLM-5.3 always thinks and turns away a request that switches thinking off. jianmu asks again with thinking left on, so the agent gets an answer.
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1573,7 +1573,7 @@ DashScope turns away a thinking Qwen model asked for one whole reply (`enable_th
 
 No. Neither Token Plan has an API for its credits; the plan’s subscription page in Alibaba’s console shows them. jianmu’s Usage tab still counts the tokens each agent spent.
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1659,7 +1659,7 @@ MiniMax’s Chat API puts a model’s thinking in the reply text between `<think
 
 Yes. Add them all to the MiniMax provider and tick each one. jianmu spreads requests over them, and weighs and rests Coding Plan keys by their windows, so a key that has used up its window sits out until it resets.
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1799,7 +1799,7 @@ Asked at the Anthropic base, OpenRouter answers with its catalog under `anthropi
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [GitHub Copilot](https://usejianmu.ai/docs/copilot) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -1946,7 +1946,7 @@ jianmu lists what Copilot’s `/models` gives the account: chat models only, wit
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -2102,7 +2102,7 @@ Yes. Both are subscriptions: `jianmu accounts add gemini` or `jianmu accounts ad
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [GitHub Copilot](https://usejianmu.ai/docs/copilot) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -2240,7 +2240,7 @@ No. The Usage tab counts tokens, cache and cost for every Grok call, priced from
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [GitHub Copilot](https://usejianmu.ai/docs/copilot) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -2373,7 +2373,7 @@ Yes. A Vibe key from a Le Chat plan (Pro, Student or Team) shows how much of the
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [GitHub Copilot](https://usejianmu.ai/docs/copilot) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -2557,7 +2557,7 @@ Other local servers, such as LM Studio, oMLX, vLLM and llama.cpp’s server, are
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [GitHub Copilot](https://usejianmu.ai/docs/copilot)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -2701,7 +2701,7 @@ Newer Claude models don’t all take `thinking` `disabled`. jianmu sends Sonnet 
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [OpenAI](https://usejianmu.ai/docs/openai) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [GitHub Copilot](https://usejianmu.ai/docs/copilot) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -2852,7 +2852,7 @@ Yes, as its own provider, Azure OpenAI. Give it the resource’s endpoint and ke
 
 **By provider:** [DeepSeek](https://usejianmu.ai/docs/deepseek) · [Kimi and Kimi Code](https://usejianmu.ai/docs/kimi) · [GLM Coding Plan](https://usejianmu.ai/docs/glm) · [Qwen](https://usejianmu.ai/docs/qwen) · [MiniMax](https://usejianmu.ai/docs/minimax) · [Anthropic](https://usejianmu.ai/docs/anthropic) · [Gemini](https://usejianmu.ai/docs/gemini) · [Grok](https://usejianmu.ai/docs/grok) · [Mistral](https://usejianmu.ai/docs/mistral) · [OpenRouter](https://usejianmu.ai/docs/openrouter) · [GitHub Copilot](https://usejianmu.ai/docs/copilot) · [Ollama](https://usejianmu.ai/docs/ollama)
 
-Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [Discord](https://discord.gg/vGSnD3ZKQF) if you get stuck.
+Every agent: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Models in Codex](https://usejianmu.ai/docs/codex-models), [Models in Gemini CLI](https://usejianmu.ai/docs/gemini-cli-models), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models). Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues) if you get stuck.
 
 ---
 
@@ -3093,7 +3093,7 @@ jianmu keeps a hash of it (for the cache) and the classifier’s answer, in memo
 
 That depends on the classifier and on how distinct your intents are. With a few clearly different kinds, a small model picks well; with overlapping ones it will sometimes guess. Since a wrong or missing answer only changes which model answers, start with two or three broad intents, watch the trace for a day and adjust the wording.
 
-Questions or a setup worth sharing? Ask on [Discord](https://discord.gg/vGSnD3ZKQF). Routing groups in general are covered in [Get started](https://usejianmu.ai/docs/start#routing).
+Questions or a setup worth sharing? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues). Routing groups in general are covered in [Get started](https://usejianmu.ai/docs/start#routing).
 
 ---
 
@@ -3256,7 +3256,7 @@ Desktop’s gateway-mode window has no translation of its own. Switching back br
 
 No. They stay in Desktop’s own profile and come back when you switch back, or you can import them with Settings → Import.
 
-The same models in the terminal: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [ChatGPT in Claude Code](https://usejianmu.ai/docs/claude-code-chatgpt). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+The same models in the terminal: [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [ChatGPT in Claude Code](https://usejianmu.ai/docs/claude-code-chatgpt). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3314,7 +3314,7 @@ No. It writes only its own provider, the default model and, if you have one, the
 
 Yes. It reads OPENCLAW_PROFILE, OPENCLAW_STATE_DIR, OPENCLAW_CONFIG_PATH and OPENCLAW_HOME the way OpenClaw does.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Hermes Agent on any model](https://usejianmu.ai/docs/hermes) and [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Hermes Agent on any model](https://usejianmu.ai/docs/hermes) and [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3378,7 +3378,7 @@ jianmu’s provider stays so its models remain in Hermes’s picker. Switch back
 
 No. It adds its own provider and changes only model.provider, model.default and, when you set it, the reasoning effort.
 
-More agents on the same models: [OpenClaw on any model](https://usejianmu.ai/docs/openclaw), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models) and [Cline on any model](https://usejianmu.ai/docs/cline). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [OpenClaw on any model](https://usejianmu.ai/docs/openclaw), [Models in OpenCode](https://usejianmu.ai/docs/opencode-models) and [Cline on any model](https://usejianmu.ai/docs/cline). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3440,7 +3440,7 @@ Cline refuses a provider it doesn’t know when a session starts, so jianmu uses
 
 Its picker lists jianmu’s models under jianmu; pick the model there, since the app doesn’t read it from Cline’s files.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Hermes Agent on any model](https://usejianmu.ai/docs/hermes) and [Goose on any model](https://usejianmu.ai/docs/goose). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Hermes Agent on any model](https://usejianmu.ai/docs/hermes) and [Goose on any model](https://usejianmu.ai/docs/goose). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3498,7 +3498,7 @@ Yes. The CLI and the desktop app read the same config, so both use the model on 
 
 Yes. jianmu sets up a Goose in a WSL distro too, with the gateway’s address as the distro reaches it.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Cline on any model](https://usejianmu.ai/docs/cline) and [Droid on any model](https://usejianmu.ai/docs/droid). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Cline on any model](https://usejianmu.ai/docs/cline) and [Droid on any model](https://usejianmu.ai/docs/droid). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3551,7 +3551,7 @@ That model doesn’t reason. For one that does, jianmu gives it a starting effor
 
 No. Your custom models stay as they were and in front of jianmu’s.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Goose on any model](https://usejianmu.ai/docs/goose) and [Zed on any model](https://usejianmu.ai/docs/zed). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Goose on any model](https://usejianmu.ai/docs/goose) and [Zed on any model](https://usejianmu.ai/docs/zed). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3604,7 +3604,7 @@ That model doesn’t think. For one that does, jianmu sets reasoning_effort, and
 
 No. jianmu sets the agent panel’s default model and adds a provider; edit predictions are left as they were.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Droid on any model](https://usejianmu.ai/docs/droid) and [Crush on any model](https://usejianmu.ai/docs/crush). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Droid on any model](https://usejianmu.ai/docs/droid) and [Crush on any model](https://usejianmu.ai/docs/crush). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3663,7 +3663,7 @@ Lighter tasks next to the main work. Set it on Crush’s row as small, to any mo
 
 Yes. jianmu sets up a Crush in a WSL distro too, with the gateway’s address as the distro reaches it.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Zed on any model](https://usejianmu.ai/docs/zed) and [Raycast on any model](https://usejianmu.ai/docs/raycast). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Zed on any model](https://usejianmu.ai/docs/zed) and [Raycast on any model](https://usejianmu.ai/docs/raycast). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3723,7 +3723,7 @@ No. Raycast watches providers.yaml and picks up jianmu’s entry when it changes
 
 Yes. Every model is listed with tools on, and the gateway carries tool calls to each model’s provider.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Crush on any model](https://usejianmu.ai/docs/crush) and [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models), [Crush on any model](https://usejianmu.ai/docs/crush) and [Copilot CLI on any model](https://usejianmu.ai/docs/copilot-cli). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3783,7 +3783,7 @@ Copilot names a model of one of its providers as provider/model, and jianmu’s 
 
 Yes. jianmu only touches its own provider and models in providers.json; yours stay as they are.
 
-More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Raycast on any model](https://usejianmu.ai/docs/raycast). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+More agents on the same models: [Models in OpenCode](https://usejianmu.ai/docs/opencode-models), [Models in Claude Code](https://usejianmu.ai/docs/claude-code-models) and [Raycast on any model](https://usejianmu.ai/docs/raycast). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3850,7 +3850,7 @@ Cherry Studio shows models you added to the provider. Fetch the jianmu provider�
 
 jianmu lists it once Cherry Studio has run on this computer. Open Cherry Studio once, then look again.
 
-Using a coding agent too? See [Subscriptions in any agent](https://usejianmu.ai/docs/subscriptions) and [Get started](https://usejianmu.ai/docs/start). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Using a coding agent too? See [Subscriptions in any agent](https://usejianmu.ai/docs/subscriptions) and [Get started](https://usejianmu.ai/docs/start). Something fails? See [Fixing common errors](https://usejianmu.ai/docs/troubleshooting), or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -3988,7 +3988,7 @@ Yes. jianmu finds agents in running WSL distros and sets each up with an address
 
 Yes. Turn on Settings › Network and sharing › Share on local network, and send a gateway key from the other computer. Don’t open the port to the internet.
 
-Still stuck? Copy the request’s report from the Routing page and ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Still stuck? Copy the request’s report from the Routing page and ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -4351,7 +4351,7 @@ curl -s http://127.0.0.1:3425/v1/jianmu/concurrency
 
 > **Away from home**, reach the shared jianmu over a VPN such as Tailscale or WireGuard, with its address there. Don’t open its port to the internet.
 
-Questions or a setup worth sharing? Ask on [Discord](https://discord.gg/vGSnD3ZKQF). The [reference](https://github.com/DamonZS/Jianmu/blob/main/docs/reference.md) has the details.
+Questions or a setup worth sharing? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues). The [reference](https://github.com/DamonZS/Jianmu/blob/main/docs/reference.md) has the details.
 
 ---
 
@@ -4506,7 +4506,7 @@ Then: `sudo chown -R 65532:65532 ./config`, `docker compose up -d`, open `http:/
 - **Updates..** Pull the new image and recreate the container on the same volume: `docker pull ghcr.io/DamonZS/Jianmu:latest`, then `docker rm -f jianmu` and the same `docker run`, or `docker compose pull && docker compose up -d`. jianmu releases several times a day; for one update a day with Renovate or Watchtower, follow `daily` (with Renovate, pin its digest), or `stable` for one a week.
 - **Build it yourself..** `docker build -t jianmu .` in a checkout of [the repository](https://github.com/DamonZS/Jianmu) makes the same image.
 
-Questions or a setup worth sharing? Ask on [Discord](https://discord.gg/vGSnD3ZKQF). The [reference](https://github.com/DamonZS/Jianmu/blob/main/docs/reference.md#docker) has the details.
+Questions or a setup worth sharing? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues). The [reference](https://github.com/DamonZS/Jianmu/blob/main/docs/reference.md#docker) has the details.
 
 ---
 
@@ -4729,7 +4729,7 @@ A plugin is an npm package jianmu runs; the user installs it from Settings → P
 - No API or link lets another app register itself as an agent, or install a plugin, without the user: plugins are installed in jianmu by the user, and agent rows come from adapters in jianmu’s source.
 - `jianmu://import` links add a *provider* (a source of models, with its key), not an agent or an app: see [Add to jianmu](https://usejianmu.ai/docs/import).
 
-Questions, or an adapter you’d like to discuss first: open an [issue](https://github.com/DamonZS/Jianmu/issues) or ask on [Discord](https://discord.gg/vGSnD3ZKQF).
+Questions, or an adapter you’d like to discuss first: open an [issue](https://github.com/DamonZS/Jianmu/issues) or ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
 
 ---
 
@@ -5690,7 +5690,7 @@ Everything in the requests it makes: the conversation, the tools and their resul
 
 A `jianmu` command in a terminal loads the folder as it is now. In the app, turn the plugin off and on in Plugins.
 
-Questions, or a plugin to share? Ask on [Discord](https://discord.gg/vGSnD3ZKQF), or open an issue in [magpie-community/plugins](https://github.com/magpie-community/plugins).
+Questions, or a plugin to share? Ask on [GitHub Issues](https://github.com/DamonZS/Jianmu/issues), or open an issue in [magpie-community/plugins](https://github.com/magpie-community/plugins).
 
 ---
 

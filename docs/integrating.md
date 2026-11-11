@@ -177,4 +177,4 @@ config, so it is not how an app registers itself.
 
 Questions, or an adapter you'd like to discuss first: open an issue at
 <https://github.com/DamonZS/Jianmu/issues> or ask on
-[Discord](https://discord.gg/vGSnD3ZKQF).
+[GitHub Issues](https://github.com/DamonZS/Jianmu/issues).
