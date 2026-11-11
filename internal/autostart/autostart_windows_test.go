@@ -1,6 +1,7 @@
 package autostart
 
 import (
+	"errors"
 	"testing"
 
 	"golang.org/x/sys/windows"
@@ -123,5 +124,75 @@ func TestEnabledWithNoMarkerIsOn(t *testing.T) {
 	}
 	if Enabled() == Off {
 		t.Fatal("a Run value with no Startup apps marker reads as off")
+	}
+}
+
+// An upgrade from the build published as magpie keeps the login item: its Run
+// value (and Task Manager's switch for it) moves to jianmu's name, and the
+// earlier value goes so login doesn't open two. A jianmu value already there
+// wins over the earlier one.
+func TestRefreshCarriesTheEarlierRunValue(t *testing.T) {
+	const sub = `Software\JianmuTest\Run`
+	const appr = `Software\JianmuTest\Approved`
+	t.Cleanup(func() {
+		registry.DeleteKey(registry.CURRENT_USER, sub)
+		registry.DeleteKey(registry.CURRENT_USER, appr)
+		registry.DeleteKey(registry.CURRENT_USER, `Software\JianmuTest`)
+	})
+	k, _, err := registry.CreateKey(registry.CURRENT_USER, sub, registry.ALL_ACCESS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer k.Close()
+	a, _, err := registry.CreateKey(registry.CURRENT_USER, appr, registry.ALL_ACCESS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer a.Close()
+
+	pr, pa := openRunKey, openApprovedKey
+	t.Cleanup(func() { openRunKey, openApprovedKey = pr, pa })
+	openRunKey = func(_ registry.Key, _ string, acc uint32) (registry.Key, error) {
+		return registry.OpenKey(registry.CURRENT_USER, sub, acc)
+	}
+	openApprovedKey = func(_ registry.Key, _ string, acc uint32) (registry.Key, error) {
+		return registry.OpenKey(registry.CURRENT_USER, appr, acc)
+	}
+
+	cmd := `"C:\Apps\jianmu\jianmu.exe" tray`
+	if err := k.SetStringValue(before, cmd); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.SetBinaryValue(before, []byte{3, 0, 0, 0}); err != nil {
+		t.Fatal(err)
+	}
+	if err := refresh(); err != nil {
+		t.Fatal(err)
+	}
+	if got, _, err := k.GetStringValue(name); err != nil || got != cmd {
+		t.Fatalf("jianmu value %q, %v; want the earlier command", got, err)
+	}
+	if b, _, err := a.GetBinaryValue(name); err != nil || len(b) == 0 || b[0] != 3 {
+		t.Fatalf("the switch was not carried: %v, %v", b, err)
+	}
+	if _, _, err := k.GetStringValue(before); !errors.Is(err, registry.ErrNotExist) {
+		t.Fatalf("the earlier value is still there: %v", err)
+	}
+	if _, _, err := a.GetBinaryValue(before); !errors.Is(err, registry.ErrNotExist) {
+		t.Fatalf("the earlier switch is still there: %v", err)
+	}
+
+	// a value of this version already there wins; the earlier one still goes
+	mine := `"D:\mine\jianmu.exe" tray`
+	k.SetStringValue(name, mine)
+	k.SetStringValue(before, cmd)
+	if err := refresh(); err != nil {
+		t.Fatal(err)
+	}
+	if got, _, _ := k.GetStringValue(name); got != mine {
+		t.Fatalf("jianmu value overwritten: %q", got)
+	}
+	if _, _, err := k.GetStringValue(before); !errors.Is(err, registry.ErrNotExist) {
+		t.Fatalf("the earlier value is still there: %v", err)
 	}
 }

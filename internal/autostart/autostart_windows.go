@@ -115,8 +115,65 @@ func disable() error {
 	return nil
 }
 
-// refresh: nothing an older jianmu wrote here needs writing again
-func refresh() error { return nil }
+// before is the Run value's name in builds published under another name.
+// An upgrade carries it to name so the login item the user turned on is not
+// lost, switch included, and leaves only one value that starts jianmu.
+const before = "magpie"
+
+// refresh carries a Run value written under the earlier name over to this
+// one; a value this version already has is left alone, and the earlier one
+// removed. Nothing else an older jianmu wrote here needs writing again.
+func refresh() error {
+	k, err := openRunKey(registry.CURRENT_USER, runKey, registry.QUERY_VALUE|registry.SET_VALUE)
+	if err != nil {
+		if errors.Is(err, registry.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	defer k.Close()
+	old, _, err := k.GetStringValue(before)
+	if err != nil {
+		if errors.Is(err, registry.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	if _, err := readRunValue(k); errors.Is(err, registry.ErrNotExist) {
+		if err := k.SetStringValue(name, old); err != nil {
+			return err
+		}
+		carryApproved()
+	}
+	if err := k.DeleteValue(before); err != nil && !errors.Is(err, registry.ErrNotExist) {
+		return err
+	}
+	dropApproved(before)
+	return nil
+}
+
+// carryApproved gives name Task Manager's switch as it was for before; one
+// that can't be reached leaves the value on, as a new one is.
+func carryApproved() {
+	a, err := openApprovedKey(registry.CURRENT_USER, approvedKey, registry.QUERY_VALUE|registry.SET_VALUE)
+	if err != nil {
+		return
+	}
+	defer a.Close()
+	if b, _, err := a.GetBinaryValue(before); err == nil {
+		_ = a.SetBinaryValue(name, b)
+	}
+}
+
+// dropApproved takes the switch kept for a value that is gone.
+func dropApproved(value string) {
+	a, err := openApprovedKey(registry.CURRENT_USER, approvedKey, registry.SET_VALUE)
+	if err != nil {
+		return
+	}
+	defer a.Close()
+	_ = a.DeleteValue(value)
+}
 
 // heldBack: nothing here is switched off apart from the record itself
 func heldBack() bool { return false }
