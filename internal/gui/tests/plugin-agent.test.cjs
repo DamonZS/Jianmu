@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok((await card.innerText()).includes("Aider"));
         assert.deepEqual(await kinds(card), [w.agent]);
         assert.ok(await card.locator(".pm-chip.kind.ag").count());
-        // yetone: 这里的 agent plugin 为什么没有 logo
+        // 这里的 agent plugin 为什么没有 logo
         assert.equal(await card.locator(".pm-logo img").getAttribute("src"), "/api/icons/aiderpic.png");
         assert.equal(await card.locator(".pm-logo svg").count(), 0);
 

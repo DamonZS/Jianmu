@@ -460,7 +460,7 @@ func TestFetchModelsURLAsksNoBase(t *testing.T) {
 // models it listed last time, as a key that can't be asked does: a failed
 // read says nothing about what the vendor serves today, and without it a
 // picked Claude model is gone from the user's provider for good (#904,
-// yetone's review of the union fetch: an Anthropic base answering 502
+// the review of the union fetch: an Anthropic base answering 502
 // deleted its models from the picks and never brought them back).
 func TestFetchKeepsTheModelsAFailedProtocolListed(t *testing.T) {
 	isolate(t)
@@ -569,7 +569,7 @@ func TestFetchKeepsTheModelsAFailedProtocolListed(t *testing.T) {
 // The other way round, which is what stops the fix from keeping every old
 // model: a model only the Chat base listed is gone from that base's list,
 // and the Anthropic base failing says nothing about it. Keeping every model
-// of a failed fetch would resurrect it (yetone's review).
+// of a failed fetch would resurrect it (the review).
 func TestFetchDropsAGoneModelWhileAnotherProtocolFails(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -655,7 +655,7 @@ func TestFetchDropsAGoneModelWhileAnotherProtocolFails(t *testing.T) {
 // protocol whose list is merged but which is kept in no side is a base a
 // fetch cannot find when it fails, so the picked Gemini model it listed was
 // read as gone and dropped for good — the very fault the Anthropic base
-// above was fixed for (yetone's review of #1006, 2026-10-13).
+// above was fixed for (the review of #1006, 2026-10-13).
 func TestFetchKeepsTheModelsAFailedGeminiBaseListed(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -764,7 +764,7 @@ func TestFetchKeepsTheModelsAFailedGeminiBaseListed(t *testing.T) {
 // And the same the other way round for Gemini: a model the Gemini base has
 // really dropped is dropped from the picks while the Chat base is down. It
 // is what stops the fix above from keeping every old model by never
-// dropping anything (yetone's review).
+// dropping anything (the review).
 func TestFetchDropsAGoneGeminiModelWhileAnotherProtocolFails(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -1035,7 +1035,7 @@ func TestFetchKeepsModelsOfAListSavedWithoutParts(t *testing.T) {
 // and a model the endpoint that does answer has dropped is gone, however
 // many rounds the other one stays at 404. Reading an absent part as an
 // empty one instead fixed that guess as what the endpoint listed, and the
-// model could never be dropped again (#904, yetone's review of #1006).
+// model could never be dropped again (#904, the review of #1006).
 func TestFetchDropsAModelWhileAnEndpointHasNeverAnswered(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -1140,7 +1140,7 @@ func TestFetchDropsAModelWhileAnEndpointHasNeverAnswered(t *testing.T) {
 // Claude model only that key saw is that base's own, and is kept as a
 // single key's failed base is. Kept as a whole list with no part saying
 // where it came from it belongs to no base at all, and is read as gone the
-// first time that key answers half-way (#904, yetone's review of #1006).
+// first time that key answers half-way (#904, the review of #1006).
 func TestFetchKeepsAModelsBaseAfterItsKeyFailedWhole(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -1266,7 +1266,7 @@ func TestFetchKeepsAModelsBaseAfterItsKeyFailedWhole(t *testing.T) {
 // this round for another of the model's keys and no longer serves it. A
 // part here said the Anthropic base still served claude-b, and the fetch
 // after that read it as a base that couldn't be asked, holding a model its
-// vendor had dropped for one round longer (yetone's review of #1006, found
+// vendor had dropped for one round longer (the review of #1006, found
 // on the path TestFetchKeepsAModelsBaseAfterItsKeyFailedWhole fixed).
 //
 // It is the same two keys as that test, and the difference is in one thing:

@@ -660,7 +660,7 @@ const (
 	healthyWhole  = `{"content":"line1\r\nline2\r\n"}`
 )
 
-// TestMessagesRelayKeepsHealthyCRLFSplit is yetone's review probe: a plain
+// TestMessagesRelayKeepsHealthyCRLFSplit is the review probe: a plain
 // Anthropic-shaped Messages stream relayed as it came, its partial_json
 // cut between the \r and the \n of a line ending. The pair survives; the
 // client reads the file's line ending as it was written.
@@ -934,7 +934,7 @@ func TestGLMFlashScope(t *testing.T) {
 // line (a big response.completed) in 32KB reads. Without the escape the
 // line comes back as it came, at a scan's cost; with one, the call it
 // carries is read once and said again. The reads themselves were
-// quadratic once (yetone's review of #4256 measured 2.43s). What is
+// quadratic once (the review of #4256 measured 2.43s). What is
 // bounded is the work the code controls, the bytes searched and the bytes
 // allocated, each a small multiple of the line's: a wall-clock bar
 // measured the machine, and went red under -race beside heavy shards

@@ -138,7 +138,7 @@ func TestSessionsCmd(t *testing.T) {
 // list cut at sessions.Limit: with the default --limit 20 the command read
 // only 200, so a history longer than that reported a remainder that was
 // wrong, and a model or folder filter picked among the rest could never be
-// resolved (yetone, #1019).
+// resolved (#1019).
 func TestSessionsMoreCountsTheWholeSet(t *testing.T) {
 	now := sessionsHome(t)
 	claude := os.Getenv("CLAUDE_CONFIG_DIR")

@@ -4,7 +4,7 @@
 // more, "Show N more" appends the next, and the note under the list says how
 // many of how many are drawn. Without the pages a history of thousands was
 // rebuilt whole on every keystroke (~300 ms a keystroke on a fast Mac, and
-// worse on Windows: yetone, #1019). The data stays complete, so the count
+// worse on Windows: #1019). The data stays complete, so the count
 // beside the list and the list still agree. English and Chinese, Chromium and
 // WebKit.
 const assert = require("node:assert/strict");
@@ -155,7 +155,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // A search that matches fewer than a page holds them all: the note says
       // "1 session", not "1 of 2600" — there is no "Show more" for the other
       // 2599, and saying so would send the reader looking for one. The whole
-      // list is drawn, so it is the length and not "1 of 1" (yetone, #1019).
+      // list is drawn, so it is the length and not "1 of 1" (#1019).
       await q.fill("Fix the session list");
       await page.locator("#sessList .row.sess").first().waitFor();
       assert.equal(await rows.count(), 1, "the one match");

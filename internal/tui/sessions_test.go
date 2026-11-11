@@ -235,7 +235,7 @@ func TestSessChart(t *testing.T) {
 // The page's list is the whole set, not sessions.Limit: the head says how
 // many sessions there are, and the list has to be as long as that. It read
 // List(sessions.Limit+1) — 201 — which kept the bug the GUI had, only past a
-// different number (yetone, #1019).
+// different number (#1019).
 func TestSessionsListIsNotCutAtTheLimit(t *testing.T) {
 	sessionsHome(t)
 	claude := os.Getenv("CLAUDE_CONFIG_DIR")

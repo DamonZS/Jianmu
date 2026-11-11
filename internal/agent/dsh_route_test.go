@@ -714,7 +714,7 @@ func dshKeyFixture(dir string) {
 const dshMineRow = "- id: llm-pi-ai\n  name: \"@deepseek-ai/dsh-llm-pi-ai\"\n  config:\n    providers:\n" +
 	"      mine:\n        displayName: Mine\n        apiKeyEnv: MINE_API_KEY\n        api: openai-completions\n        baseURL: https://mine.example/v1\n        models:\n          - id: m1\n"
 
-// yetone's review of #1029: a home layer whose start names one of jianmu's
+// the review of #1029: a home layer whose start names one of jianmu's
 // models and which has no llm-pi-ai of its own must gain none — the home
 // layer's config replaces every profile's whole entry (dshOver), so an entry
 // added there takes the user's own providers out of dsh's list (#804).
@@ -762,7 +762,7 @@ func TestDshHomeLayerWithPiRowGetsItsRouteBack(t *testing.T) {
 	}
 }
 
-// yetone's review of #1029: with no catalog to write a route from, a profile
+// the review of #1029: with no catalog to write a route from, a profile
 // whose start is not jianmu's and which has no route is still said — the
 // loop over the other profiles must not be skipped just because nothing can
 // be written back (the web profile here is wired, with jianmu's route, so
@@ -796,7 +796,7 @@ func TestDshCheckSaysWhenNoCatalogAndAProfileHasNoRoute(t *testing.T) {
 	}
 }
 
-// yetone's review of #1029, the branch left untested: with no catalog there is
+// the review of #1029, the branch left untested: with no catalog there is
 // nothing a round could write back, so a second profile whose start names one
 // of jianmu's models is said too — `canWriteBack` must stay false here (set it
 // true and this test fails: the profile would be passed over in silence).

@@ -83,7 +83,7 @@ func TestKimiToolEnumTypes(t *testing.T) {
 // its items, an array, not from its values, a string: the node was read
 // from its enum first and went on with items beside a string, as a
 // Gemini one did before geminiSchemaType read its keywords first
-// (d71362af; yetone, #3867). A $ref's target is typed the same way. An
+// (d71362af; #3867). A $ref's target is typed the same way. An
 // enum with no items or properties is still typed from its values.
 func TestKimiToolEnumTypesItemsBeforeEnum(t *testing.T) {
 	kimi, err := provider.FromPreset("kimi-code-cn")

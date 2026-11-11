@@ -54,7 +54,7 @@ func (f *refusedOpenCode) RoundTrip(r *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// #4900 (51bit.eth, via yetone): OpenCode Go's /models refuses an expired
+// #4900 (51bit.eth): OpenCode Go's /models refuses an expired
 // key, and jianmu lists the models.dev catalog in its place — free rows Go
 // doesn't serve among them. The vendor's list is public: a list the key is
 // refused is asked again bare, so the picker says what OpenCode serves,

@@ -18,7 +18,7 @@
 // public/contributors.json at deploy) and by worker.js (the contributors
 // page). It imports nothing, so the worker can bundle it.
 
-export const MAINTAINERS = ["yetone"];
+export const MAINTAINERS = ["DamonZS"];
 // agents and bots that author or co-author commits
 const BOT = /\[bot\]$|^(claude( code| opus.*| sonnet.*| haiku.*)?|amp|codex|copilot|github copilot|cursor( agent)?|devin( ai)?|gemini|opencode|droid|factory-droid|dependabot|github-actions|renovate|jev)$/i;
 // agents and machine accounts that co-author commits: "Instinct Agent

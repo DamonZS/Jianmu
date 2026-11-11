@@ -163,7 +163,7 @@ func TestClaudeSignInThroughDisconnect(t *testing.T) {
 
 // An empty key at an endpoint the user set after jianmu stepped out is
 // theirs, though Claude Code kept its claude.ai sign-in through jianmu
-// before: its model default leaves it (yetone on #1218).
+// before: its model default leaves it (a user on #1218).
 func TestClaudeOwnEndpointWithAnEmptyKey(t *testing.T) {
 	t.Setenv("JIANMU_ADDR", "")
 	home, path := claudeSettings(t, `{"theme":"dark","env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay"}}`)

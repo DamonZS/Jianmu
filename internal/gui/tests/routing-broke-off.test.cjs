@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 // Settings, a title reply with no title in it — answered: its try has no
 // fail. The rule reads the tries, not the route's error, so the row stays
 // a green dot rather than turning every titled thread's first request red
-// (yetone, reviewing #772).
+// (reviewing #772).
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
     test(`${engine} ${lang}: a 200 with a note of its own is still an answer`, async (t) => {

@@ -95,7 +95,7 @@ func TestPluginOwnIcon(t *testing.T) {
 	}
 }
 
-// yetone: 非官方插件显示不出来 logo. A repository's https picture not fetched
+// 非官方插件显示不出来 logo. A repository's https picture not fetched
 // before is waited for, so the GitHub list's first answer has it; one slower
 // than the wait shows the next time, and the wait ends when it does.
 func TestRepoIconsWaitForFirstFetch(t *testing.T) {

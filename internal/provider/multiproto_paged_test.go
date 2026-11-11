@@ -293,7 +293,7 @@ func TestFetchKeepsAnotherVendorsAnthropicList(t *testing.T) {
 }
 
 // One OpenRouter provider, over two rounds, with the shapes openrouter.ai
-// really answered (#904, yetone's review of #1006): the catalog at the Chat
+// really answered (#904, the review of #1006): the catalog at the Chat
 // base, and at the Anthropic base first the whole namespaced catalog and
 // then one page of it. Neither the ids of that page nor a pick that fell
 // off it belong to what the provider serves.

@@ -7407,9 +7407,9 @@ function countPartner(what, ids) {
 
 // a partner listed since the add sheet last showed the partners puts a
 // small dot on the add button, its name in the button's title, until the
-// sheet shows it (yetone: 有了新的合作伙伴的时候…提醒吸引用户点击查看),
+// sheet shows it (有了新的合作伙伴的时候…提醒吸引用户点击查看),
 // and a still one on Providers in the nav, as Plugins has for an update
-// (yetone: 侧边栏…不要太打扰用户)
+// (侧边栏…不要太打扰用户)
 function markNewPartners() {
   const list = providers || providersEarly?.got;
   const fresh = adding ? [] : (list?.presets || []).filter((p) => p.kind === "partner" && p.new && !p.added && partnerShown(p));

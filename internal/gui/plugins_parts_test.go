@@ -23,7 +23,7 @@ func TestPluginMarketInParts(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("JIANMU_PLUGIN_MARKET", "off")
 	const pkg = "@magpie-community/opencode-zcode-auth"
-	// a listing the market gives no icon (yetone: 这里的 agent plugin 为什么
+	// a listing the market gives no icon (这里的 agent plugin 为什么
 	// 没有 logo): the picture its package gives (jianmu.icon) is kept here,
 	// and the page gets it as a file, never the data URI
 	const agent = "@magpie-community/middleware-word-guard"

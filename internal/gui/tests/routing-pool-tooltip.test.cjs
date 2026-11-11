@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A routing pool's account list is the name element's tooltip, not the row's:
 // attached to the whole row it covered the Routing and Stays buttons on it,
-// so a press landed on the tip's text and nothing was picked (#3785, yetone).
+// so a press landed on the tip's text and nothing was picked (#3785).
 // The buttons carry no title of their own; the element listing the accounts
 // behind them still does.
 const assert = require("node:assert/strict");

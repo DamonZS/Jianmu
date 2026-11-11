@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Discover is one market: jianmu's community, other authors and the
 // repositories tagged jianmu-plugin on GitHub, browsed with one bar
-// (yetone: 社区插件、非官方插件散落的太厉害了，你要把它统筹起来). The bar's
+// (社区插件、非官方插件散落的太厉害了，你要把它统筹起来). The bar's
 // kinds say how many of each there are under what Origin leaves; Origin
 // picks a source and, beside it, what isn't installed yet (the owner:
 // 加一个未安装); a shelf's See all opens its kind whole; Sort puts them by

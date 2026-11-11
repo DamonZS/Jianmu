@@ -43,7 +43,7 @@ test("a quote after the name is not part of it", () => {
 });
 
 test("the maintainer, the owner and descriptions of someone are nobody", () => {
-  assert.deepEqual(names("plugins: the GitHub list waits up to 3s for a repository's https icon fetched the first time (yetone: 非官方插件显示不出来 logo)"), []);
+  assert.deepEqual(names("plugins: the GitHub list waits up to 3s for a repository's https icon fetched the first time (非官方插件显示不出来 logo)"), []);
   assert.deepEqual(names("tray: with the menu bar's jianmu icon off, a click opens the panel on the tab left last, not Allowances (the owner: 每次都会自动跳转到 allowances，我记得之前是可以的)"), []);
   assert.deepEqual(names("gui: a Claude account saved in jianmu can be removed while Claude Code is signed out (𝕏 user on Discord: a banned account logged out, and its line in Providers had nothing to remove it with) — saved accounts are listed"), []);
 });

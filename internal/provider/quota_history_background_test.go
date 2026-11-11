@@ -17,7 +17,7 @@ import (
 // history too, as a Usage-page reading is: a jianmu only ever serving
 // other jianmus has nobody on its Usage page, so its routing read each
 // account every few minutes while GET /v1/jianmu/quotas/history stayed
-// empty (#1313; yetone on #1317).
+// empty (#1313; a user on #1317).
 func TestBackgroundLoginReadNotesQuotaHistory(t *testing.T) {
 	azureHome(t)
 	writeFile(t, filepath.Join(os.Getenv("HOME"), ".codex", "auth.json"), map[string]any{

@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang + ": the add sheet", async () => {
         const w = L[lang];
         // no plugin and no account: neither, as they are the Plugins page's
-        // to install (yetone: 对于新用户来说，这里应该只显示内置的 provider)
+        // to install (对于新用户来说，这里应该只显示内置的 provider)
         let { page, errors } = await open(browser, lang, { installed: false }, "providers");
         assert.deepEqual(await qoderTiles(page), []);
         // signed in to the built-in Qoder CN: its tile, deprecated, under

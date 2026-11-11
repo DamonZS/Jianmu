@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Repositories their authors tagged jianmu-plugin on GitHub (yetone: 在插件页
+// Repositories their authors tagged jianmu-plugin on GitHub (在插件页
 //能否自动识别打了 jianmu-plugin 的 github repo 来显示为非官方插件): Discover
 // shows them among the community's, by kind (Origin picks them alone),
 // each card saying Unreviewed, its owner and its stars. One whose package the market
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // the picture its package.json gives (jianmu.icon), as jianmu keeps it; one that gives none, the puzzle
           assert.equal(await c.locator(".pm-logo img").getAttribute("src"), "/api/icons/claude-auth.svg");
           assert.equal(await cards.filter({ hasText: "agy-staff" }).locator(".pm-logo img").count(), 0);
-          // a provider and a middleware part by hue (yetone: 中间件和供应商稍微有点区分吧)
+          // a provider and a middleware part by hue (中间件和供应商稍微有点区分吧)
           assert.equal(await c.locator(".pm-chip.kind.pv").count(), 1);
           // among the community's, each says nobody reviewed it: a quiet
           // outlined word by its author, not a chip in its facts (the

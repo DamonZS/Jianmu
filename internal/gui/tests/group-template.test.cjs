@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// yetone, 10-10: a routing group took the whole editor to make. Templates
+// 10-10: a routing group took the whole editor to make. Templates
 // make one of the user's own models in a click: with no group of the
 // user's yet, the Routing page shows them as cards, each with the models
 // it takes, Add and Edit first; one that can't be made says what it needs

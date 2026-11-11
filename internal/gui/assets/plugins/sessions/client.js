@@ -34,7 +34,7 @@ jianmu.plugin("sessions", (ctx) => {
   let trashOn = false;
   // Picking sessions to delete is a mode of its own, as in Finder and Mail:
   // off, no row carries a checkbox and there is no bar over the list
-  // (yetone: a box on every row, and a lone Delete under the Trash).
+  // (a box on every row, and a lone Delete under the Trash).
   let selecting = false;
   let othersOpen = false;     // the folders an app or the system made, unfolded
   const picked = new Set();   // ids picked to delete, of the agent shown
@@ -86,7 +86,7 @@ jianmu.plugin("sessions", (ctx) => {
   // an app that runs Codex once per picture in a folder of its own left
   // 11,358 folders of one session each, and drawing them all made 114,000
   // elements, held every click on the page for over a second, and slowed
-  // the Library page after it (yetone).
+  // the Library page after it.
   const FOLDERS = "\x00folders";
   const OTHERS = "\x00others";
 
@@ -122,7 +122,7 @@ jianmu.plugin("sessions", (ctx) => {
   // A folder an app or the system made, not a project of the reader's: the
   // disk's root, a temp folder, or one under a hidden folder of a home
   // (~/.some-agent/…). They go under a fold of their own after the
-  // projects (yetone: "/", "T" and folders named by UUIDs led the list).
+  // projects ("/", "T" and folders named by UUIDs led the list).
   const scratch = (k) => {
     if (!k || k === GW || k === DRAFTS) return false;
     const p = k.replace(/\\/g, "/").replace(/\/+$/, "");

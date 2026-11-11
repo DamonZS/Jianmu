@@ -3279,7 +3279,7 @@ let sessQuery = "";
 // and the list agree), but a filter click or a keystroke in Search draws
 // SESS_PAGE rows and no more, and "Show N more" appends the next page. A
 // history of thousands rebuilt whole on every keystroke took ~300ms a
-// keystroke on a fast Mac (yetone, #1019). sessShown resets to one page
+// keystroke on a fast Mac (#1019). sessShown resets to one page
 // whenever the filters change, so what is drawn never grows with the history.
 const SESS_PAGE = 200;
 let sessShown = SESS_PAGE;
@@ -3863,7 +3863,7 @@ function renderSessions() {
   // The list is every session the filters keep, drawn in pages, so the note
   // counts that list and not every session on the computer: a search that
   // matches one session says "1 session", not "1 of 2600", which read as if
-  // the rest were behind a "Show more" that isn't there (yetone, #1019).
+  // the rest were behind a "Show more" that isn't there (#1019).
   // Nothing left to draw, the note is just the list's length, in words a
   // reader uses: one session is a session, not "1 sessions".
   const parts = [t("Totals count native sessions and gateway requests with a session ID")];

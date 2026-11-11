@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // GitHub answers after the rest of the plugins page, seconds after on a
 // slow line, and its plugins weren't shown until it did, so it read as
-// there being no unofficial plugins (yetone: 当还没加载完的时候，压根就不显示，
+// there being no unofficial plugins (当还没加载完的时候，压根就不显示，
 // 会让那些网慢的用户以为没有非官方插件). While /api/plugins/github is held
 // here, Discover's browse bar says it is looking on GitHub, and picking
 // the GitHub origin shows cards still to come; let go, its cards come in

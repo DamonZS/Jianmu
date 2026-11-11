@@ -151,7 +151,7 @@ func TestNPMInfoAtOnce(t *testing.T) {
 	}
 }
 
-// yetone: 这里的 agent plugin 为什么没有 logo. The picture a package gives
+// 这里的 agent plugin 为什么没有 logo. The picture a package gives
 // in package.json's jianmu.icon comes with what npm says of it, so a
 // listing the market gives no icon shows it; anything but an https URL or
 // a data:image URI is left out.

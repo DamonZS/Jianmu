@@ -2,7 +2,7 @@
 // A plugin its author publishes from their own repository is listed in
 // registry.json without "community": true (the owner on
 // magpie-community/plugins#479). Discover browses it with the rest
-// (yetone: 社区插件、非官方插件散落的太厉害了，你要把它统筹起来): in Agents,
+// (社区插件、非官方插件散落的太厉害了，你要把它统筹起来): in Agents,
 // and alone under the Other authors origin. Browsed or found by a search,
 // by its name or its publisher, it is under its publisher's name and never
 // with the jianmu community badge, on its card and on its page. PinK's listing is

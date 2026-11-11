@@ -148,7 +148,7 @@ func pluginOwnIcon(said string) string {
 // give in their package.json (repositories tagged jianmu-plugin), checked
 // and kept as an installed plugin's are: "" where there is none to show.
 // An https picture not fetched before is waited for up to wait, so the
-// list's first answer has it (yetone: 非官方插件显示不出来 logo); one
+// list's first answer has it (非官方插件显示不出来 logo); one
 // slower than that shows the next time the list is asked.
 func RepoIcons(said []string, wait time.Duration) []string {
 	out := make([]string, len(said))

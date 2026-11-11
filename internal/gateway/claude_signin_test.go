@@ -40,7 +40,7 @@ func TestClaudeSignInNotToldItsSignInFailed(t *testing.T) {
 		badKey  = `{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}`
 		revoked = `{"type":"error","error":{"type":"permission_error","message":"OAuth token has been revoked. Please obtain a new token."}}`
 		denied  = `{"type":"error","error":{"type":"permission_error","message":"This organization has been disabled."}}`
-		// as yetone's run of Claude Code 2.1.293 had them (#1218)
+		// as the reviewer's run of Claude Code 2.1.293 had them (#1218)
 		keyDenied = `{"type":"error","error":{"type":"permission_error","message":"invalid x-api-key"}}`
 		noKey     = `{"type":"error","error":{"type":"invalid_request_error","message":"x-api-key header is required"}}`
 		limited   = `{"type":"error","error":{"type":"rate_limit_error","message":"rate limited for this x-api-key"}}`

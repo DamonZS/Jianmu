@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The Partners heading's light (yetone: 每次点击"添加供应商"……要有一个优雅、
+// The Partners heading's light (每次点击"添加供应商"……要有一个优雅、
 // 精致、让人舒服的流光动画; the owner picked the traced outline): once the
 // sheet opens and the heading is in view, a hairline runs round it and
 // fades, and at the same time one runs round the partners' tiles

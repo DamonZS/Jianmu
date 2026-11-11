@@ -21,7 +21,7 @@ import (
 // answers goes first.
 //
 // PIN (2026-10-01): weekly pace is its own option, "pace"; Least used
-// keeps its most-left-first meaning and Smart is left as it is (yetone,
+// keeps its most-left-first meaning and Smart is left as it is (owner,
 // PR #517 review).
 func TestWeeklyPace(t *testing.T) {
 	old := allowances

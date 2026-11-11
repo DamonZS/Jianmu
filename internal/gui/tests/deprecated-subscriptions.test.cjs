@@ -6,7 +6,7 @@
 // signed-in ones with the same reason. One already on its plugin, or a
 // subscription with no plugin, carries no badge; Not now hides the notice
 // until another deprecated subscription signs in. One with no account isn't
-// in the Add sheet at all (yetone: 对于新用户来说，这里应该只显示内置的
+// in the Add sheet at all (对于新用户来说，这里应该只显示内置的
 // provider): a search naming it offers More in Plugins, opened on that
 // search, where it is installed. In English and Chinese, Chromium and
 // WebKit; the API is faked here.

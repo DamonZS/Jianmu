@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The add sheet's Partners (yetone: 在订阅上面加上一栏是「合作伙伴」): the
+// The add sheet's Partners (在订阅上面加上一栏是「合作伙伴」): the
 // services that pay to be listed, first and under a heading that says so,
 // each one quiet row with no badge of its own. Who they are comes from
 // usejianmu.ai through /api/providers (internal/provider/partners.go); one
