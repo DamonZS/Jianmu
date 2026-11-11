@@ -71,7 +71,7 @@ async function until(ok, ms = 8000, page) {
   }
 }
 
-const english = ["How masking works", "Little Jianmu", "Over the network", "notebook", "Model service", "Letter to the provider", "Your computer",
+const english = ["How masking works", "Jianmu", "Over the network", "notebook", "Model service", "Letter to the provider", "Your computer",
   "Sign in to github.com", "Signed in to github.com", "Nothing in it yet", "Signing in on your computer", "on your computer", "placeholders"];
 const wide = (page) => page.evaluate(() => {
   const over = [...document.querySelectorAll("#view-masking *")].filter((n) => n.getClientRects().length && n.getBoundingClientRect().right > innerWidth + 1).map((n) => n.className?.baseVal ?? n.className);

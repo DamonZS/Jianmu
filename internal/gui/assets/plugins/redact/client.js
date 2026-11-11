@@ -5,7 +5,7 @@
 // before app.js; page.js, after app.js, is the page's code. The card on
 // top says how much was masked over 7 or 30 days and where it went, the
 // list under it each request (or each value) masking changed (between
-// them, folded, demo.js's 小鹊 shows how masking works), and a
+// them, folded, demo.js's 建木 shows how masking works), and a
 // request opened says what it carried, what the vendor got instead, and
 // how each value was found and put back. The Masking alert is with
 // masking's other settings, in Settings › Privacy (settings.js). The
@@ -21,7 +21,7 @@ jianmu.plugin("redact", (ctx) => {
   <section class="msk-demo" id="maskDemo" data-no-pii>
     <button type="button" class="md-row" id="mdRow" aria-expanded="false" aria-controls="mdBody">
       <span class="md-thumb" aria-hidden="true"></span>
-      <span class="md-words"><span class="md-name" data-t>How masking works</span><span class="md-sub" data-t>Little Jianmu walks one request through: passwords become placeholders before it leaves, and come back on your computer with the answer</span></span>
+      <span class="md-words"><span class="md-name" data-t>How masking works</span><span class="md-sub" data-t>Jianmu walks one request through: passwords become placeholders before it leaves, and come back on your computer with the answer</span></span>
       <span class="md-len">0:27</span>
       <svg class="md-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>

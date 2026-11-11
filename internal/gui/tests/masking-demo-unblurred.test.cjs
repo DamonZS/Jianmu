@@ -69,7 +69,7 @@ async function until(ok, ms = 8000, page) {
   }
 }
 
-const MAIL = "yetone@example.com", PASS = "hunter2-prod";
+const MAIL = "demo@example.com", PASS = "hunter2-prod";
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {

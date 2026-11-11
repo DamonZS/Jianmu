@@ -1,4 +1,4 @@
-// Insights › Masking's demo (client.js has its row): 小鹊 takes one request
+// Insights › Masking's demo (client.js has its row): 建木 takes one request
 // through masking. The letter comes to her before it leaves this computer,
 // she tears the password and the email out into her notebook and sticks
 // placeholders in their place, the provider answers with placeholders, and
@@ -15,16 +15,16 @@
 
 const XQD_END = 27.5;
 const XQD_STEPS = [
-  [0, "You send a request", "You ask the agent to sign in to github.com with a password. The letter goes to Little Jianmu first and hasn't left your computer yet."],
-  [5.4, "She reads it through", "Little Jianmu opens the letter and reads it line by line for what shouldn't be sent: emails, passwords."],
+  [0, "You send a request", "You ask the agent to sign in to github.com with a password. The letter goes to Jianmu first and hasn't left your computer yet."],
+  [5.4, "She reads it through", "Jianmu opens the letter and reads it line by line for what shouldn't be sent: emails, passwords."],
   [7.8, "Tearing out what's private", "The real values are torn out and written in her notebook. The notebook stays on your computer."],
   [10.6, "Sticking on placeholders", "Placeholders fill the gaps. A value always gets the same one, so the model still understands."],
   [12.8, "Off to the provider", "The letter is sealed and sent. The provider gets only placeholders."],
   [15.6, "The answer calls the browser", "The model decides to call browser.login, and its arguments are placeholders too."],
-  [18.8, "Putting the values back", "When the answer comes, Little Jianmu opens her notebook and turns each placeholder back into its value."],
+  [18.8, "Putting the values back", "When the answer comes, Jianmu opens her notebook and turns each placeholder back into its value."],
   [22.2, "Signing in on your computer", "The tool signs in with the real password on your computer. The password never left it."],
 ];
-const XQD_MAIL = "yetone@example.com", XQD_PASS = "hunter2-prod";
+const XQD_MAIL = "demo@example.com", XQD_PASS = "hunter2-prod";
 const XQD_PM = "{{EMAIL_r3tvb2ce}}", XQD_PP = "{{PASSWORD_k7q2m4xa}}";
 
 let xqd = null;   // the demo, once its row has been opened
@@ -78,7 +78,7 @@ function maskDemoStage() {
   const req = box("req", "you", "You tell the agent");
   req.append(at(el("div", "xq-msg"), "reqmsg"));
 
-  const ledger = box("ledger", "book", "Little Jianmu's notebook", "Kept on your computer only");
+  const ledger = box("ledger", "book", "Jianmu's ledger", "Kept on your computer only");
   ledger.append(at(xqdSay("xq-lempty", "Nothing in it yet"), "lempty"));
   // the entries follow the header, so a taller font moves them down with it
   const entries = el("div", "xq-llist");
@@ -370,12 +370,12 @@ function maskDemoBuild(body) {
   const dark = matchMedia("(prefers-color-scheme: dark)");
   // boot.js says it before the page draws: /api/state's settings don't
   // carry it, so a demo opened before Settings was never told (avk458 on X)
-  const noVideo = !!window.bootPrefs?.noVideo;
+  const noVideo = true;
   const pickVid = () => {
     const th = document.documentElement.dataset.theme || (dark.matches ? "dark" : "light");
     if (th === theme) return;
     theme = th;
-    vid.poster = `plugins/redact/xq_${th}.jpg`;
+    vid.removeAttribute("poster");
     take = noVideo ? "" : `plugins/redact/xq_${th}.webm`;
     // a new source starts paused: it goes on where the old one was
     seek(T);

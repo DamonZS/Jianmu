@@ -254,7 +254,7 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 }
 @media (prefers-reduced-motion: reduce) { .mo-scan, .msk-live i { animation: none; } }
 
-/* How masking works (demo.js): a row that opens onto 小鹊 taking one request
+/* How masking works (demo.js): a row that opens onto Jianmu taking one request
    through. Her video is drawn on the card's colour, one take per theme; the
    stage is laid out at 1000×420 and scaled to the card */
 .msk-demo { flex: none; margin-top: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); overflow: hidden; }
@@ -262,7 +262,7 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 .md-row { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 9px 16px 9px 12px; cursor: pointer; }
 .md-row:hover { background: var(--pill-hover); }
 .md-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 14px; }
-.md-thumb { flex: none; width: 32px; height: 32px; border-radius: 9px; background: url(xq_light.jpg) -33px -5px / 98px auto no-repeat var(--card); box-shadow: inset 0 0 0 1px var(--line-2); }
+.md-thumb { flex: none; width: 32px; height: 32px; border-radius: 9px; background: radial-gradient(circle, #66C2CE 0 22%, transparent 23% 38%, #ED9834 39% 52%, transparent 53%) var(--card); box-shadow: inset 0 0 0 1px var(--line-2); }
 .md-words { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .md-name { font-size: 13px; font-weight: 600; color: var(--fg); }
 .md-sub { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -270,8 +270,8 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 .md-chev { flex: none; color: var(--faint); transition: transform .2s; }
 .md-row[aria-expanded="true"] .md-chev { transform: rotate(90deg); }
 .md-body { border-top: 1px solid var(--line-2); padding: 10px 12px 12px; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .md-thumb { background-image: url(xq_dark.jpg); } }
-:root[data-theme="dark"] .md-thumb { background-image: url(xq_dark.jpg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .md-thumb { background-image: radial-gradient(circle, #66C2CE 0 22%, transparent 23% 38%, #ED9834 39% 52%, transparent 53%); } }
+:root[data-theme="dark"] .md-thumb { background-image: radial-gradient(circle, #66C2CE 0 22%, transparent 23% 38%, #ED9834 39% 52%, transparent 53%); }
 
 .xqd { --xq-paper: #fffdf8; --xq-shadow: 0 6px 18px rgba(20, 22, 30, .10), 0 1px 3px rgba(20, 22, 30, .06), 0 0 0 .5px rgba(20, 22, 30, .08); --xq-env-shadow: rgba(20, 22, 30, .10); font-size: 13px; line-height: 1.45; color: var(--fg); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .xqd { --xq-paper: #2a2a2f; --xq-shadow: 0 6px 18px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3), 0 0 0 .5px rgba(255, 255, 255, .07); --xq-env-shadow: rgba(0, 0, 0, .35); } }
@@ -313,7 +313,7 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 .xq-bbtn { height: 22px; margin-top: 4px; display: grid; place-items: center; border-radius: 7px; background: var(--accent); font-size: 11px; font-weight: 600; color: var(--accent-fg); }
 .xq-bok { position: absolute; inset: 32px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: var(--card); font-size: 12px; font-weight: 600; text-align: center; opacity: 0; }
 .xq-chk { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--green-soft); color: var(--green); }
-.xq-her { position: absolute; left: 290px; top: 16px; width: 440px; height: 293.33px; pointer-events: none; }
+.xq-her { display: none; position: absolute; left: 290px; top: 16px; width: 440px; height: 293.33px; pointer-events: none; }
 .xq-her video { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: fill; -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.6%, #000 98.4%, transparent), linear-gradient(transparent, #000 4%, #000 98.4%, transparent); -webkit-mask-composite: source-in; mask-composite: intersect; }
 .xq-paper { position: absolute; left: 360px; top: 274px; width: 300px; height: 118px; padding: 9px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--xq-paper); box-shadow: var(--xq-shadow); transform-origin: 50% 50%; visibility: hidden; }
 .xq-ph { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 10.5px; white-space: nowrap; color: var(--muted); }
