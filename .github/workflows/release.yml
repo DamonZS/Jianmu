@@ -81,8 +81,39 @@ jobs:
           path: dist/jianmu-*
           if-no-files-found: error
 
+  macos:
+    needs: trigger-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: macos-13
+          - arch: arm64
+            runner: macos-14
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: build the app and its dmg
+        env:
+          VERSION: ${{ needs.trigger-release.outputs.version }}
+        run: |
+          v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
+          make app VERSION="$v"
+          mkdir -p dist
+          hdiutil create -volname Jianmu -srcfolder jianmu.app -ov -format UDZO "dist/jianmu-macos-${{ matrix.arch }}.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-macos-${{ matrix.arch }}
+          path: dist/jianmu-macos-*.dmg
+          if-no-files-found: error
+
   publish:
-    needs: [trigger-release, build]
+    needs: [trigger-release, build, macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -90,8 +121,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
+          pattern: dist*
           path: dist
+          merge-multiple: true
       - uses: actions/download-artifact@v4
         with:
           name: notes
