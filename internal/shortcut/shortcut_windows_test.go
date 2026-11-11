@@ -99,3 +99,31 @@ func TestInstalledAppsEntry(t *testing.T) {
 		t.Fatal("an entry for an exe that is gone stayed")
 	}
 }
+
+// dropEarlier takes out what a build published under another name
+// registered: its App Paths and Installed apps keys.
+func TestDropEarlier(t *testing.T) {
+	base := `Software\jianmu-test\` + t.Name()
+	wasApp, wasUn := earlierAppPath, earlierUninstallKey
+	earlierAppPath = base + `\App Paths\magpie.exe`
+	earlierUninstallKey = base + `\Uninstall\magpie`
+	t.Cleanup(func() {
+		registry.DeleteKey(registry.CURRENT_USER, base+`\App Paths`)
+		registry.DeleteKey(registry.CURRENT_USER, base+`\Uninstall`)
+		registry.DeleteKey(registry.CURRENT_USER, base)
+		earlierAppPath, earlierUninstallKey = wasApp, wasUn
+	})
+	for _, k := range []string{earlierAppPath, earlierUninstallKey} {
+		h, _, err := registry.CreateKey(registry.CURRENT_USER, k, registry.SET_VALUE)
+		if err != nil {
+			t.Fatal(err)
+		}
+		h.Close()
+	}
+	dropEarlier()
+	for _, k := range []string{earlierAppPath, earlierUninstallKey} {
+		if _, err := registry.OpenKey(registry.CURRENT_USER, k, registry.QUERY_VALUE); err == nil {
+			t.Fatal("an earlier key stayed:", k)
+		}
+	}
+}

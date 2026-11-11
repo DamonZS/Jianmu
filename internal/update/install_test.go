@@ -16,6 +16,8 @@ type installFixture struct {
 	downloads, exe, to, profiles string
 	versions                     map[string]uint64
 	placed                       []string // folders installCLI was asked to put on PATH
+	removedEarlier               []string // folders removeEarlierDir was asked to take out of PATH
+	earlier                      string   // the folder a build under another name installed in, as earlierAppDir answers
 	portable                     string
 	record                       string   // the folder chosen, as HKCU\Software\jianmu keeps it
 	asked                        []string // what AskFolder was offered
@@ -37,7 +39,7 @@ func newInstallFixture(t *testing.T) *installFixture {
 	if err := os.WriteFile(f.exe, []byte("MZ new download"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	saved := []any{installTarget, downloadFolder, fileVersion, portableData, webViewHome, installCLI}
+	saved := []any{installTarget, downloadFolder, fileVersion, portableData, webViewHome, installCLI, earlierAppDir, removeEarlierDir}
 	wasRead, wasWrite, wasAsk := recordedDir, recordDir, AskFolder
 	t.Cleanup(func() {
 		recordedDir, recordDir, AskFolder = wasRead, wasWrite, wasAsk
@@ -47,6 +49,8 @@ func newInstallFixture(t *testing.T) *installFixture {
 		portableData = saved[3].(func() string)
 		webViewHome = saved[4].(func(string) string)
 		installCLI = saved[5].(func(string, string) error)
+		earlierAppDir = saved[6].(func() string)
+		removeEarlierDir = saved[7].(func(string))
 	})
 	installTarget = func() string { return f.to }
 	downloadFolder = func(dir string) bool { return samePath(dir, f.downloads) }
@@ -64,6 +68,13 @@ func newInstallFixture(t *testing.T) *installFixture {
 		f.placed = append(f.placed, dir)
 		return nil
 	}
+	earlierAppDir = func() string {
+		if f.earlier != "" {
+			return f.earlier
+		}
+		return ""
+	}
+	removeEarlierDir = func(dir string) { f.removedEarlier = append(f.removedEarlier, dir) }
 	recordedDir = func() string { return f.record }
 	recordDir = func(dir string) error { f.record = dir; return nil }
 	AskFolder = nil

@@ -1,6 +1,7 @@
 package update
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	ptr "unsafe"
@@ -23,6 +24,61 @@ func installPath() string {
 		return ""
 	}
 	return filepath.Join(local, "Programs", "jianmu", "jianmu.exe")
+}
+
+// earlierAppDirF is where a build published under another name installed:
+// %LOCALAPPDATA%\Programs\magpie\magpie.exe.
+func earlierAppDirF() string {
+	local := appdir.Getenv("LOCALAPPDATA")
+	if local == "" {
+		if p, err := windows.KnownFolderPath(windows.FOLDERID_UserProgramFiles, 0); err == nil && p != "" {
+			return filepath.Join(p, "magpie", "magpie.exe")
+		}
+		return ""
+	}
+	return filepath.Join(local, "Programs", "magpie", "magpie.exe")
+}
+
+// removeEarlierDirF takes that folder out of the user's PATH, which its
+// install put there, and the magpie.com and magpie.cmd an older jianmu
+// wrote there to run it, which a terminal's `jianmu` would run over this
+// one. Files it didn't write stay; the folder and the exe in it are
+// left, which the user's records live in.
+func removeEarlierDirF(dir string) {
+	removePathEntry(dir)
+	com := filepath.Join(dir, "magpie.com")
+	if b, err := os.ReadFile(com); err == nil && comTarget(b) == "magpie.exe" {
+		os.Remove(com)
+	}
+	shim := filepath.Join(dir, "magpie.cmd")
+	if b, err := os.ReadFile(shim); err == nil && bytes.Contains(b, []byte("magpie.exe")) {
+		os.Remove(shim)
+	}
+}
+
+// removePathEntry takes dir out of the user's PATH in the registry, whose
+// install put it there (cliPlace's way in, out).
+func removePathEntry(dir string) {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Environment`, registry.QUERY_VALUE|registry.SET_VALUE)
+	if err != nil {
+		return
+	}
+	defer k.Close()
+	v, typ, err := k.GetStringValue("Path")
+	if err != nil {
+		return
+	}
+	nv := pathRemove(v, dir)
+	if nv == v {
+		return
+	}
+	// kept REG_EXPAND_SZ, as Windows has it, so %USERPROFILE% in it still works
+	if typ == registry.EXPAND_SZ {
+		_ = k.SetExpandStringValue("Path", nv)
+	} else {
+		_ = k.SetStringValue("Path", nv)
+	}
+	settingChanged()
 }
 
 // isDownloadFolder: Downloads and Desktop, where they are kept (the

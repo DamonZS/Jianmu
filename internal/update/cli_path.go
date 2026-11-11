@@ -417,3 +417,17 @@ func pathFirst(v, dir string) string {
 	}
 	return strings.Join(out, ";")
 }
+
+// pathRemove is the PATH value v (Windows', ;-separated) without dir.
+func pathRemove(v, dir string) string {
+	same := func(d string) bool {
+		return strings.EqualFold(strings.TrimRight(strings.TrimSpace(d), `\`), strings.TrimRight(dir, `\`))
+	}
+	var out []string
+	for _, d := range strings.Split(v, ";") {
+		if strings.TrimSpace(d) != "" && !same(d) {
+			out = append(out, d)
+		}
+	}
+	return strings.Join(out, ";")
+}

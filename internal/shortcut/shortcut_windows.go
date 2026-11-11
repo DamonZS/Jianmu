@@ -19,7 +19,26 @@ import (
 // own, no administrator needed. A var so the test writes a key of its own.
 var appPath = `Software\Microsoft\Windows\CurrentVersion\App Paths\jianmu.exe`
 
+// earlier entries are what a build published under another name registered:
+// its App Paths and Installed apps keys and its Start menu shortcut. They
+// are removed when this version registers its own, so an upgrade leaves one
+// jianmu in the Start menu and Settings, not two. Vars so the test writes
+// keys of its own.
+var (
+	earlierAppPath      = `Software\Microsoft\Windows\CurrentVersion\App Paths\magpie.exe`
+	earlierUninstallKey = `Software\Microsoft\Windows\CurrentVersion\Uninstall\magpie`
+)
+
+func dropEarlier() {
+	_ = registry.DeleteKey(registry.CURRENT_USER, earlierAppPath)
+	_ = registry.DeleteKey(registry.CURRENT_USER, earlierUninstallKey)
+	if dir, err := programs(); err == nil {
+		_ = os.Remove(filepath.Join(dir, "Magpie.lnk"))
+	}
+}
+
 func registerAppPath(exe string) {
+	dropEarlier()
 	if k, _, err := registry.CreateKey(registry.CURRENT_USER, appPath, registry.SET_VALUE); err == nil {
 		_ = k.SetStringValue("", exe)
 		_ = k.SetStringValue("Path", filepath.Dir(exe))

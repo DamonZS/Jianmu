@@ -70,6 +70,13 @@ var (
 	// installCLI puts the installed folder on the user's PATH with the
 	// command a terminal runs there
 	installCLI = cliPlace
+	// earlierAppDir is where a build published under another name
+	// installed: %LOCALAPPDATA%\Programs\magpie\magpie.exe, "" off
+	// Windows
+	earlierAppDir = earlierAppDirF
+	// removeEarlierDir takes that folder out of the user's PATH and the
+	// magpie.com and magpie.cmd written there
+	removeEarlierDir = removeEarlierDirF
 	// recordedDir is the folder the user chose to install in, "" when
 	// none was (the default, or a jianmu installed before it could be
 	// chosen); recordDir keeps it
@@ -168,8 +175,11 @@ func writeErr(err error) error {
 const exeName = "jianmu.exe"
 
 // installed is where jianmu is installed: the folder the user chose, else
-// the default; ok is false when neither holds it, and to is then where
-// to offer, the folder chosen before first.
+// the default, else the older install of a build published under another
+// name (migrated, and its folder's PATH entry and jianmu.com and
+// jianmu.cmd taken out when the user installs fresh); ok is false when
+// none of them hold it, and to is then where to offer, the folder chosen
+// before first.
 func installed() (to string, ok bool) {
 	def := installTarget()
 	if def == "" {
@@ -184,6 +194,9 @@ func installed() (to string, ok bool) {
 	}
 	if exists(def) {
 		return def, true
+	}
+	if e := earlierAppDir(); e != "" && exists(e) {
+		return e, true
 	}
 	if chosen != "" {
 		return chosen, false
@@ -268,6 +281,12 @@ func settle(exe string) (string, error) {
 	if _, err := InstallBinaryAside(staged, to); err != nil {
 		os.Remove(staged)
 		return "", fmt.Errorf("putting %s in place of %s: %w", filepath.Base(exe), to, err)
+	}
+	// into the folder a build published under another name had it in:
+	// that folder's PATH entry and the jianmu.com and jianmu.cmd an
+	// older jianmu wrote there come out
+	if samePath(to, earlierAppDir()) {
+		removeEarlierDir(filepath.Dir(to))
 	}
 	return to, nil
 }
