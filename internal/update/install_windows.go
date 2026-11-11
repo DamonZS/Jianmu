@@ -97,8 +97,20 @@ func hide(p string) {
 // jianmu in (Settle). Uninstall removes it.
 const installKey = `Software\jianmu`
 
+// earlierInstallKey is where a build published under another name kept the
+// folder the user chose: read when installKey has none, so an upgrade still
+// finds that install instead of making a second one.
+const earlierInstallKey = `Software\magpie`
+
 func readInstallDir() string {
-	k, err := registry.OpenKey(registry.CURRENT_USER, installKey, registry.QUERY_VALUE)
+	if v := readInstallDirAt(installKey); v != "" {
+		return v
+	}
+	return readInstallDirAt(earlierInstallKey)
+}
+
+func readInstallDirAt(key string) string {
+	k, err := registry.OpenKey(registry.CURRENT_USER, key, registry.QUERY_VALUE)
 	if err != nil {
 		return ""
 	}
