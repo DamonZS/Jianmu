@@ -67,6 +67,8 @@ var Vars = []string{
 	"GROK_HOME", "GROK_BIN_DIR",
 	// Grok App's data folder (its agent-home/config.toml), else the OS's app-data one
 	"GROK_APP_HOME",
+	// Bun's install folder, whose bin/ holds the agents installed with it
+	"BUN_INSTALL",
 	// Kimi Code and its shared folder
 	"KIMI_CODE_HOME", "KIMI_SHARE_DIR",
 	// Qwen Code's home, ~/.qwen without it
