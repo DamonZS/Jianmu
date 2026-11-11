@@ -190,7 +190,7 @@ func qoderCall(ctx context.Context, a qoderCheckinAcct, method, u string, dst an
 	}
 	defer res.Body.Close()
 	b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
-	if strings.EqualFold(res.Header.Get("X-Jianmu-Sign-In"), "expired") || res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
+	if strings.EqualFold(res.Header.Get("X-Magpie-Sign-In"), "expired") || res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
 		return errors.New("Qoder's sign-in has expired — sign in again")
 	}
 	if res.StatusCode == http.StatusNotFound && strings.Contains(string(b), "only chat completions") {

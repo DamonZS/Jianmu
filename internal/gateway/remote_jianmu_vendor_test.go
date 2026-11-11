@@ -44,7 +44,7 @@ func newRemoteVendors(t *testing.T) *remoteVendors {
 		rv.tried = append(rv.tried, up)
 		br := rv.breaking && up == "first"
 		rv.mu.Unlock()
-		w.Header().Set("X-Jianmu-Provider", up)
+		w.Header().Set("X-Magpie-Provider", up)
 		if br {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)

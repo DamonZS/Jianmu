@@ -15,7 +15,7 @@ import (
 // PI-Desktop (vastsa/PI-Desktop) keeps its chats as its own jsonl, not
 // Pi's, and their names only in its index database: pi.sqlite's sessions
 // table (id, title, deleted_at; its crates/host-core/src/db/schema.rs). A
-// chat it sends through jianmu with X-Jianmu-Session is a gateway session
+// chat it sends through jianmu with X-Magpie-Session is a gateway session
 // with no file jianmu reads, so it went by its id (#1967, dgmico); these
 // are the names it goes by instead.
 

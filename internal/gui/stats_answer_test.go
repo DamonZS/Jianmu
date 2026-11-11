@@ -81,11 +81,11 @@ func TestSameAnswerNotHeldWhole(t *testing.T) {
 		t.Fatalf("writeSame allocated %d bytes for a %d-byte answer", got, len(big))
 	}
 	same := httptest.NewRequest("GET", "/x", nil)
-	same.Header.Set("X-Jianmu-Had", tag)
+	same.Header.Set("X-Magpie-Had", tag)
 	w = httptest.NewRecorder()
 	writeSame(w, same, write)
-	if w.Header().Get("X-Jianmu-Same") != "1" || w.Body.Len() != 0 {
-		t.Fatalf("asked with its own tag: same %q, %d bytes", w.Header().Get("X-Jianmu-Same"), w.Body.Len())
+	if w.Header().Get("X-Magpie-Same") != "1" || w.Body.Len() != 0 {
+		t.Fatalf("asked with its own tag: same %q, %d bytes", w.Header().Get("X-Magpie-Same"), w.Body.Len())
 	}
 }
 

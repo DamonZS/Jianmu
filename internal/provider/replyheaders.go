@@ -35,7 +35,7 @@ var replyHeadersNever = map[string]bool{
 // Proxy-Authenticate and the rest; CORS's, which would let a page read
 // jianmu; Sec- fetch metadata; and jianmu's own, which the gateway reads
 // as said by the jianmu that answered (a rest, a refusal, a key limit).
-var replyHeadersNeverPrefix = []string{"Content-", "Proxy-", "Access-Control-", "Sec-", "X-Jianmu-"}
+var replyHeadersNeverPrefix = []string{"Content-", "Proxy-", "Access-Control-", "Sec-", "X-Magpie-"}
 
 // ReplyHeaderPassable says whether a header of a vendor's reply may be
 // passed on to the agent at all.

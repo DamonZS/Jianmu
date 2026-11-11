@@ -215,7 +215,7 @@ func hubVisitor(r *http.Request) HubVisitor {
 
 // RouterHeader marks a request of jianmu's own router to another jianmu's
 // (FromRouter).
-const RouterHeader = "X-Jianmu-Router"
+const RouterHeader = "X-Magpie-Router"
 
 type fromRouterKey struct{}
 

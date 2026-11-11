@@ -20,14 +20,14 @@ import (
 )
 
 // A reply from a group says which member answered it (#822): its
-// X-Jianmu-Provider and X-Jianmu-Model headers always, relayed or
+// X-Magpie-Provider and X-Magpie-Model headers always, relayed or
 // translated, streamed or not, after a failover too; its body's model the
 // group the agent asked for, unless ReplyModel member (or the request's
-// X-Jianmu-Response-Model: member) asks for jianmu's provider/model id
+// X-Magpie-Response-Model: member) asks for jianmu's provider/model id
 // there — never for Claude Code or Codex, which read it themselves — or
-// ReplyModel or X-Jianmu-Response-Model vendor for the vendor's own name,
+// ReplyModel or X-Magpie-Response-Model vendor for the vendor's own name,
 // for every agent. memberModel in a file from before ReplyModel still
-// names the member; X-Jianmu-Response-Model: asked the model asked for.
+// names the member; X-Magpie-Response-Model: asked the model asked for.
 func TestReplyNamesMember(t *testing.T) {
 	bodies := map[string]string{
 		"/v1/messages":         `{"model":"group/auto","max_tokens":100,"messages":[{"role":"user","content":"hi"}]`,
@@ -52,7 +52,7 @@ func TestReplyNamesMember(t *testing.T) {
 			for _, c := range []struct {
 				name   string
 				reply  string // Settings' ReplyModel; old: memberModel in a file from before it
-				header string // X-Jianmu-Response-Model
+				header string // X-Magpie-Response-Model
 				token  string // the agent's key
 				want   string // the model the body names
 			}{
@@ -240,7 +240,7 @@ func TestReplyNamesAskedModel(t *testing.T) {
 		asked  string
 		ids    map[string]string // settings' ModelIDs
 		served string            // what the vendor's reply says
-		header string            // X-Jianmu-Response-Model
+		header string            // X-Magpie-Response-Model
 		want   string
 	}{
 		{"own id", "deepseek-v4.1-flash", map[string]string{"d/deepseek-v4.1-flash": "deepseek-v4.1-flash-1017"}, "deepseek-v4.1-flash-1017", "", "deepseek-v4.1-flash"},

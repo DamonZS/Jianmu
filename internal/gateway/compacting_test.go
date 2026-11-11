@@ -338,7 +338,7 @@ const almaCompactAsk = "Merge the previous summary with the new conversation. Pr
 
 // Alma compacting is recognised by its ask, at the start of the last user
 // message (#2833): a group's compact rule sends it to its model and says so
-// in X-Jianmu-Model, while a note that only quotes the ask further into a
+// in X-Magpie-Model, while a note that only quotes the ask further into a
 // long message goes by the rule that matches it, as compactLead bounds it.
 func TestRuleCompactAlma(t *testing.T) {
 	s, _, _ := ruled(t, provider.Rule{Use: "a/small", Compact: true}, provider.Rule{Use: "b/big", Tokens: 1})

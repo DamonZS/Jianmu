@@ -26,7 +26,7 @@ func TestRemoteJianmuAgent(t *testing.T) {
 		io.Copy(io.Discard, r.Body)
 		mu.Lock()
 		for k := range r.Header {
-			if strings.HasPrefix(strings.ToLower(k), "x-jianmu-") {
+			if strings.HasPrefix(strings.ToLower(k), "x-magpie-") {
 				leaked = append(leaked, k)
 			}
 		}

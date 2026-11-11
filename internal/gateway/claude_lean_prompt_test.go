@@ -120,7 +120,7 @@ func TestClaudeLeanPromptNotWithClientCacheMarks(t *testing.T) {
 	h, runs := newLeanHarness(t)
 	leanSetting(t, true)
 	h.post(`{"model":"claude-sonnet-5","max_tokens":100,"system":[{"type":"text","text":"Rules.","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"turn-one"}]}`,
-		"X-Jianmu-Cache-Marks", "client")
+		"X-Magpie-Cache-Marks", "client")
 	if r := told(t, runs(), "turn-one"); r.hasSys || !strings.Contains(r.log, "external_system_instructions") {
 		t.Fatalf("a client cache marks request was given a system prompt (%t):\n%s", r.hasSys, r.log)
 	}

@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The Sessions tab reads its list and stats again every 15 s, and over a long
 // history the list is ~8 MB, parsed and compared whole to find it the same.
-// Each ask says the tag of the answer it has (X-Jianmu-Had); an answer that
-// is the same comes back with no body (X-Jianmu-Same) and is the object read
+// Each ask says the tag of the answer it has (X-Magpie-Had); an answer that
+// is the same comes back with no body (X-Magpie-Same) and is the object read
 // before, and one that changed is read and drawn. Chromium and WebKit, in
 // English and Chinese; no backend, the API is faked.
 const assert = require("node:assert/strict");
@@ -30,13 +30,13 @@ function serve(lang, back) {
     const same = (data, rows) => {
       const body = JSON.stringify(data);
       const tag = hash(body);
-      const had = req.headers()["x-jianmu-had"];
+      const had = req.headers()["x-magpie-had"];
       back.asks.push({ path: url.pathname, had: had || "" });
-      if (had === tag) return route.fulfill({ status: 200, headers: { "X-Jianmu-Tag": tag, "X-Jianmu-Same": "1" }, body: "" });
+      if (had === tag) return route.fulfill({ status: 200, headers: { "X-Magpie-Tag": tag, "X-Magpie-Same": "1" }, body: "" });
       back.bodies++;
       const was = rows && back.sent.get(had);
       if (rows) back.sent.set(tag, data[rows].map((r) => JSON.stringify(r)));
-      if (!was) return route.fulfill({ status: 200, headers: { "X-Jianmu-Tag": tag, "Content-Type": "application/json" }, body });
+      if (!was) return route.fulfill({ status: 200, headers: { "X-Magpie-Tag": tag, "Content-Type": "application/json" }, body });
       back.deltas++;
       const list = [];
       for (const r of data[rows]) {
@@ -46,7 +46,7 @@ function serve(lang, back) {
         else if (Array.isArray(last) && last[0] + last[1] === j) last[1]++;
         else list.push([j, 1]);
       }
-      return route.fulfill({ status: 200, headers: { "X-Jianmu-Tag": tag, "X-Jianmu-Delta": rows, "Content-Type": "application/json" }, body: JSON.stringify({ ...data, [rows]: list }) });
+      return route.fulfill({ status: 200, headers: { "X-Magpie-Tag": tag, "X-Magpie-Delta": rows, "Content-Type": "application/json" }, body: JSON.stringify({ ...data, [rows]: list }) });
     };
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:${JSON.stringify(lang)},theme:"light",web:true};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });

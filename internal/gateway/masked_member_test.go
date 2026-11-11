@@ -15,7 +15,7 @@ import (
 )
 
 // A reply whose body names the member (Settings' MemberModel, or a
-// request's X-Jianmu-Response-Model: member) went through two writers
+// request's X-Magpie-Response-Model: member) went through two writers
 // that each hold a whole body until the handler is done: the one that
 // names the member, outside, and the one that puts masked values back,
 // inside it. The namer wrote what it held first, nothing yet, and the

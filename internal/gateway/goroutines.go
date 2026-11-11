@@ -32,7 +32,7 @@ import (
 const GoroutinesPath = "/v1/jianmu/goroutines"
 
 // GoroutineStatsHeader carries GoroutineStats, as JSON, beside the dump.
-const GoroutineStatsHeader = "X-Jianmu-Goroutine-Stats"
+const GoroutineStatsHeader = "X-Magpie-Goroutine-Stats"
 
 // GoroutineStats says which process the dump is of.
 type GoroutineStats struct {

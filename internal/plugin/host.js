@@ -732,7 +732,7 @@ function asked(input, init) {
 // and the effort asked of a model with variants (EffortHeader):
 // for the plugin to read, never for its vendor, so a plugin that sends on
 // the headers it was given sends them nowhere.
-const JIANMU_ONLY = ["x-jianmu-work-dir", "x-jianmu-work-git", "x-jianmu-fallback", "x-jianmu-session", "x-jianmu-subagent", "x-jianmu-effort"]
+const JIANMU_ONLY = ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent", "x-magpie-effort"]
 
 function unsaid(input, init) {
   if (input instanceof Request && JIANMU_ONLY.some((k) => input.headers.has(k))) {
@@ -2271,7 +2271,7 @@ async function info(id, key, strict, limit, quiet, signal) {
       // list a request should be built from
       if (e instanceof Late) out.late = true
       // an error the models hook throws may say what it means for the
-      // sign-in, as an answer's X-Jianmu-Sign-In does: a built-in whose
+      // sign-in, as an answer's X-Magpie-Sign-In does: a built-in whose
       // model list the vendor refused marked the account
       if (["expired", "kept", "renewed"].includes(e?.signIn) && all[k]) send({ event: "signIn", provider: id, account: k, said: e.signIn })
       // strict (a move's check) fails on what the account can't do, but
@@ -3182,7 +3182,7 @@ async function load({ provider, account, proxy }) {
 //       and puts the one with the most left first among the provider's
 //       accounts in the same unit, #3950) }],
 //     signIn?: "expired" | "kept" | "renewed" (what the read means for the
-//       account's sign-in, as a model request's X-Jianmu-Sign-In says;
+//       account's sign-in, as a model request's X-Magpie-Sign-In says;
 //       without it an error saying to sign in again marks the account and
 //       a clean read clears it)
 //   }
@@ -3455,9 +3455,9 @@ async function fetchAs(id, record, key, params) {
     transitionFetch(record, "streaming")
     const rh = {}
     res.headers.forEach((v, k) => (rh[k] = v))
-    if (res.status === 401 && !("x-jianmu-sign-in" in rh) && key) {
+    if (res.status === 401 && !("x-magpie-sign-in" in rh) && key) {
       const said = await staleAccess(key, before)
-      if (said) rh["x-jianmu-sign-in"] = said
+      if (said) rh["x-magpie-sign-in"] = said
     }
     const head = headCost(rh)
     if (head.entries > HEAD_ENTRIES || head.n > HEAD_MAX) {

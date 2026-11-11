@@ -307,7 +307,7 @@ var nativeDropped = map[string]bool{
 
 func nativeHeaderDropped(k string) bool {
 	k = http.CanonicalHeaderKey(k)
-	return nativeDropped[k] || proxyIdentity(k) || strings.HasPrefix(k, "X-Jianmu-") || strings.HasPrefix(k, "Sec-")
+	return nativeDropped[k] || proxyIdentity(k) || strings.HasPrefix(k, "X-Magpie-") || strings.HasPrefix(k, "Sec-")
 }
 
 // proxyIdentity says k is what a proxy or tunnel in front of jianmu says

@@ -354,7 +354,7 @@ export async function onResponse(reply,ctx){await fetch(ctx.options.url,{method:
 			t.Setenv("JIANMU_ADDR", "0.0.0.0:3425")
 			req := httptest.NewRequest("POST", "http://127.0.0.1/v1/chat/completions", strings.NewReader(`{"model":"fake/m1","origin":"local","messages":[{"role":"user","content":"hello"}]}`))
 			req.RemoteAddr = tc.peer
-			req.Header.Set("X-Jianmu-Origin", "local")
+			req.Header.Set("X-Magpie-Origin", "local")
 			if tc.header != "" {
 				req.Header.Set(tc.header, "remote-client")
 			}

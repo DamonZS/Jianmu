@@ -48,7 +48,7 @@ func codexReadsWholeCatalog(v string) bool {
 // kept to the models a gateway key may use (keyAllowed, as /v1/models is).
 // For a Codex before 0.166 (by its ?client_version=, codexReadsWholeCatalog)
 // entries that would take the answer past codexCatalogMost are left out,
-// the last first, and the answer says how many in X-Jianmu-Left-Out.
+// the last first, and the answer says how many in X-Magpie-Left-Out.
 func (s *Server) codexCatalog(w http.ResponseWriter, r *http.Request) {
 	// the catalog, the groups and the windows read the providers over and
 	// over: held, they are built once (#746)
@@ -89,7 +89,7 @@ func (s *Server) codexCatalog(w http.ResponseWriter, r *http.Request) {
 	b.Write(tail)
 	if out > 0 {
 		log.Printf("%s: %d of Codex's %d models left out, past the %d bytes Codex reads of a catalog; pick fewer for Codex on the Agents page, or hold the key to fewer", CodexCatalogPath, out, n+out, codexCatalogMost)
-		w.Header().Set("X-Jianmu-Left-Out", strconv.Itoa(out))
+		w.Header().Set("X-Magpie-Left-Out", strconv.Itoa(out))
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

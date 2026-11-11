@@ -265,7 +265,7 @@ func TestQoderFirstTitleBeforeItsFile(t *testing.T) {
 // session-id had them, for Qoder and Qoder CN, the title and suggestion
 // calls too, so the Sessions page joins them to the session Qoder titled.
 // A session the request names itself (an older Qoder's session-id,
-// X-Jianmu-Session) is kept, and another agent's request is never matched
+// X-Magpie-Session) is kept, and another agent's request is never matched
 // to Qoder's files.
 func TestQoderSessionThroughGateway(t *testing.T) {
 	h := qoderGateway(t, qoderHome(t, "headless", "interactive"))

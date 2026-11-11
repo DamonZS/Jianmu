@@ -48,7 +48,7 @@ func TestSessionsAPIFoundGroupNames(t *testing.T) {
 		t.Helper()
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", path, nil)
-		r.Header.Set("X-Jianmu-Had", tag)
+		r.Header.Set("X-Magpie-Had", tag)
 		mux.ServeHTTP(w, r)
 		if w.Code != 200 {
 			t.Fatalf("%s: %d %s", path, w.Code, w.Body)
@@ -95,14 +95,14 @@ func TestSessionsAPIFoundGroupNames(t *testing.T) {
 			t.Fatalf("%s filter lost sessions: %+v", model, o)
 		}
 	}
-	tag := first.Header().Get("X-Jianmu-Tag")
-	if w := get("/api/sessions", tag); w.Header().Get("X-Jianmu-Same") != "1" {
+	tag := first.Header().Get("X-Magpie-Tag")
+	if w := get("/api/sessions", tag); w.Header().Get("X-Magpie-Same") != "1" {
 		t.Fatal("unchanged names did not keep the list tag")
 	}
 	if err := provider.SetAutoGroups(false); err != nil {
 		t.Fatal(err)
 	}
-	if w := get("/api/sessions", tag); w.Header().Get("X-Jianmu-Same") == "1" {
+	if w := get("/api/sessions", tag); w.Header().Get("X-Magpie-Same") == "1" {
 		t.Fatal("group catalog changed but list kept old names")
 	}
 }

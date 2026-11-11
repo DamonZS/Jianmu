@@ -52,9 +52,9 @@ import (
 const (
 	// KeepTurnHeader asks a remote jianmu to keep the turn though the
 	// request says store false
-	KeepTurnHeader = "X-Jianmu-Keep-Turn"
+	KeepTurnHeader = "X-Magpie-Keep-Turn"
 	// KeptTurnHeader on a jianmu's reply says it kept the turn when asked
-	KeptTurnHeader = "X-Jianmu-Kept-Turn"
+	KeptTurnHeader = "X-Magpie-Kept-Turn"
 	// remoteRefusedWait is how long a route whose jianmu refused the id
 	// is sent whole before a delta is tried again
 	remoteRefusedWait = 30 * time.Minute

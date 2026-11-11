@@ -83,7 +83,7 @@ short paths (`images/generations`, `contents/generations/tasks[/<id>]`)
 still work under the key's base. It takes the same gateway key as every
 route, and a key held to models, accounts or a budget is refused it.
 
-**Optional.** Send `X-Jianmu-Session: <id>` with a conversation's requests
+**Optional.** Send `X-Magpie-Session: <id>` with a conversation's requests
 and `GET /v1/jianmu/route?session=<id>` says which model a routing group
 picked for the turn and the fallbacks it tried, before the first token
 (long-poll with `after=<seq>&wait=<s>`). `GET /v1/jianmu/quotas` lists the

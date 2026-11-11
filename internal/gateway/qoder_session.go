@@ -42,7 +42,7 @@ import (
 // file written last: a new session's "hi" against an older one's. The id
 // found goes on the request as session-id, the header 1.1.81 sent, so the
 // request is recorded, titled and grouped as an older Qoder's was. A
-// request that names a session (an older Qoder, X-Jianmu-Session) is left
+// request that names a session (an older Qoder, X-Magpie-Session) is left
 // as it came. Only a request from this computer is matched: another's
 // sessions are in another folder.
 

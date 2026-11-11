@@ -25,7 +25,7 @@ var limitClock = time.Now
 // remoteKeyLimitHeader marks a 429 as the gateway key's own limit, not a
 // provider's: a jianmu that uses this one as a remote rests its key on it,
 // and only its model on any other refusal (#2077).
-const remoteKeyLimitHeader = "X-Jianmu-Limit-Reset"
+const remoteKeyLimitHeader = "X-Magpie-Limit-Reset"
 
 // keyLimited holds a gateway key's requests to its limit (#585, see
 // package budget for the rules): one that would go over is refused with a

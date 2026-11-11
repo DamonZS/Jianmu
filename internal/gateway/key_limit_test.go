@@ -103,7 +103,7 @@ func TestKeyLimitRefusesBeforeUpstream(t *testing.T) {
 	}
 	// it resets at the next midnight after the check
 	_, reset := access.Window("day", now)
-	if ra := w.Header().Get("Retry-After"); ra != strconv.Itoa(int(reset.Sub(now).Seconds())) || w.Header().Get("X-Jianmu-Limit-Reset") != reset.Format(time.RFC3339) || w.Header().Get("X-Should-Retry") != "false" {
+	if ra := w.Header().Get("Retry-After"); ra != strconv.Itoa(int(reset.Sub(now).Seconds())) || w.Header().Get("X-Magpie-Limit-Reset") != reset.Format(time.RFC3339) || w.Header().Get("X-Should-Retry") != "false" {
 		t.Fatal("headers", w.Header())
 	}
 	rec := lastUsage(t)
@@ -362,7 +362,7 @@ func TestKeyLimitDaysCycleAndReset(t *testing.T) {
 	if !strings.Contains(w.Body.String(), "this 1-day cycle") {
 		t.Fatal("refusal says", w.Body.String())
 	}
-	if got := w.Header().Get("X-Jianmu-Limit-Reset"); got != set.Add(24*time.Hour).Format(time.RFC3339) {
+	if got := w.Header().Get("X-Magpie-Limit-Reset"); got != set.Add(24*time.Hour).Format(time.RFC3339) {
 		t.Fatal("resets at", got, "not a day after", set)
 	}
 	stored := func() access.Key {
@@ -485,7 +485,7 @@ func TestKeyLimitHoursCycle(t *testing.T) {
 	if w.Code != 429 || calls.Load() != 2 || !strings.Contains(w.Body.String(), "this 5-hour cycle") {
 		t.Fatal("spent key:", w.Code, calls.Load(), w.Body.String())
 	}
-	if got := w.Header().Get("X-Jianmu-Limit-Reset"); got != set.Add(5*time.Hour).Format(time.RFC3339) {
+	if got := w.Header().Get("X-Magpie-Limit-Reset"); got != set.Add(5*time.Hour).Format(time.RFC3339) {
 		t.Fatal("resets at", got, "not 5 hours after", set)
 	}
 	lim := call("GET", "/v1/jianmu/limit", "")
@@ -566,13 +566,13 @@ func TestKeyLimitSeveralLimits(t *testing.T) {
 	_, endOfDay := access.Window("day", now)
 	_, endOfWeek := access.Window("week", now)
 	w := call("POST", "/v1/chat/completions", chatReq)
-	if w.Code != 429 || calls.Load() != 2 || w.Header().Get("X-Jianmu-Limit-Reset") != endOfDay.Format(time.RFC3339) {
+	if w.Code != 429 || calls.Load() != 2 || w.Header().Get("X-Magpie-Limit-Reset") != endOfDay.Format(time.RFC3339) {
 		t.Fatal("day spent:", w.Code, calls.Load(), w.Header(), w.Body.String())
 	}
 	// both spent: the week is the one that holds it longest
 	at(1, &access.Limit{Period: "week", Tokens: 700})
 	w = call("POST", "/v1/chat/completions", chatReq)
-	if w.Code != 429 || w.Header().Get("X-Jianmu-Limit-Reset") != endOfWeek.Format(time.RFC3339) ||
+	if w.Code != 429 || w.Header().Get("X-Magpie-Limit-Reset") != endOfWeek.Format(time.RFC3339) ||
 		w.Header().Get("Retry-After") != strconv.Itoa(int(endOfWeek.Sub(now).Seconds())) {
 		t.Fatal("both spent:", w.Code, w.Header(), w.Body.String())
 	}
@@ -588,7 +588,7 @@ func TestKeyLimitSeveralLimits(t *testing.T) {
 	}
 	// the day's limit raised: the week still refuses
 	at(0, &access.Limit{Period: "day", Tokens: 5000})
-	if w := call("POST", "/v1/chat/completions", chatReq); w.Code != 429 || w.Header().Get("X-Jianmu-Limit-Reset") != endOfWeek.Format(time.RFC3339) {
+	if w := call("POST", "/v1/chat/completions", chatReq); w.Code != 429 || w.Header().Get("X-Magpie-Limit-Reset") != endOfWeek.Format(time.RFC3339) {
 		t.Fatal("week spent:", w.Code, w.Body.String())
 	}
 	// the week's taken off: in again

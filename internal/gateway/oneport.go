@@ -70,7 +70,7 @@ func ClientPath(p string) bool {
 // answered client routes. The header only ever takes a request's
 // locality away, so one a client sends itself costs nobody else; lanGuard
 // moves it into the request's context, so it never goes on upstream.
-const PagePortHeader = "X-Jianmu-Page-Port"
+const PagePortHeader = "X-Magpie-Page-Port"
 
 // pagePort is the context key of a request the page's port handed over.
 type pagePort struct{}

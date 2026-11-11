@@ -88,7 +88,7 @@ func TestClaudeClientCachePrompt(t *testing.T) {
 			}
 			rec := httptest.NewRecorder()
 			cacheDropped(rec, r)
-			if got := rec.Header().Get("X-Jianmu-Cache-Marks-Dropped"); got != "" {
+			if got := rec.Header().Get("X-Magpie-Cache-Marks-Dropped"); got != "" {
 				t.Fatalf("fresh mark dropped: %s", got)
 			}
 		})
@@ -175,7 +175,7 @@ func TestClaudeClientCacheValidation(t *testing.T) {
 			s := New()
 			t.Cleanup(s.subscription.abortAll)
 			r := httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body))
-			r.Header.Set("X-Jianmu-Cache-Marks", "client")
+			r.Header.Set("X-Magpie-Cache-Marks", "client")
 			w := httptest.NewRecorder()
 			code, _ := s.serveSubscription(w, r, provider.Anthropic, "Claude Code", "claude-sonnet-5", "test", []byte(body), &Usage{},
 				func(context.Context, *Request) (*subscriptionRun, <-chan Event, error) {
@@ -204,7 +204,7 @@ func cacheAsk(t *testing.T, h *resumeHarness, fields, messages, mode string) *ht
 		r.RemoteAddr = h.from
 	}
 	if mode != "" {
-		r.Header.Set("X-Jianmu-Cache-Marks", mode)
+		r.Header.Set("X-Magpie-Cache-Marks", mode)
 	}
 	w := httptest.NewRecorder()
 	if code, msg := h.s.serveClaudeSubscription(w, r, provider.Anthropic, h.p, "claude-sonnet-5", []byte(body), &Usage{}); code != 200 {
@@ -220,13 +220,13 @@ func TestClaudeClientCacheRunningTailAndDrops(t *testing.T) {
 	tail := func(ttl string) string { return `"cache_control":{"type":"ephemeral","ttl":"` + ttl + `"},` }
 	first := `{"role":"user","content":"hello"}`
 	w := cacheAsk(t, h, system+tool+tail("5m"), `[`+first+`]`, "client")
-	if got := w.Header().Get("X-Jianmu-Cache-Marks-Dropped"); got != "tools:1" {
+	if got := w.Header().Get("X-Magpie-Cache-Marks-Dropped"); got != "tools:1" {
 		t.Fatalf("tool drop: %q", got)
 	}
 	marked := `{"role":"user","content":[{"type":"text","text":"hello","cache_control":{"type":"ephemeral"}}]}`
 	rest := `,{"role":"assistant","content":"ok"},{"role":"user","content":"next"}`
 	w = cacheAsk(t, h, system+tool+tail("5m"), `[`+marked+rest+`]`, "client")
-	if got := w.Header().Get("X-Jianmu-Cache-Marks-Dropped"); got != "tools:1,messages:1" {
+	if got := w.Header().Get("X-Magpie-Cache-Marks-Dropped"); got != "tools:1,messages:1" {
 		t.Fatalf("running drops: %q", got)
 	}
 	third := first + rest + `,{"role":"assistant","content":"ok"},{"role":"user","content":"again"}`
@@ -273,7 +273,7 @@ func TestClaudeClientCacheRunningTailAndDrops(t *testing.T) {
 	if len(h.runs()) != 2 {
 		t.Fatal("opted-out turn reused client-cache run")
 	}
-	if w.Header().Get("X-Jianmu-Cache-Marks-Dropped") != "" {
+	if w.Header().Get("X-Magpie-Cache-Marks-Dropped") != "" {
 		t.Fatal("ordinary reply reports cache drops")
 	}
 }
@@ -284,7 +284,7 @@ func TestClaudeClientCacheAbsentUnchanged(t *testing.T) {
 	h.from = "127.0.0.1:51000" // a caller elsewhere is told where its tools run
 	fields := `"system":[{"type":"text","text":"shared","cache_control":{"type":"ephemeral","ttl":"5m"}}],"cache_control":{"type":"ephemeral","ttl":"1h"},`
 	w := cacheAsk(t, h, fields, `[{"role":"user","content":"hello"}]`, "")
-	if w.Header().Get("X-Jianmu-Cache-Marks-Dropped") != "" {
+	if w.Header().Get("X-Magpie-Cache-Marks-Dropped") != "" {
 		t.Fatal("ordinary header changed")
 	}
 	for _, log := range h.runs() {
@@ -398,7 +398,7 @@ done
 				p := provider.Provider{ID: "claude", Account: &provider.Account{Agent: "claude", User: "u"}}
 				body := fmt.Sprintf(`{"model":"claude-sonnet-5","max_tokens":100,"stream":%t,"cache_control":{"type":"ephemeral"},"messages":[{"role":"user","content":"hi"}]}`, stream)
 				r := httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body))
-				r.Header.Set("X-Jianmu-Cache-Marks", "client")
+				r.Header.Set("X-Magpie-Cache-Marks", "client")
 				w := httptest.NewRecorder()
 				var usage Usage
 				if code, msg := s.serveClaudeSubscription(w, r, provider.Anthropic, p, "claude-sonnet-5", []byte(body), &usage); code != 200 {
@@ -455,7 +455,7 @@ func TestClaudeClientCacheStreamingHeaders(t *testing.T) {
 			if mode == "selected" {
 				want = "tools:1"
 			}
-			if got := w.Result().Header.Get("X-Jianmu-Cache-Marks-Dropped"); got != want {
+			if got := w.Result().Header.Get("X-Magpie-Cache-Marks-Dropped"); got != want {
 				t.Fatalf("header %q, want %q", got, want)
 			}
 		})
@@ -468,7 +468,7 @@ func TestClaudeClientCacheServerValidationBeforeStreaming(t *testing.T) {
 	t.Cleanup(s.subscription.abortAll)
 	body := `{"model":"claude/claude-sonnet-5","max_tokens":10,"stream":true,"system":[{"type":"text","text":"short","cache_control":{"type":"ephemeral"}}],"cache_control":{"type":"ephemeral","ttl":"1h"},"messages":[{"role":"user","content":"hi"}]}`
 	r := httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body))
-	r.Header.Set("X-Jianmu-Cache-Marks", "client")
+	r.Header.Set("X-Magpie-Cache-Marks", "client")
 	r.Header.Set("x-api-key", Token)
 	r.RemoteAddr = "127.0.0.1:12345"
 	w := httptest.NewRecorder()
@@ -494,7 +494,7 @@ func TestClaudeClientCacheTryKeepalive(t *testing.T) {
 				}
 				// A failed try can leave a note on the shared writer before
 				// headers go out. The next candidate must remove it too.
-				w.Header().Set("X-Jianmu-Cache-Marks-Dropped", "tools:1")
+				w.Header().Set("X-Magpie-Cache-Marks-Dropped", "tools:1")
 			}
 			hw := newHoldWriter(w, true)
 			hw.alive = alive
@@ -503,7 +503,7 @@ func TestClaudeClientCacheTryKeepalive(t *testing.T) {
 			if !w.Flushed || w.Body.String() != ": keepalive\n" {
 				t.Fatalf("API-key keepalive held for Claude selection: %q", w.Body.String())
 			}
-			if got := w.Result().Header.Get("X-Jianmu-Cache-Marks-Dropped"); got != "" {
+			if got := w.Result().Header.Get("X-Magpie-Cache-Marks-Dropped"); got != "" {
 				t.Fatalf("API-key keepalive leaked a Claude report: %q", got)
 			}
 		})
@@ -577,7 +577,7 @@ data: {"type":"message_stop"}
 				t.Cleanup(s.subscription.abortAll)
 				body := fmt.Sprintf(`{"model":"group/two","max_tokens":100,"stream":%t,"tools":[{"name":"read","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"hello"}]}`, stream)
 				r := httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body))
-				r.Header.Set("X-Jianmu-Cache-Marks", "client")
+				r.Header.Set("X-Magpie-Cache-Marks", "client")
 				r.Header.Set("x-api-key", Token)
 				r.RemoteAddr = "127.0.0.1:12345"
 				w := httptest.NewRecorder()
@@ -585,7 +585,7 @@ data: {"type":"message_stop"}
 				if w.Code != 200 || !strings.Contains(w.Body.String(), "from key") {
 					t.Fatalf("API-key member did not answer: %d %s", w.Code, w.Body)
 				}
-				if got := w.Result().Header.Get("X-Jianmu-Cache-Marks-Dropped"); got != "" {
+				if got := w.Result().Header.Get("X-Magpie-Cache-Marks-Dropped"); got != "" {
 					t.Errorf("API-key reply reports dropped marks: %q", got)
 				}
 				if tried, _ := os.ReadFile(calls); (len(tried) > 0) != claudeFirst {
@@ -608,7 +608,7 @@ func TestClaudeClientCacheOtherAPIsIgnoreHeader(t *testing.T) {
 			h := newScriptHarness(t, "ok", `echo "cache-disabled ${DISABLE_PROMPT_CACHING-unset}" >> $log`)
 			t.Setenv("DISABLE_PROMPT_CACHING", "0")
 			r := httptest.NewRequest("POST", tc.path, strings.NewReader(tc.body))
-			r.Header.Set("X-Jianmu-Cache-Marks", "client")
+			r.Header.Set("X-Magpie-Cache-Marks", "client")
 			w := httptest.NewRecorder()
 			if code, msg := h.s.serveClaudeSubscription(w, r, tc.proto, h.p, "claude-sonnet-5", []byte(tc.body), &Usage{}); code != 200 {
 				t.Fatalf("%d %s", code, msg)

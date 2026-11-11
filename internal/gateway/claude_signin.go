@@ -96,7 +96,7 @@ func (w *signInWriter) Write(b []byte) (int, error) {
 		h.Del("Content-Length")
 		h.Set("Content-Type", "application/json")
 		w.ResponseWriter.WriteHeader(http.StatusBadGateway)
-		msg := refusedMessage(b, h.Get("X-Jianmu-Provider"), code)
+		msg := refusedMessage(b, h.Get("X-Magpie-Provider"), code)
 		body, _ := json.Marshal(map[string]any{"type": "error", "error": map[string]any{"type": "api_error", "message": msg}})
 		w.wrote = true
 		_, err := w.ResponseWriter.Write(body)

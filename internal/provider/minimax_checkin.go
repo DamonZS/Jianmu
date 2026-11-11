@@ -214,7 +214,7 @@ func miniMaxCall(ctx context.Context, a miniMaxAccount, method, path string, dst
 	}
 	defer res.Body.Close()
 	b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
-	if strings.EqualFold(res.Header.Get("X-Jianmu-Sign-In"), "expired") || res.StatusCode == http.StatusUnauthorized {
+	if strings.EqualFold(res.Header.Get("X-Magpie-Sign-In"), "expired") || res.StatusCode == http.StatusUnauthorized {
 		return errors.New("MiniMax Code's sign-in has expired — sign in again")
 	}
 	if err := json.Unmarshal(b, dst); err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {

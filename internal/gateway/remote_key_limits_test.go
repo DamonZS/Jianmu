@@ -155,7 +155,7 @@ func TestKeyLimitTellsOnlyTheCaller(t *testing.T) {
 	for _, q := range []string{"", "?key=" + keys[1].ID, "?key=B", "?id=" + keys[1].ID + "&name=B"} {
 		r := httptest.NewRequest("GET", "/v1/jianmu/limit"+q, nil)
 		r.Header.Set("Authorization", "Bearer "+secrets[0])
-		r.Header.Set("X-Jianmu-Key", keys[1].ID)
+		r.Header.Set("X-Magpie-Key", keys[1].ID)
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, r)
 		var got struct {

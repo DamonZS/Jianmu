@@ -46,7 +46,7 @@ func testingPlugin(t *testing.T, ctx context.Context, vendor http.Handler) Provi
 }
 
 // answers is a vendor that streams one word on chat completions, and
-// keeps the X-Jianmu-Fallback and X-Saw-Fallback each request came with.
+// keeps the X-Magpie-Fallback and X-Saw-Fallback each request came with.
 type answers struct {
 	mu   sync.Mutex
 	seen []string

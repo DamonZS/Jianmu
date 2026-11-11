@@ -169,7 +169,7 @@ func TestRemoteJianmuSentTheNewInputAfterAKeptTurn(t *testing.T) {
 	// no vendor is ever sent the header
 	for i := range vendor.n() {
 		for k := range vendor.header(i) {
-			if strings.HasPrefix(strings.ToLower(k), "x-jianmu-") {
+			if strings.HasPrefix(strings.ToLower(k), "x-magpie-") {
 				t.Fatalf("vendor sent %s", k)
 			}
 		}

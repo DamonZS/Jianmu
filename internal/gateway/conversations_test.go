@@ -24,7 +24,7 @@ func TestGatewayConversationCapture(t *testing.T) {
 	post := func(id string) {
 		r := httptest.NewRequest("POST", "/v1/chat/completions", strings.NewReader(`{"model":"fake/m1","messages":[{"role":"user","content":"hello"}]}`))
 		r.Header.Set("User-Agent", "claude-cli/2.1.0")
-		r.Header.Set("X-Jianmu-Session", id)
+		r.Header.Set("X-Magpie-Session", id)
 		w := httptest.NewRecorder()
 		s.Handler().ServeHTTP(w, r)
 		if w.Code != 200 || !strings.Contains(w.Body.String(), "done") {

@@ -357,7 +357,7 @@ func TestBurstSpreadsOnlyOverAlikePaces(t *testing.T) {
 	}
 }
 
-// The session a caller names in X-Jianmu-Session is its conversation's, as
+// The session a caller names in X-Magpie-Session is its conversation's, as
 // the agent's own session header is: two sessions that open alike are two
 // conversations, the second not kept on the first's account (#5242's
 // second run: each request named a session of its own, and every one was
@@ -392,7 +392,7 @@ func TestJianmuSessionIsTheConversation(t *testing.T) {
 	// what a vendor or plugin is sent as the conversation never is the caller's
 	in.Del("session_id")
 	if got := conversationID(in, nil); got == "jianmu-s" {
-		t.Errorf("conversationID %q: X-Jianmu-Session would go upstream", got)
+		t.Errorf("conversationID %q: X-Magpie-Session would go upstream", got)
 	}
 	if got := affinityID(in, nil); got != "jianmu-s" {
 		t.Errorf("affinityID %q, want jianmu-s", got)

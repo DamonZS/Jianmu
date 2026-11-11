@@ -58,7 +58,7 @@ func (f *fakeMiniMaxCheckin) serveSite(t *testing.T, site string) {
 			f.bad = append(f.bad, "signature")
 		}
 		if f.expired {
-			w.Header().Set("X-Jianmu-Sign-In", "expired")
+			w.Header().Set("X-Magpie-Sign-In", "expired")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

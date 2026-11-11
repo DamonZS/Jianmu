@@ -521,7 +521,7 @@ orders and bars a group by the figure it shows first (`usage.Totals`
 
 It lists **accounts** too: each Codex, Claude or other subscription account's
 tokens and cost, by the account that actually answered — the one that took
-over after a failover, the one `X-Jianmu-Account` pinned. The account is named
+over after a failover, the one `X-Magpie-Account` pinned. The account is named
 as the Routing view names it (its email or login, never a token); the CSV
 adds `provider_account` (JSON `providerAccount`), `jianmu usage --csv
 --account <name>` keeps one account's calls, and the app's Usage page has an
@@ -749,7 +749,7 @@ as $20 a month on `openai/*` beside $50 a month on the whole key. Such a
 limit counts only the calls those models answered, by the provider and
 model in the usage log. Once it is spent, a request naming one of them is
 refused with the same 429 (it names the models, and sets no
-`X-Jianmu-Limit-Reset`, so a jianmu using this one as a remote rests only
+`X-Magpie-Limit-Reset`, so a jianmu using this one as a remote rests only
 the model), and a routing group, a model's fallbacks, `count_tokens`,
 embeddings, images, videos, the decision groups and jianmu's own calls for
 the key leave its models out and go on to the others, from the next
@@ -902,7 +902,7 @@ reads it by default; 0.160 needs `[features] api_key_model_discovery = true`.
 Codex before 0.166 reads at most 1 MiB of a catalog, and every entry
 carries the instructions official Codex sends its model (about 21 KB), so
 for such a Codex past about 48 models the list keeps the first that fit and
-the answer's `X-Jianmu-Left-Out` header says how many it left out: update
+the answer's `X-Magpie-Left-Out` header says how many it left out: update
 Codex, pick fewer for Codex, or hold the key to fewer. Codex 0.166 and later
 read the list whole (jianmu knows it by the `client_version` Codex sends).
 
@@ -2615,8 +2615,8 @@ models are named `provider/model`.
   `input` and `instructions` are masked as your redaction settings say;
   the answer is audio, so a masked value is read aloud as its
   placeholder.
-- Every reply names who answered in `X-Jianmu-Provider` (the provider)
-  and `X-Jianmu-Model` (`provider/model`), and so does the usage log.
+- Every reply names who answered in `X-Magpie-Provider` (the provider)
+  and `X-Magpie-Model` (`provider/model`), and so does the usage log.
 
 Anything with a base-URL setting can use it:
 
@@ -2626,18 +2626,18 @@ Anything with a base-URL setting can use it:
 | Anthropic   | `http://127.0.0.1:3425`    | `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY=jianmu` |
 | Gemini      | `http://127.0.0.1:3425`    | `GOOGLE_GEMINI_BASE_URL`, `GEMINI_API_KEY=jianmu` |
 
-An optional `X-Jianmu-Account: <account>` header (the account's email
+An optional `X-Magpie-Account: <account>` header (the account's email
 or login, or its id on the Routing page) pins a request to one account of a
 subscription with several: only it is tried, and an unknown account, one
 whose plan lacks the model, or one resting is an error rather than another
 account's reply. The header is not sent on to the vendor. A header value is
 ASCII, so an account named in other letters (`北冥`) is sent percent-encoded
-(`X-Jianmu-Account: %E5%8C%97%E5%86%A5`, JavaScript's `encodeURIComponent`);
+(`X-Magpie-Account: %E5%8C%97%E5%86%A5`, JavaScript's `encodeURIComponent`);
 jianmu decodes it, and a value that isn't such an encoding is the name as
 written.
 
 A status bar can show where a turn went before its first token arrives:
-send `X-Jianmu-Session: <id>` with the requests (an agent's own session
+send `X-Magpie-Session: <id>` with the requests (an agent's own session
 header, such as Pi's or Claude Code's, works too) and read
 `GET /v1/jianmu/route?session=<id>`. It answers the session's latest
 request as routing has it so far — `asked` (the model the agent named),
@@ -2724,7 +2724,7 @@ collection (`runtime/pprof`'s `heap`, gzipped protobuf, which
 `go tool pprof` reads), and writes it to `<file>`, else
 `jianmu-heap-<date>-<time>.pb.gz` in the working folder, never over a file
 there. It prints the file and the runtime's numbers the gateway sends in
-`X-Jianmu-Heap-Stats`: the process, `HeapAlloc` (and what is live after the
+`X-Magpie-Heap-Stats`: the process, `HeapAlloc` (and what is live after the
 collection), `HeapInuse`, `HeapSys`, `StackSys`, `Sys` (all Go took from
 the system; a footprint far above it is outside Go, such as the webview),
 `NumGC` and the goroutine count. The route answers only a program on this
@@ -2744,7 +2744,7 @@ you do when it is busy, such as running Codex: the gateway goes on serving
 every other call, and the profile is of that. It writes the profile to
 `<file>`, else `jianmu-cpu-<date>-<time>.pb.gz` in the working folder,
 and refuses a file that is there before it records, not after. It prints
-the file and the numbers the gateway sends in `X-Jianmu-CPU-Stats`: the
+the file and the numbers the gateway sends in `X-Magpie-CPU-Stats`: the
 process, the CPU time it used over the seconds recorded (user and system,
 as the system counts it, with the share of one core) and since it started,
 its cores and `GOMAXPROCS`, and the goroutine count. Go records one CPU
@@ -2763,7 +2763,7 @@ it. Arguments are printed as numbers, never what they point at, so it holds
 no keys or messages. Nothing is stopped. It writes the dump to `<file>`,
 else `jianmu-goroutines-<date>-<time>.txt` in the working folder, never
 over a file there, and prints the file and the process the gateway names in
-`X-Jianmu-Goroutine-Stats` (its id, program, version, uptime and goroutine
+`X-Magpie-Goroutine-Stats` (its id, program, version, uptime and goroutine
 count). The route answers the same callers as `/v1/jianmu/heap`, and
 refuses the same ones 403. It answers ahead of everything else a request
 passes through first (the allow list, which reads settings.json under its

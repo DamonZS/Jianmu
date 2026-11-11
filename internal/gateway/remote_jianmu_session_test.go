@@ -14,7 +14,7 @@ import (
 )
 
 // A request one jianmu passes on to another (a Remote jianmu provider)
-// keeps the session its agent named — jianmu's X-Jianmu-Session and the
+// keeps the session its agent named — jianmu's X-Magpie-Session and the
 // agent's own session_id — so the other jianmu records it under that
 // session and keeps the conversation apart from another with the same first
 // message; they were dropped for an agent that isn't Codex, such as Pi
@@ -101,7 +101,7 @@ func TestRemoteJianmuKeepsTheSession(t *testing.T) {
 	defer mu.Unlock()
 	for _, v := range vendor {
 		for k := range v {
-			if lk := strings.ToLower(k); strings.HasPrefix(lk, "x-jianmu-") || lk == "session_id" || lk == "x-conversation-id" {
+			if lk := strings.ToLower(k); strings.HasPrefix(lk, "x-magpie-") || lk == "session_id" || lk == "x-conversation-id" {
 				t.Errorf("the vendor was sent %s", k)
 			}
 		}

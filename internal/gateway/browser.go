@@ -63,7 +63,7 @@ const BrowserStatusPath = "/v1/jianmu/browser"
 // BrowserSessionHeader names the agent session a call is from, so each
 // one goes on in the tab it was working in; `jianmu mcp browser` sends one
 // a process.
-const BrowserSessionHeader = "X-Jianmu-Browser-Session"
+const BrowserSessionHeader = "X-Magpie-Browser-Session"
 
 // browserCallWait is how long a call waits for the extension: a
 // browser_wait waits up to 60s, a load 30s, and each acts then waits for the

@@ -445,7 +445,7 @@ call costs about 0.1·S + 2·M and the `-p` one about 2·(0.1·(S+M) + 2·D),
 which meet at M ≈ 15–20K tokens. A shorter classifier, and every other
 request, stays interactive; a conversation's later turns go on in their
 run, which keeps its own cache, so none of them is moved. Desktop's
-classifier, which sends no `X-Jianmu-Cache-Marks` header, is parsed for
+classifier, which sends no `X-Magpie-Cache-Marks` header, is parsed for
 its marks with the interactive mode on only for this
 (`serveSubscriptionAs`). `TestClaudeTUIClassifierKeepsLongMarksAsPrint`
 holds it, with and without the header.
@@ -838,7 +838,7 @@ lifetime with `runTTLFor`:
   computer (its token or `claude-cli/` User-Agent from loopback,
   `caller.claudeHere`), it is this computer's, read as `claudeRunTTL`
   reads it. For a request another jianmu passed on, it is what that
-  jianmu named in `X-Jianmu-Claude-Cache-TTL` (`ClaudeCacheTTLHeader`):
+  jianmu named in `X-Magpie-Claude-Cache-TTL` (`ClaudeCacheTTLHeader`):
   `5m`, `1h`, or `default` for no pick. `passOnCaller` sends it on every
   request to a Remote jianmu whose caller is Claude Code here, or that
   came with it. `callerFrom` takes it from a `jianmu/` request alone, and
@@ -870,7 +870,7 @@ too (`cleanClaudeEnv`). `TestAskedCacheTTL`,
 
 ## Client-placed cache marks (#1717)
 
-A client can send `X-Jianmu-Cache-Marks: client` on a `/v1/messages`
+A client can send `X-Magpie-Cache-Marks: client` on a `/v1/messages`
 request to a Claude subscription. Without that header, the bridge behaves
 as before — except Claude Code's auto mode classifier, whose own marks are
 kept like an opted-in client's when they are valid, and dropped as before when
@@ -916,7 +916,7 @@ messages order, returns HTTP 400 with Anthropic's `type: error` and
 `cache_control`. Both error messages and the omitted-TTL default were
 checked through a relay to the live Anthropic API.
 
-`X-Jianmu-Cache-Marks-Dropped` lists counts by section, such as
+`X-Magpie-Cache-Marks-Dropped` lists counts by section, such as
 `tools:1,messages:3`. It is absent when nothing was dropped. A mark on a
 system block removed with the billing header is reported as `system`.
 The bridge also reports marks on content it cannot render. Cache usage

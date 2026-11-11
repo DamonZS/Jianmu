@@ -149,7 +149,7 @@ func TestCodexCatalogFitsCodexsLimit(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &list); err != nil {
 		t.Fatal(err)
 	}
-	out, _ := strconv.Atoi(w.Header().Get("X-Jianmu-Left-Out"))
+	out, _ := strconv.Atoi(w.Header().Get("X-Magpie-Left-Out"))
 	t.Logf("%d listed in %d bytes, %d left out", len(list.Models), w.Body.Len(), out)
 	if len(list.Models) < 40 || out == 0 || len(list.Models)+out != 300 {
 		t.Fatalf("%d listed, %d left out", len(list.Models), out)
@@ -160,8 +160,8 @@ func TestCodexCatalogFitsCodexsLimit(t *testing.T) {
 	for _, v := range []string{"0.165.0", "0.99.1", "", "x"} {
 		w := httptest.NewRecorder()
 		New().Handler().ServeHTTP(w, httptest.NewRequest("GET", CodexCatalogPath+"?client_version="+v, nil))
-		if w.Body.Len() > codexCatalogMost || w.Header().Get("X-Jianmu-Left-Out") == "" {
-			t.Errorf("client_version %q: %d bytes, %q left out", v, w.Body.Len(), w.Header().Get("X-Jianmu-Left-Out"))
+		if w.Body.Len() > codexCatalogMost || w.Header().Get("X-Magpie-Left-Out") == "" {
+			t.Errorf("client_version %q: %d bytes, %q left out", v, w.Body.Len(), w.Header().Get("X-Magpie-Left-Out"))
 		}
 	}
 	for _, v := range []string{"0.166.0", "0.167.0-alpha.1", "1.0.0"} {
@@ -170,8 +170,8 @@ func TestCodexCatalogFitsCodexsLimit(t *testing.T) {
 		if err := json.Unmarshal(w.Body.Bytes(), &list); err != nil {
 			t.Fatal(err)
 		}
-		if len(list.Models) != 300 || w.Header().Get("X-Jianmu-Left-Out") != "" {
-			t.Errorf("client_version %s: %d listed, %q left out", v, len(list.Models), w.Header().Get("X-Jianmu-Left-Out"))
+		if len(list.Models) != 300 || w.Header().Get("X-Magpie-Left-Out") != "" {
+			t.Errorf("client_version %s: %d listed, %q left out", v, len(list.Models), w.Header().Get("X-Magpie-Left-Out"))
 		}
 	}
 }
