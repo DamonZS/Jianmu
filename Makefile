@@ -119,7 +119,7 @@ release-cli: assets-pack
 	@for t in $(TARGETS); do \
 		os=$${t%/*}; arch=$${t#*/}; ext=""; [ $$os = windows ] && ext=.exe; oa=$$arch; [ $$arch = amd64 ] && oa=x64; \
 		echo "  $$os/$$arch (cli)"; \
-		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -tags "nogui packedassets" -trimpath -ldflags="$(LDFLAGS)" -o dist/jianmu-cli-$$os-$$oa$$ext . || exit 1; \
+		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -tags "nogui packedassets" -trimpath -ldflags="$(LDFLAGS)" -o dist/jianmu-$$([ $$os = linux ] || echo cli-)$$os-$$oa$$ext . || exit 1; \
 	done
 
 # The desktop app for Windows: the system WebView2 needs no cgo, so both

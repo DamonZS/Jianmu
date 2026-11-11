@@ -40,7 +40,7 @@ func TestRosettaUpdatesToAppleSilicon(t *testing.T) {
 		{"darwin", "arm64", false, true, "jianmu-darwin-arm64.zip", "jianmu-cli-darwin-arm64"},
 		// only macOS has Rosetta: a translated answer elsewhere changes nothing
 		{"windows", "amd64", true, true, "jianmu-darwin-x64.zip", "jianmu-windows-x64.exe"},
-		{"linux", "amd64", true, false, "jianmu-darwin-x64.zip", "jianmu-cli-linux-x64"},
+		{"linux", "amd64", true, false, "jianmu-darwin-x64.zip", "jianmu-linux-x64"},
 		{"linux", "arm64", false, true, "jianmu-darwin-arm64.zip", "jianmu-linux-arm64"},
 	} {
 		onSystem(t, c.os, c.arch, c.tr)

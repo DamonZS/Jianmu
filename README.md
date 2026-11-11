@@ -57,7 +57,8 @@ macOS 桌面版（`jianmu-darwin-<arch>.zip`，已签名并公证）不在 CI �
 发布资源的文件名必须与更新器一致（`internal/update/update.go` 的 `BinaryAsset` / `AppAsset`）：
 
 - 桌面版：`jianmu-windows-x64.exe`、`jianmu-windows-arm64.exe`、`jianmu-darwin-arm64.zip`
-- CLI 版：`jianmu-cli-<os>-<arch>[.exe]`
+- Linux：`jianmu-linux-x64`、`jianmu-linux-arm64`
+- CLI 版：`jianmu-cli-darwin-<arch>`、`jianmu-cli-windows-<arch>.exe`（x64 即 amd64）
 
 ## 更新源
 

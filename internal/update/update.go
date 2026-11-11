@@ -262,6 +262,9 @@ func assetArch() string {
 func AppAsset() string { return "jianmu-darwin-" + assetArch() + ".zip" }
 func BinaryAsset() string {
 	name := "jianmu-cli-" + goos + "-" + assetArch()
+	if goos == "linux" {
+		name = "jianmu-linux-" + assetArch()
+	}
 	if GUI && goos != "darwin" {
 		name = "jianmu-" + goos + "-" + assetArch()
 	}
