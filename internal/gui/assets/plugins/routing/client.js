@@ -2071,11 +2071,15 @@ function routingPage(part) {
     }
     slowMove();
   }
-  // dashFor is a wire's dashes from top to bottom, measured from its d,
+  // dashFor is a wire's dots from top to bottom, measured from its d,
   // which is jianmu's own M, L, Q and C: WebKit's getPointAtLength took
   // milliseconds a wire, and a wire's d changes with most updates. Each
   // bend is walked in 16 straight steps, a little shorter than the bend,
-  // so its ends are moved out by 64px each way, more than that is off
+  // so its ends are moved out by 64px each way, more than that is off.
+  // A dot is a round-capped dash three long on the 8-unit step (routing.css
+  // .rt-flows path), the same step --rt-dash moves the dots by, and the
+  // .rev copy against it, the same dots the same speed: the energy
+  // reads as equal both ways.
   const dashFor = (d, top, bottom) => {
     const n = (d.match(/-?[\d.]+(?:e-?\d+)?/g) || []).map(Number), cmd = d.match(/[MLQC]/g) || [];
     let x = n[0], y = n[1], k = 2, len = 0, s0 = Infinity, s1 = -Infinity;
@@ -2206,6 +2210,10 @@ function routingPage(part) {
       return v;
     };
     const h = hubBox = b(hub);
+    // the golden vein in tree.webp, as fractions of the square trunk: it enters at the top and leaves at the foot, where branches and roots join it
+    const hw = h.r - h.l, hh = h.b - h.t, vt = { x: h.l + hw * .517, y: h.t + hh * .02 }, vb = { x: h.l + hw * .522, y: h.b - hh * .05 };
+    const vein = [[.517, .03], [.49, .30], [.555, .48], [.57, .60], [.535, .74], [.522, .93]].map(([x, y]) => [h.l + hw * x, h.t + hh * y]);
+    const veinD = () => vein.reduce((d, p, i) => { if (!i) return `M${p[0]} ${p[1]}`; const q = vein[i - 1], a0 = vein[i - 2] || q, a3 = vein[i + 1] || p; return d + ` C${q[0] + (p[0] - a0[0]) / 6} ${q[1] + (p[1] - a0[1]) / 6} ${p[0] - (a3[0] - q[0]) / 6} ${p[1] - (a3[1] - q[1]) / 6} ${p[0]} ${p[1]}`; }, '');
     // a key off screen is not drawn, and its content is as tall as a drawn
     // key's (routing.css, #3164)
     let row = list.firstElementChild;
@@ -2213,17 +2221,31 @@ function routingPage(part) {
     const pad = row && getComputedStyle(row), rowH = row && Math.round((b(row).b - b(row).t - parseFloat(pad.paddingTop) - parseFloat(pad.paddingBottom) - parseFloat(pad.borderTopWidth) - parseFloat(pad.borderBottomWidth)) * 100) / 100;
     // The tree, read bottom to top: the accounts are its roots, jianmu's
     // trunk rises from them, and each agent sits on a branch over it. A
-    // branch leaves the trunk's top and bends out to the agent's foot, so
-    // two agents fan as evenly as eight.
+    // branch leaves the trunk's top as two cubic bends: the first, wide,
+    // where it forks off, the second narrower out to the agent's foot, so
+    // two agents fan as evenly as eight. It is one d, as sets.push has
+    // always taken it, and .rt-branch (routing.css) strokes it wide where
+    // it forks and thin where it runs on; a root is two bends, the first
+    // wider than the last, as it leaves the trunk's foot.
+    const branch = (x1, y1, x2, y2, w1, w2) =>
+      `M${vt.x} ${vt.y} C${vt.x - hw * .12} ${vt.y - hh * .02} ${x2 + hw * .04} ${y2 - hh * .06} ${x2} ${y2}`;
     for (const a of agents.values()) {
-      const s = b(a.node), my = (h.t + s.b) / 2;
-      sets.push([a.wire, `M${h.cx} ${h.t} C${h.cx} ${my} ${s.cx} ${my} ${s.cx} ${s.b}`]);
+      const s = b(a.node), drop = s.b - h.t;
+      a.wire.classList.toggle("rt-branch", drop > 70);
+      const my = h.t + drop * .5;
+      if (drop > 70) {
+        const fx = h.cx + (s.cx - h.cx) * .55, fy = my + drop * .15;
+        sets.push([a.wire, branch(fx, fy, s.cx, s.b, Math.max(24, Math.min(64, drop * .3)), Math.max(12, drop * .15))]);
+      } else sets.push([a.wire, branch(s.cx, my, s.cx, s.b, Math.max(14, drop * .55), 14)]);
     }
-    // A root leaves the trunk's foot and bends out to its row's edge; rows
-    // are stacked below it, so the bend is as short as the row is near.
-    const fromHub = (a) => {
+    // A root leaves the trunk's foot and bends out to its row's edge, as
+    // two bends, the first wider than the last; rows are stacked below it,
+    // so a root is as short as the row is near.
+    const fromHub = (wire, a) => {
       const x = a.l, y = a.cy, k = Math.max(14, Math.min(90, (y - h.b) * .5));
-      return `M${h.cx} ${h.b} C${h.cx} ${h.b + k} ${x - 26} ${y - k * .55} ${x} ${y}`;
+      const fx = h.cx + (x - h.cx) * .5, fy = h.b + k * .6;
+      wire.classList.toggle("rt-root", y - h.b > 46);
+      return veinD() + ` L${a.cx} ${a.t}`;
     };
     // a group in the group: its models hang from its heading, a lane down
     // from where the wire to it ends (under the heading) to each
@@ -2233,19 +2255,19 @@ function routingPage(part) {
     };
     for (const s of subs.values()) {
       const up = s.up && subs.get(s.up);
-      sets.push([s.wire, up ? fromSub(up, b(s.li)) : fromHub(b(s.li))]);
+      sets.push([s.wire, up ? (s.wire.classList.remove("rt-root"), fromSub(up, b(s.li))) : fromHub(s.wire, b(s.li))]);
     }
     for (const f of folds.values()) {
       if (!f.li.isConnected) { sets.push([f.wire, null]); continue; }
       const up = f.up && subs.get(f.up);
-      sets.push([f.wire, up ? fromSub(up, b(f.li)) : fromHub(b(f.li))]);
+      sets.push([f.wire, up ? (f.wire.classList.remove("rt-root"), fromSub(up, b(f.li))) : fromHub(f.wire, b(f.li))]);
     }
     for (const row of rows.values()) {
       // a key folded away has no wire: its fold's is the way to it
       if (!row.li.isConnected && !gapOf.has(row.li)) { sets.push([row.wire, null]); continue; }
       const f = row.fold && folds.get(row.fold);
       const up = f?.open ? f : row.up && subs.get(row.up), a = b(row.li);
-      sets.push([row.wire, up ? fromSub(up, a) : fromHub(a)]);
+      sets.push([row.wire, up ? (row.wire.classList.remove("rt-root"), fromSub(up, a)) : fromHub(row.wire, a)]);
     }
     // set after this frame: the keys not drawn changing size resize the
     // stage, which in its own ResizeObserver WebKit reports as a loop
@@ -5167,7 +5189,7 @@ function routingPage(part) {
     if (still() || !shown()) return null;
     const g = document.createElementNS(NS, "g");
     g.setAttribute("class", "rt-flier " + kind);
-    g.innerHTML = FLIER;
+    g.innerHTML = '<g class="rt-lift"><circle r="6" fill="#f6d27a" style="filter:drop-shadow(0 0 6px #ED9834)"/><circle r="2.5" fill="#fff8e0"/></g>';
     sky.appendChild(g);
     return g;
   }

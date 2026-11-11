@@ -16,13 +16,25 @@
    the account rows run under (a grid area of their own keeps their
    widths; layout, client.js, draws the trunk and the branches). */
 .rt-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; row-gap: 0; padding: 22px 2px 12px; }
+/* the three layers of the tree: the crown (agents) over room for the branches, the trunk, then the ground line with the roots (accounts) under it */
+.rt-stage > .rt-srcs { margin-bottom: 84px; }
+.rt-stage > .rt-accts { margin-top: 78px; padding-top: 14px; border-top: 2px dashed color-mix(in srgb, #8a6a3a 60%, var(--line)); }
 .rt-stage > .rt-srcs { order: 1; width: 100%; }
 .rt-stage > .rt-hub { order: 2; }
 .rt-stage > .rt-accts { order: 3; width: 100%; }
 .rt-stage > :is(.rt-srcs, .rt-hub) { min-width: 124px; }
 .rt-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .rt-wires path { fill: none; stroke: color-mix(in srgb, #8a6a3a 55%, var(--line)); stroke-width: 3; stroke-linecap: round; transition: opacity .3s; }
-.rt-wires path.live { stroke: var(--agent, var(--muted)); stroke-dasharray: 3 5; animation: rtflow .7s linear infinite; }
+/* the tree: a branch (an agent's way to jianmu) is a wider limb than a
+   wire is — wide where it forks off the trunk, its glow the same as the
+   pulse's; a root, the way down to an account's row, keeps the limb's
+   weight. Both are one d the class sets the width of (client.js layout) */
+.rt-wires path.rt-branch { stroke-width: 5; }
+.rt-wires path.rt-root { stroke-width: 3.5; }
+.rt-wires path:is(.rt-branch, .rt-root) { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--agent, #8a6a3a) 20%, transparent)); }
+/* live: the energy on a branch, the same dots .rt-flows runs — standing
+   still on the limb until one is in flight (#2386) */
+.rt-wires path.live { stroke: var(--agent, var(--muted)); stroke-dasharray: 3 5; filter: drop-shadow(0 0 4px var(--agent, var(--muted))); }
 /* lit: the way the request shown went, over; only a request in flight flows (#2386) */
 .rt-wires path.lit { stroke: var(--agent, var(--muted)); }
 .rt-wires path.rest { stroke-dasharray: 2 6; opacity: .45; }
@@ -33,11 +45,10 @@
 /* its dashes move by --rt-dash, which a timer sets 15 times a second
    (slowTick): an animated offset was drawn again every frame. With motion
    reduced they stand still and the layer fades by --rt-fade instead */
-.rt-flows path { fill: none; stroke: var(--agent, var(--muted)); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 3 5; stroke-dashoffset: var(--rt-dash, 0); filter: drop-shadow(0 0 4px var(--agent, var(--muted))); }
-/* the same wire the other way: the same dashes, the same speed, the
+.rt-flows path { fill: none; stroke: var(--agent, var(--muted)); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 3 5; stroke-dashoffset: var(--rt-dash, 0); filter: drop-shadow(0 0 4px var(--agent, var(--muted))); }
+/* the same wire the other way: the same dots, the same speed, the
    offset moving the opposite way, so the energy reads as equal both ways */
 .rt-flows path.rev { stroke-dashoffset: calc(-1 * var(--rt-dash, 0)); }
-@keyframes rtflow { to { stroke-dashoffset: -8; } }
 /* the jianmus: one carries each request out, another brings its answer
    back — the dot at the tip of its beak. They fly over the cards (the
    owner, 11-09: under them, 869c4d112, a jianmu vanished crossing
@@ -79,9 +90,12 @@
 .rt-node .rt-ic .ic img, .rt-node .rt-ic .ic svg { width: 26px; height: 26px; }
 .rt-node b { font-size: 13px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rt-node small { font-size: 11px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rt-hub { min-height: 96px; justify-content: center; border-radius: 26px 26px 12px 12px; border-color: color-mix(in srgb, var(--fg) 55%, #8a6a3a); background: linear-gradient(180deg, var(--card) 0%, color-mix(in srgb, #8a6a3a 14%, var(--card)) 100%); box-shadow: 0 0 0 4px var(--card-2), 0 0 18px color-mix(in srgb, #ED9834 28%, transparent); animation: rttrunk 2.4s ease-in-out infinite; }
+/* the trunk: narrow above, wider at its foot, wood grain down it */
+.rt-hub { min-height: 160px; justify-content: center; width: 46%; min-width: 124px; max-width: 190px; border-radius: 14px 14px 30px 30px; border: 1.5px solid color-mix(in srgb, var(--fg) 45%, #8a6a3a); background: linear-gradient(90deg, transparent 38%, color-mix(in srgb, #8a6a3a 24%, transparent) 50%, transparent 62%) , linear-gradient(180deg, color-mix(in srgb, #8a6a3a 10%, var(--card)) 0%, color-mix(in srgb, #8a6a3a 24%, var(--card)) 100%); box-shadow: 0 0 0 4px var(--card-2), 0 0 18px color-mix(in srgb, #ED9834 28%, transparent); animation: rttrunk 2.4s ease-in-out infinite; }
 @keyframes rttrunk { 50% { box-shadow: 0 0 0 4px var(--card-2), 0 0 28px color-mix(in srgb, #66C2CE 45%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .rt-hub { animation: none; } }
+/* the trunk's shape: tall and narrow, flaring into a root crown at its foot */
+.rt-stage > .rt-hub { width: 34%; min-width: 124px; max-width: 150px; min-height: 170px; border-radius: 12px 12px 60% 60% / 12px 12px 44px 44px; padding-bottom: 14px; }
 .rt-hub i { font-style: normal; font-size: 10.5px; font-weight: 560; margin-top: 5px; padding: 1px 8px; border-radius: 999px; background: var(--fg); color: var(--card); }
 .rt-hub.tick, .rt-src.tick { animation: rttick .4s ease-out; }
 @keyframes rttick { 40% { transform: scale(1.04); } }
@@ -1158,3 +1172,24 @@ body.window .rt-gedit > .bar { --vfoot: 8px; }
 .rt-acts-foot button.text { font-size: 11px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rt-acts-foot button.text:hover { color: var(--fg); }
 .rt-acts-foot button.text[hidden] { display: none; }
+
+/* the trunk, after the owner's reference: narrow at the crown, swelling down to a flared root crown, bark grain and a vein of golden energy up its middle */
+.rt-stage > .rt-hub { width: 46%; min-width: 150px; max-width: 280px; min-height: 240px; padding: 46px 0 30px; border: 0; border-radius: 0; clip-path: polygon(35% 0, 65% 0, 60% 28%, 66% 60%, 84% 82%, 100% 100%, 0 100%, 16% 82%, 34% 60%, 40% 28%); background: repeating-linear-gradient(98deg, transparent 0 7px, rgba(0, 0, 0, .24) 7px 9px), linear-gradient(90deg, #3b2a18 0%, #8a6a3a 45%, #4a3520 70%, #2e2012 100%); box-shadow: none; animation: none; color: #fff3dc; }
+.rt-stage > .rt-hub b, .rt-stage > .rt-hub small { color: #fff3dc; }
+.rt-stage > .rt-hub::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: linear-gradient(180deg, #ED9834, #f6d27a 50%, #66C2CE); filter: drop-shadow(0 0 5px #ED9834); opacity: .85; z-index: 0; }
+.rt-stage > .rt-hub > * { position: relative; z-index: 1; }
+
+/* the trunk is the owner's tree picture: its transparent background sits on the stage, the golden vein in it is where the energy runs */
+.rt-stage > .rt-hub { width: 52%; min-width: 220px; max-width: 360px; aspect-ratio: 1 / 1; min-height: 0; padding: 0 0 6px; border: 0; border-radius: 0; clip-path: none; background: url("tree.webp") center bottom / contain no-repeat; box-shadow: none; animation: none; justify-content: flex-end; }
+.rt-stage > .rt-hub::before { content: none; }
+.rt-stage > .rt-hub > * { position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0, 0, 0, .85); }
+.rt-stage > .rt-hub .rt-bird { display: none; }
+.rt-stage > .rt-srcs { margin-bottom: 10px; }
+.rt-stage > .rt-accts { margin-top: 0; }
+
+/* the agents sit on the tree's crown: their row is laid over the trunk picture's top, as wide as it, so a card rests on a branch tip */
+.rt-stage > .rt-srcs { width: 52%; min-width: 220px; max-width: 360px; justify-self: center; justify-items: start; margin-bottom: -104px; z-index: 3; }
+
+/* the agent rests on the left branch tip of the tree picture */
+.rt-stage > .rt-srcs { margin-bottom: -36px; }
+.rt-stage > .rt-srcs > .rt-node { margin-left: -60px; }
