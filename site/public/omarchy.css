@@ -35,10 +35,9 @@ html.omarchy .theme, html.omarchy .icon-btn, html.omarchy .copy { border-color: 
 html.omarchy .theme:hover, html.omarchy .icon-btn:hover, html.omarchy .copy:hover { color: var(--om-accent); border-color: var(--om-accent); }
 
 /* surfaces: flat, on the line; a hover lights the frame */
-html.omarchy .sponsor .card:hover, html.omarchy .community a:hover, html.omarchy .chip:hover { border-color: var(--om-accent); transform: none; }
+html.omarchy .sponsor .card:hover, html.omarchy .chip:hover { border-color: var(--om-accent); transform: none; }
 html.omarchy .hub, html.omarchy .rt-hub { border-color: var(--om-edge); border-width: var(--om-border); }
 html.omarchy .shot picture img, html.omarchy .shot img.pick, html.omarchy .split img, html.omarchy .wide img, html.omarchy .figure img { border: var(--om-border) solid var(--om-edge); }
-html.omarchy .community .glyph { background: var(--om-accent); color: var(--bg); }
 html.omarchy .install code::before { content: "❯ "; color: var(--om-accent); }
 html.omarchy .grid code, html.omarchy article :not(pre) > code { color: var(--om-accent); }
 html.omarchy pre .k { color: var(--om-accent); }
