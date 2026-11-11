@@ -1,38 +1,72 @@
-# A tag v* publishes a release: the Windows app (amd64, arm64), which
-# cross-compiles, and the terminal build for every platform, which
-# cross-compiles too. Every command here is a Makefile target, so a release
-# is made the way `make release` makes one at a terminal: the UI packed into
-# one zip first (assets.zip, `assets-pack`), the version stamped in with
-# -X main.version, and the files named as internal/update expects
-# (BinaryAsset: jianmu-cli-<os>-<arch>, and jianmu-windows-<arch>.exe for the
-# app).
+# Every push to main publishes a release: trigger-release picks the next
+# version (or takes the pushed v* tag) and writes the update notes from the
+# commits since the last release; the Windows app and the terminal builds are
+# made as Makefile targets; mirror-release gathers the files, writes
+# SHA256SUMS and creates the GitHub release with those notes.
 #
-# The macOS app is not built here: jianmu-darwin-<arch>.zip is a signed and
-# notarised .app, which needs a Mac and Apple's signing keys. The Linux app
-# is not built either: it links GTK 3 and WebKitGTK 4.1 through cgo and is
-# built natively (`make release-linux`; docs/reference.md), not cross-built.
-# The terminal build is the Linux download, as it is for a machine without
-# the libraries.
-name: release
+# The macOS app (signed and notarised) and the Linux app (GTK/WebKitGTK via
+# cgo) are not built here; the terminal build is the Linux download.
+name: Release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    tags: ['v*']
 
-# Nothing here needs to write, except publishing the release (the publish
-# job says so itself).
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
+  trigger-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: version and update notes
+        id: v
+        run: |
+          set -eu
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            version="$GITHUB_REF_NAME"
+          else
+            last=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+            if [ -z "$last" ]; then
+              version=v0.1.0
+            else
+              IFS=. read -r a b c <<< "${last#v}"
+              version="v$a.$b.$((c+1))"
+            fi
+          fi
+          prev=$(git tag --list 'v*' --sort=-v:refname | grep -vx "$version" | head -n1 || true)
+          range=HEAD
+          [ -n "$prev" ] && range="$prev..HEAD"
+          {
+            echo "## 更新内容"
+            echo
+            git log "$range" --no-merges --pretty='- %s' | grep -v '^- Merge' || true
+            echo
+            [ -n "$prev" ] && echo "完整对比：https://github.com/${GITHUB_REPOSITORY}/compare/${prev}...${version}"
+          } > notes.md
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          cat notes.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: notes.md
+          if-no-files-found: error
+
   cli:
-    # `make release-cli` loops over TARGETS; one target per leg, so the
-    # builds go in parallel. android/arm64 is in the Makefile's TARGETS too
-    # (the Termux build the installer fetches) and can be appended here.
+    needs: trigger-release
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
@@ -47,12 +81,9 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # The tag is the version, as a release build has it: parse() in
-      # internal/update/update.go takes the leading v. Only what a version is
-      # spelled with is kept (the Makefile does the same to git describe's).
       - name: build
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ needs.trigger-release.outputs.version }}
         run: |
           v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
           make release-cli VERSION="$v" TARGETS=${{ matrix.os }}/${{ matrix.arch }}
@@ -64,10 +95,7 @@ jobs:
           if-no-files-found: error
 
   windows-desktop:
-    # The Windows app needs no cgo (WebView2 is the system's), so both arches
-    # are built on one Linux runner: release-windows makes the launcher
-    # jianmu.com for each arch first (`internal/update/launcher-<arch>.com`),
-    # which the app embeds with -tags comlauncher, then the GUI app itself.
+    needs: trigger-release
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -79,7 +107,7 @@ jobs:
 
       - name: build
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ needs.trigger-release.outputs.version }}
         run: |
           v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
           make release-windows VERSION="$v"
@@ -90,9 +118,10 @@ jobs:
           path: dist/jianmu-windows-*.exe
           if-no-files-found: error
 
-  publish:
-    needs: [cli, windows-desktop]
+  mirror-release:
+    needs: [trigger-release, cli, windows-desktop]
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -102,16 +131,20 @@ jobs:
           path: dist
           merge-multiple: true
 
-      # The site copies a release into R2 only with the SHA-256 this file
-      # gives, and the update feed hands each file its hash from here
-      # (site/worker.js, site/files.js).
+      - uses: actions/download-artifact@v4
+        with:
+          name: notes
+          path: .
+
       - name: SHA256SUMS
         run: cd dist && sha256sum jianmu-* > SHA256SUMS && cat SHA256SUMS
 
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.trigger-release.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ needs.trigger-release.outputs.version }}
+          body_path: notes.md
           files: dist/*
           fail_on_unmatched_files: true
-          generate_release_notes: true
-          # v1.2.3-rc1 is a pre-release, as semver reads it
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(needs.trigger-release.outputs.version, '-') }}
