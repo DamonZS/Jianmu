@@ -6123,7 +6123,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		}
 	}
 	if p.IsPlugin() {
-		req.Header.Set(provider.ConversationHeader, conversationID(in, body))
+		provider.SetPlugin(req.Header, provider.ConversationHeader, conversationID(in, body))
 		// the session and subagent the agent named, for a plugin that
 		// keeps state per conversation (plugins#620)
 		provider.DelPlugin(req.Header, provider.SessionToPluginHeader)

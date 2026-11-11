@@ -762,12 +762,13 @@ func pluginFetch(pp plugin.Provider, account string, req *http.Request) (*http.R
 	}
 	h := map[string]string{}
 	for k, vs := range req.Header {
-		if len(vs) > 0 && !strings.EqualFold(k, ConversationHeader) {
+		if len(vs) > 0 && !strings.EqualFold(k, ConversationHeader) && !strings.EqualFold(k, Twin(ConversationHeader)) {
 			h[strings.ToLower(k)] = vs[0]
 		}
 	}
 	if e, _ := ctx.Value(effortKey{}).(string); e != "" {
 		h[strings.ToLower(EffortHeader)] = e
+		h[strings.ToLower(Twin(EffortHeader))] = e
 	}
 	resp, err := plugin.Fetch(ctx, plugin.FetchRequest{
 		Provider: pp.ID, Account: account, Model: api, NPM: m.NPM, URL: url, Method: req.Method,
@@ -855,7 +856,10 @@ func modelOnly401(resp *http.Response) bool {
 // that is about the model alone leaves the account as it is (kept).
 func notePluginSignIn(pp plugin.Provider, account string, resp *http.Response) {
 	said := strings.ToLower(strings.TrimSpace(resp.Header.Get(SignInHeader)))
-	resp.Header.Del(SignInHeader)
+	if said == "" {
+		said = strings.ToLower(strings.TrimSpace(resp.Header.Get(Twin(SignInHeader))))
+	}
+	DelPlugin(resp.Header, SignInHeader)
 	if said == "" && modelOnly401(resp) {
 		said = "kept"
 	}
@@ -1014,7 +1018,7 @@ func (p Provider) do(client *http.Client, req *http.Request) (*http.Response, er
 			client = c
 		}
 	}
-	req.Header.Del(ConversationHeader)
+	DelPlugin(req.Header, ConversationHeader)
 	// the account's credential goes to its own origin only (redirect.go)
 	return Keyed(client).Do(req)
 }
