@@ -88,6 +88,12 @@ icons:
 	@go run build/icon/gen.go win-ico internal/gui/icon-windows.ico
 	@go run build/icon/gen.go app 1024 internal/gui/icon-1024.png
 	@go run build/icon/gen.go app 256 internal/gui/icon-256.png
+	@# a page's own icon: opaque to the edges, since iOS blackens a transparent
+	@# one, and the same drawing the app tiles carry
+	@go run build/icon/gen.go web 512 internal/gui/assets/icons/icon-512.png
+	@go run build/icon/gen.go web 180 internal/gui/assets/icons/apple-touch-icon.png
+	@go run build/icon/gen.go app 256 site/public/img/icon-256.png
+	@go run build/icon/gen.go app 64 site/public/favicon.png
 	@rm -rf build/darwin/jianmu.iconset && mkdir -p build/darwin/jianmu.iconset
 	@for s in 16 32 128 256 512; do \
 		go run build/icon/gen.go app $$s build/darwin/jianmu.iconset/icon_$${s}x$${s}.png; \
@@ -95,7 +101,7 @@ icons:
 	done
 	@iconutil -c icns build/darwin/jianmu.iconset -o build/darwin/jianmu.icns && rm -rf build/darwin/jianmu.iconset
 	@# macOS 26 draws the Dock icon from AppIcon.icon (Xcode 26's actool) in every icon
-	@# style: light, dark, and clear or tinted, where the bird's luminance takes the tint;
+	@# style: light, dark, and clear or tinted, where the mark's luminance takes the tint;
 	@# the compiled Assets.car is kept in the tree so a release needn't have it
 	@go run build/icon/gen.go glyph 1024 build/darwin/AppIcon.icon/Assets/jianmu.png
 	@rm -rf build/darwin/actool && mkdir -p build/darwin/actool

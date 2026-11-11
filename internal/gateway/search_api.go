@@ -455,7 +455,7 @@ func (s *Server) askSearchAPI(ctx context.Context, a provider.SearchAPI, query s
 	r.Header.Set("User-Agent", SearchAgent)
 	if a.Vendor == "you" {
 		// the tag You.com asked for, to tell jianmu's searches apart (#1626)
-		r.Header.Set("User-Agent", SearchAgent+" youdotcom-integration/yetone-jianmu")
+		r.Header.Set("User-Agent", SearchAgent+" youdotcom-integration/jianmu")
 	}
 	if a.Key != "" {
 		switch a.Vendor {

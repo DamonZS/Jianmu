@@ -7,43 +7,34 @@ import (
 	"strings"
 )
 
-// The Dock tile's flap is the header logo's (assets/app.css, .logo.wag), as
-// the tray's frames are (build/icon/gen.go): the drawing cut into body,
-// tail and wing by index.html's clip paths, each piece turned about the
-// same point through the same keyframes over the same .9s,
-// cubic-bezier(.3, 0, .3, 1) between each two of them, and the whole bird
-// bobbing about its feet. TestDockFlapIsTheLogos holds them to app.css.
+// The Dock tile's pulse is the header logo's (assets/app.css,
+// .logo.wag svg): two concentric rings have no tail to flick or wing to
+// flap, so the mark swells and settles instead, over the same .9s,
+// cubic-bezier(.3, 0, .3, 1) between each two keys. TestDockFlapIsTheLogos
+// holds it to app.css.
 const (
 	flapSecs  = 0.9
 	flapEvery = 0.03
 )
 
-// A keyframe: at is the fraction of the animation, deg the rotation.
-type flapKey struct{ at, deg float64 }
+// A keyframe: at is the fraction of the animation, size the mark's scale.
+type flapKey struct{ at, size float64 }
 
-var (
-	wingKeys = []flapKey{{0, 0}, {.12, 10}, {.26, -3}, {.40, 8}, {.56, -2}, {.72, 3}, {1, 0}}
-	tailKeys = []flapKey{{0, 0}, {.18, 16}, {.36, -7}, {.54, 9}, {.72, -3}, {.86, 2}, {1, 0}}
-	bobKeys  = []flapKey{{0, 0}, {.18, -4}, {.40, 2}, {.62, -1}, {1, 0}}
-	// transform-origin, in the 44-unit viewBox
-	wingAt, tailAt, bobAt = [2]float64{30, 19.8}, [2]float64{14, 22}, [2]float64{26, 38}
-)
+var markKeys = []flapKey{{0, 1}, {.22, .90}, {.46, 1}, {.70, .93}, {.86, .98}, {1, 1}}
 
-// flapAt is the bob, tail and wing turns at t, 0..1 of the flap.
-func flapAt(t float64) (bob, tail, wing float64) {
-	return keyed(bobKeys, t), keyed(tailKeys, t), keyed(wingKeys, t)
-}
+// markAt is the mark's scale at t, 0..1 of the pulse.
+func markAt(t float64) float64 { return keyed(markKeys, t) }
 
-// keyed is the rotation at t of keyframes played as CSS plays them, each
-// step eased by cubic-bezier(.3, 0, .3, 1).
+// keyed is the scale at t of keyframes played as CSS plays them, each step
+// eased by cubic-bezier(.3, 0, .3, 1).
 func keyed(ks []flapKey, t float64) float64 {
 	for i := 1; i < len(ks); i++ {
 		if t <= ks[i].at {
 			a, b := ks[i-1], ks[i]
-			return a.deg + (b.deg-a.deg)*flapEase((t-a.at)/(b.at-a.at))
+			return a.size + (b.size-a.size)*flapEase((t-a.at)/(b.at-a.at))
 		}
 	}
-	return ks[len(ks)-1].deg
+	return ks[len(ks)-1].size
 }
 
 // flapEase is cubic-bezier(.3, 0, .3, 1): x found for the curve's parameter
@@ -69,23 +60,22 @@ type flapPath struct {
 	pts []float64
 }
 
-// logoPaths reads the header logo's bird and its three clip paths (body,
-// tail, wing) out of index.html, so the Dock cuts the bird where the logo
-// does. ok is false when one is missing or has a command it doesn't read.
-func logoPaths(page string) (bird flapPath, clips [3]flapPath, ok bool) {
-	d := func(re string) (flapPath, bool) {
-		m := regexp.MustCompile(re).FindStringSubmatch(page)
-		if m == nil {
-			return flapPath{}, false
+// logoPaths reads the header logo's mark: the rings index.html draws
+// under #bird, one path each, outer first. ok is false when none is
+// there or one has a command it doesn't read.
+func logoPaths(page string) (rings []flapPath, ok bool) {
+	m := regexp.MustCompile(`(?s)<g id="bird">(.*?)</g>`).FindStringSubmatch(page)
+	if m == nil {
+		return nil, false
+	}
+	for _, d := range regexp.MustCompile(` d="([^"]+)"`).FindAllStringSubmatch(m[1], -1) {
+		p, good := parseFlapPath(d[1])
+		if !good {
+			return nil, false
 		}
-		return parseFlapPath(m[1])
+		rings = append(rings, p)
 	}
-	var good [4]bool
-	bird, good[0] = d(`<path id="bird"[^>]* d="([^"]+)"`)
-	for i, id := range []string{"bird-body", "bird-tail", "bird-wing"} {
-		clips[i], good[i+1] = d(`<clipPath id="` + id + `"><path[^>]* d="([^"]+)"`)
-	}
-	return bird, clips, good[0] && good[1] && good[2] && good[3]
+	return rings, len(rings) > 0
 }
 
 // parseFlapPath reads absolute M, L, H, V, C and Z, H and V written as L.

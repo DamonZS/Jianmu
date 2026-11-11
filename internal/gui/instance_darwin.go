@@ -49,7 +49,7 @@ func runningAlready(showMain bool, link string) bool {
 		// by its bundle id: the jianmu running may be another copy of the
 		// app, which opening this one's path wouldn't reach
 		if update.Bundle() != "" {
-			proc.Command("open", "-b", "com.yetone.jianmu").Run()
+			proc.Command("open", "-b", "com.jianmu").Run()
 		}
 	}
 	return true

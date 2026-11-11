@@ -26,7 +26,7 @@ import (
 	"github.com/DamonZS/Jianmu/internal/proc"
 )
 
-// Name is the service's name: jianmu.service, com.yetone.jianmu.serve.
+// Name is the service's name: jianmu.service, com.jianmu.serve.
 const Name = "jianmu"
 
 // Status is what the system says of the service.

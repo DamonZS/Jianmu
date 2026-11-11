@@ -10,6 +10,7 @@
 //	go run build/icon/gen.go tray-flap internal/gui/trayflap # its frames when clicked (a size after the folder for a bigger look)
 //	go run build/icon/gen.go app 64 internal/gui/icon.png   # app icon at a given size
 //	go run build/icon/gen.go win 256 build/windows/icon-256.png # the Windows tile, filling its square
+//	go run build/icon/gen.go web 512 internal/gui/assets/icons/icon-512.png # a square a phone can install
 //	go run build/icon/gen.go win-ico internal/gui/icon-windows.ico # it at the tray's sizes, one .ico
 //	make icons                                              # regenerates all of them plus jianmu.icns
 package main
@@ -63,6 +64,9 @@ func main() {
 	case len(os.Args) == 4 && os.Args[1] == "win":
 		n, _ := strconv.Atoi(os.Args[2])
 		img = win(n)
+	case len(os.Args) == 4 && os.Args[1] == "web":
+		n, _ := strconv.Atoi(os.Args[2])
+		img = web(n)
 	case len(os.Args) == 3 && os.Args[1] == "win-ico":
 		if err := winICO(os.Args[2], trayICOSizes); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -243,7 +247,7 @@ func glyph(n int) image.Image {
 func app(n int, dark bool) image.Image {
 	S := float64(n)
 	inset := S * 0.1
-	return tile(n, inset, (S-2*inset)*0.225, dark)
+	return tile(n, inset, (S-2*inset)*0.225, dark, 0.8)
 }
 
 // win is the same tile as Windows draws an app's icon: filling its square,
@@ -254,16 +258,25 @@ func app(n int, dark bool) image.Image {
 // be most of the margin and only blur the edge, so the tile meets it.
 func win(n int) image.Image {
 	inset := float64(n / 32)
-	return tile(n, inset, (float64(n)-2*inset)*0.2, false)
+	return tile(n, inset, (float64(n)-2*inset)*0.2, false, 0.8)
+}
+
+// web is the icon a page shows when it is added to a home screen
+// (manifest.json and the apple-touch-icon link): a square that fills its
+// canvas, opaque to the edges, since iOS draws a transparent one black and
+// rounds the corners itself. The mark is a little larger than on the app
+// tiles, as it was, to clear the corners the system rounds off.
+func web(n int) image.Image {
+	return tile(n, 0, 0, false, 0.83)
 }
 
 // tile draws the rounded square inset from each edge of an n-pixel canvas,
 // its corners of the given radius, and the rings on it at .8 of its side,
 // each in the colour its path names.
-func tile(n int, inset, radius float64, dark bool) image.Image {
+func tile(n int, inset, radius float64, dark bool, mark float64) image.Image {
 	S := float64(n)
 	side := S - 2*inset
-	k := side * 0.8 / 44
+	k := side * mark / 44
 	o := inset + side/2 - 22*k
 	ss := 4
 	if n <= 64 {

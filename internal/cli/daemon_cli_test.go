@@ -144,7 +144,7 @@ func TestDaemonStatusPrintsPage(t *testing.T) {
 	file := filepath.Join(home, ".config", "systemd", "user", "jianmu.service")
 	text := "ExecStart=\"/usr/bin/jianmu\" serve \"--web=0.0.0.0:3430\"\nEnvironment=\"JIANMU_WEB_KEY=" + key + "\"\n"
 	if runtime.GOOS == "darwin" {
-		file = filepath.Join(home, "Library", "LaunchAgents", "com.yetone.jianmu.serve.plist")
+		file = filepath.Join(home, "Library", "LaunchAgents", "com.jianmu.serve.plist")
 		text = "<array><string>/usr/bin/jianmu</string><string>serve</string><string>--web=0.0.0.0:3430</string></array>\n<key>JIANMU_WEB_KEY</key><string>" + key + "</string>\n"
 	}
 	os.MkdirAll(filepath.Dir(file), 0o755)

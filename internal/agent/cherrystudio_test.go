@@ -13,7 +13,7 @@ import (
 // The link's bytes, as Cherry Studio is handed them.
 func TestCherryStudioLink(t *testing.T) {
 	got := CherryStudioLink("http://127.0.0.1:3425")
-	want := "cherrystudio://providers/api-keys?v=1&data=eyJpZCI6Im1hZ3BpZSIsImJhc2VVcmwiOiJodHRwOi8vMTI3LjAuMC4xOjM0MjUvdjEiLCJhcGlLZXkiOiJtYWdwaWUtY2hlcnJ5c3R1ZGlvIiwibmFtZSI6Im1hZ3BpZSIsInR5cGUiOiJvcGVuYWkifQ%3D%3D"
+	want := "cherrystudio://providers/api-keys?v=1&data=eyJpZCI6ImppYW5tdSIsImJhc2VVcmwiOiJodHRwOi8vMTI3LjAuMC4xOjM0MjUvdjEiLCJhcGlLZXkiOiJqaWFubXUtY2hlcnJ5c3R1ZGlvIiwibmFtZSI6ImppYW5tdSIsInR5cGUiOiJvcGVuYWkifQ%3D%3D"
 	if got != want {
 		t.Fatalf("link\n got %s\nwant %s", got, want)
 	}

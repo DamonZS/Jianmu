@@ -3355,7 +3355,7 @@ port is free.
   `XDG_RUNTIME_DIR=/run/user/$(id -u)`. On WSL, turn systemd on first
   (`[boot] systemd=true` in `/etc/wsl.conf`). A system without systemd is
   told so; run `jianmu serve` under the manager it has.
-- **macOS:** a launch agent, `~/Library/LaunchAgents/com.yetone.jianmu.serve.plist`,
+- **macOS:** a launch agent, `~/Library/LaunchAgents/com.jianmu.serve.plist`,
   loaded with `launchctl bootstrap gui/$UID`. Its log:
   `~/Library/Logs/jianmu/serve.log`, beside the app's own `app.log`
   (`jianmu log`).
