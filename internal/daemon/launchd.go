@@ -15,6 +15,30 @@ type launchd struct{}
 // Label is the launch agent's; the tray's at login is com.jianmu.
 const Label = "com.jianmu.serve"
 
+// oldLabel is the launch agent's in builds published under another bundle
+// id (com.yetone.jianmu.serve). It runs the same program, so an upgrade
+// leaves it serving the gateway: what must not happen is a second job
+// beside it, both starting at login and fighting over the port. Every
+// write that takes the service over takes that job out first.
+const oldLabel = "com.yetone.jianmu.serve"
+
+func earlierFile() string {
+	return filepath.Join(home(), "Library", "LaunchAgents", oldLabel+".plist")
+}
+
+// handOver takes a job written under the earlier label out of launchd and
+// removes its plist.
+func handOver() error {
+	if _, err := os.Stat(earlierFile()); err != nil {
+		return nil
+	}
+	launchctl("bootout", domain()+"/"+oldLabel)
+	if err := os.Remove(earlierFile()); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
 func home() string {
 	h, _ := os.UserHomeDir()
 	return h
@@ -64,6 +88,9 @@ func plist(exe string, args, env []string) string {
 }
 
 func (l launchd) install(exe string, args, env []string) error {
+	if err := handOver(); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Dir(l.file()), 0o755); err != nil {
 		return err
 	}
@@ -80,6 +107,10 @@ func (l launchd) install(exe string, args, env []string) error {
 }
 
 func (l launchd) uninstall() error {
+	// the user asked for no service, not just for none under this label
+	if err := handOver(); err != nil {
+		return err
+	}
 	if _, err := os.Stat(l.file()); err != nil {
 		return nil
 	}
