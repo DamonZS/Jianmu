@@ -42,7 +42,7 @@ var builtinParsed = sync.OnceValue(func() []Listing {
 
 // MarketURL is where the list is kept; JIANMU_PLUGIN_MARKET moves it, and
 // "off" keeps to the built-in copy.
-const MarketURL = "https://raw.githubusercontent.com/magpie-community/plugins/main/registry.json"
+const MarketURL = "https://raw.githubusercontent.com/DamonZS/jianmu-commonity/main/plugins/registry.json"
 
 // Listing is a plugin the market suggests. One not Community is an
 // author's own package the list names, published from their repository

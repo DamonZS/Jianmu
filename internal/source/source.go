@@ -25,7 +25,7 @@ const (
 	// with the 「国内镜像」 switch: Bun's releases at npmmirror, and the
 	// plugin list at jsDelivr, both copies of the very files
 	bunMirror  = "https://registry.npmmirror.com/-/binary/bun"
-	listMirror = "https://cdn.jsdelivr.net/gh/magpie-community/plugins@"
+	listMirror = "https://cdn.jsdelivr.net/gh/DamonZS/jianmu-commonity@"
 	hfMirror   = "https://hf-mirror.com"
 )
 
@@ -57,8 +57,8 @@ func chinaFirst(raw string) string {
 	case "huggingface.co":
 		return modelMirror(u)
 	case "raw.githubusercontent.com":
-		// /magpie-community/plugins/<branch>/<path>
-		if rest, ok := strings.CutPrefix(u.EscapedPath(), "/magpie-community/plugins/"); ok {
+		// /DamonZS/jianmu-commonity/<branch>/<path>
+		if rest, ok := strings.CutPrefix(u.EscapedPath(), "/DamonZS/jianmu-commonity/"); ok {
 			if ref, path, ok := strings.Cut(rest, "/"); ok && ref != "" && path != "" && u.RawQuery == "" {
 				return listMirror + ref + "/" + path
 			}

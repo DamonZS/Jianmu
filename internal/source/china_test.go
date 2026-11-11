@@ -33,7 +33,7 @@ func TestChinaFirst(t *testing.T) {
 		"https://registry.npmjs.org/@magpie-community%2fopencode-kiro-auth":                            "https://registry.npmmirror.com/@magpie-community%2fopencode-kiro-auth",
 		"https://registry.npmjs.org/-/v1/search?text=opencode&size=20":                                 "https://registry.npmmirror.com/-/v1/search?text=opencode&size=20",
 		"https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-darwin-aarch64.zip":           "https://registry.npmmirror.com/-/binary/bun/bun-v1.4.2/bun-darwin-aarch64.zip",
-		"https://raw.githubusercontent.com/magpie-community/plugins/main/registry.json":                "https://cdn.jsdelivr.net/gh/magpie-community/plugins@main/registry.json",
+		"https://raw.githubusercontent.com/DamonZS/jianmu-commonity/main/plugins/registry.json":        "https://cdn.jsdelivr.net/gh/DamonZS/jianmu-commonity@main/plugins/registry.json",
 		"https://huggingface.co/LocalAI-io/privacy-filter-GGUF/resolve/935d868/privacy-filter-q8.gguf": "https://hf-mirror.com/LocalAI-io/privacy-filter-GGUF/resolve/935d868/privacy-filter-q8.gguf",
 		// no other model, and no page of Hugging Face's
 		"https://huggingface.co/someone/else/resolve/main/x.gguf":                                     "",
@@ -48,7 +48,7 @@ func TestChinaFirst(t *testing.T) {
 		"https://github.com/o/r/releases/download/v1/x.zip":                          "",
 		"https://api.github.com/repos/oven-sh/bun/releases/latest":                   "",
 		"https://raw.githubusercontent.com/someone/else/main/registry.json":          "",
-		"https://raw.githubusercontent.com/magpie-community/plugins/main/x.json?t=1": "",
+		"https://raw.githubusercontent.com/DamonZS/jianmu-commonity/main/x.json?t=1": "",
 		"http://registry.npmjs.org/pkg":                                              "",
 	} {
 		if got := chinaFirst(raw); got != want {
@@ -74,8 +74,8 @@ func TestChinaComesFirst(t *testing.T) {
 		t.Fatalf("switch and fallback on: URLs = %q", got)
 	}
 	// GitHub's fallback proxy stays after the official address
-	gh := "https://raw.githubusercontent.com/magpie-community/plugins/main/registry.json"
-	want := "https://cdn.jsdelivr.net/gh/magpie-community/plugins@main/registry.json " + gh + " https://gh-proxy.com/" + gh
+	gh := "https://raw.githubusercontent.com/DamonZS/jianmu-commonity/main/plugins/registry.json"
+	want := "https://cdn.jsdelivr.net/gh/DamonZS/jianmu-commonity@main/plugins/registry.json " + gh + " https://gh-proxy.com/" + gh
 	if got := strings.Join(URLs(gh), " "); got != want {
 		t.Fatalf("plugin list URLs = %q, want %q", got, want)
 	}
@@ -148,7 +148,7 @@ func TestDoFaithful(t *testing.T) {
 		asked = append(asked, r.URL.String())
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader("{}")), Header: http.Header{}, Request: r}, nil
 	})}
-	list := "https://raw.githubusercontent.com/magpie-community/plugins/main/registry.json"
+	list := "https://raw.githubusercontent.com/DamonZS/jianmu-commonity/main/plugins/registry.json"
 	ask := func() {
 		asked = nil
 		req, _ := http.NewRequest("GET", list, nil)
@@ -164,7 +164,7 @@ func TestDoFaithful(t *testing.T) {
 	}
 	chinaOn(t)
 	ask()
-	if strings.Join(asked, " ") != "https://cdn.jsdelivr.net/gh/magpie-community/plugins@main/registry.json" {
+	if strings.Join(asked, " ") != "https://cdn.jsdelivr.net/gh/DamonZS/jianmu-commonity@main/plugins/registry.json" {
 		t.Fatalf("switch on: asked %q", asked)
 	}
 	// a request with a credential stays official
