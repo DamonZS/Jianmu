@@ -168,6 +168,10 @@ var alibabaPlanModels = []string{"auto", "qwen3.8-max", "qwen3.8-flash", "qwen3.
 
 // presets are ordered as they appear in the picker.
 var presets = []PresetDef{
+	// jianmu's own relay, listed first among the relays
+	{ID: "toporeduce", Name: "拓扑API", Icon: "generic", Kind: KindRelay, Sponsored: true,
+		Chat: "https://api.toporeduce.cn/v1", Anthropic: "https://api.toporeduce.cn",
+		Website: "https://toporeduce.cn", KeysURL: "https://api.toporeduce.cn"},
 	{ID: "anthropic", Name: "Anthropic", Icon: "claude-color", Kind: KindVendor, Catalog: "anthropic",
 		Anthropic: "https://api.anthropic.com",
 		Website:   "https://console.anthropic.com", KeysURL: "https://console.anthropic.com/settings/keys",
