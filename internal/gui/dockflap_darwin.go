@@ -22,6 +22,7 @@ static const CGFloat mpDockBird = 0.64;
 
 static CGImageRef mpDockClean; // the tile, the mark taken out
 static CGImageRef mpDockMark;  // the mark, with alpha
+static CGPathRef mpDockMarkPath; // the mark's outline, kept for the second, wider cut
 static NSImageView *mpDockView;
 
 static CGPathRef mpDockPath(const char *ops, int nops, const double *pts) {
