@@ -1,0 +1,200 @@
+package provider
+
+import (
+	"context"
+	"maps"
+	"slices"
+	"strings"
+
+	"github.com/DamonZS/Jianmu/internal/catalog"
+)
+
+// A remote jianmu is another computer's jianmu gateway, shared on its
+// network (Settings → Network and sharing → Share on local network), as a provider: the
+// computers' agents stay wired by their own jianmu, while the providers,
+// routing groups and usage are the one jianmu's they all share. Its
+// address serves every API jianmu does, so the provider speaks them all
+// — Chat Completions and Responses at <address>/v1, Anthropic's Messages
+// at the address — and a request goes on in the API the agent spoke. Its
+// model list tells, of each model, the APIs its own provider serves it on
+// (native_endpoints), and a request for one goes on one of those: turned
+// into another API once, here, when it must be, never on both computers.
+
+// Its list also has the image models the other jianmu draws with, which
+// it gives only to a jianmu that asks for them (DrawersHeader), each
+// marked "kind": "image": an older jianmu would have taken one whose id
+// doesn't say it draws for a model to chat with. They go on to the other
+// jianmu's images API, which asks their vendor as it would its own.
+// Each model's label is the other jianmu's name for it, with its provider
+// there after it ("Claude Sonnet 5 · RelayA"), as its own agents see it:
+// two of its providers' models of one name are told apart here too.
+// Provider in model names Off here names each by its name there alone
+// (display_name, catalog.Model's Plain), whatever that jianmu's own
+// setting put after it (ARNO on Discord).
+
+// Its video models come the same way (VideomakersHeader), marked "kind":
+// "video", and go on to its videos API (#545).
+
+// Its list also tells what each model costs there (PricesHeader): the
+// price the other jianmu counts its usage at — what its user set for the
+// model by hand, else its provider's list price, at that provider's price
+// rate — so its calls cost the same here (Sorghum on Discord). It is this
+// provider's list price for the model: a price set here for it still comes
+// first, as one set for any provider's list price does. A jianmu tells it
+// only to its own computer and to one sharing it with a gateway key, and
+// one from before it tells nothing, which leaves the models priced as
+// they were: by models.dev.
+
+// Its decision models are requested with DecidersHeader, marked
+// "kind": "decision", and asked at its System One API, including models
+// whose names aren't Jev's.
+
+// DrawersHeader asks a jianmu's model list for its image models as well.
+const DrawersHeader = "X-Jianmu-Drawers"
+
+// VideomakersHeader asks a jianmu's model list for its video models as
+// well: a jianmu that doesn't send it would take grok-imagine-video, whose
+// id says "imagine", for an image model.
+const VideomakersHeader = "X-Jianmu-Videomakers"
+
+// PricesHeader asks a jianmu's model list for what each model costs
+// there ("jianmu_price"): a jianmu that doesn't send it is told nothing
+// more than before.
+const PricesHeader = "X-Jianmu-Prices"
+
+// DecidersHeader asks a jianmu's model list for its decision models too.
+const DecidersHeader = "X-Jianmu-Deciders"
+
+// RemoteJianmuPreset is the preset's id.
+const RemoteJianmuPreset = "remote-jianmu"
+
+// IsRemoteJianmu reports whether the provider is another jianmu.
+func (p Provider) IsRemoteJianmu() bool { return p.Preset == RemoteJianmuPreset }
+
+// remoteJianmuEndpoints puts every API on the address given, however it
+// was typed: the bare host and port (plain http, which jianmu serves),
+// …/v1, or the Anthropic root.
+func (p *Provider) remoteJianmuEndpoints() {
+	if !p.IsRemoteJianmu() {
+		return
+	}
+	root := ""
+	for _, u := range []string{p.Chat, p.Responses, p.Anthropic, p.Decide} {
+		if u = strings.TrimRight(strings.TrimSpace(u), "/"); u != "" {
+			root = u
+			break
+		}
+	}
+	if root == "" {
+		return
+	}
+	if !strings.Contains(root, "://") {
+		root = "http://" + root
+	}
+	for _, suf := range []string{
+		"/v1/messages/count_tokens", "/v1/messages",
+		"/v1/chat/completions", "/v1/responses", "/v1/systemone",
+		"/v1/embeddings", "/v1/rerank", "/v1/decisions",
+		"/v1/audio/transcriptions", "/v1/audio/translations", "/v1/audio/speech",
+		"/v1/images/generations", "/v1/images/edits",
+		"/v1/videos", "/v1",
+	} {
+		if b, ok := strings.CutSuffix(root, suf); ok {
+			root = b
+			break
+		}
+	}
+	p.Chat, p.Responses, p.Anthropic = root+"/v1", root+"/v1", root
+	p.Decide = p.Chat
+}
+
+// listHeaders are the headers p's model list is asked with: a remote
+// jianmu is asked for its image, video and decision models too, and its prices.
+// Its key goes as x-api-key whatever the user's headers say (remoteKey).
+// A list is no turn of a conversation: ${sessionId} and ${threadId} in a
+// value are an id of the list's own (conversation.go).
+func (p Provider) listHeaders() map[string]string {
+	h := p.SentHeaders(context.Background())
+	if !p.IsRemoteJianmu() {
+		return h
+	}
+	h = maps.Clone(h)
+	if h == nil {
+		h = map[string]string{}
+	}
+	for k := range h {
+		if strings.EqualFold(k, "x-api-key") {
+			delete(h, k)
+		}
+	}
+	h[DrawersHeader] = "1"
+	h[VideomakersHeader] = "1"
+	h[PricesHeader] = "1"
+	h[DecidersHeader] = "1"
+	return h
+}
+
+// listHeadersAt is listHeaders for a list asked at u: at OpenCode's
+// gateway with a session of the list's own (OpenCodeSession), unless the
+// user set one on the provider.
+func (p Provider) listHeadersAt(u string) map[string]string {
+	h := p.listHeaders()
+	if !OpenCodeURL(u) {
+		return h
+	}
+	for k := range h {
+		if strings.EqualFold(k, "x-opencode-session") {
+			return h
+		}
+	}
+	h = maps.Clone(h)
+	if h == nil {
+		h = map[string]string{}
+	}
+	id := openCodeSession("")
+	h["X-Opencode-Session"], h["X-Opencode-Session-Id"] = id, id
+	// as OpenCode 2 asks its gateway (#3491), unless the user set their own
+	if !slices.ContainsFunc(slices.Collect(maps.Keys(h)), func(k string) bool { return strings.EqualFold(k, "User-Agent") }) {
+		h["User-Agent"] = OpenCodeUserAgent()
+	}
+	if !slices.ContainsFunc(slices.Collect(maps.Keys(h)), func(k string) bool { return strings.EqualFold(k, "x-opencode-client") }) {
+		h["X-Opencode-Client"] = "cli"
+	}
+	return h
+}
+
+// remotePrice is what a remote jianmu's list said the model costs there,
+// if it said.
+func (p Provider) remotePrice(model string) (catalog.Price, bool) {
+	if !p.IsRemoteJianmu() {
+		return catalog.Price{}, false
+	}
+	for _, m := range p.liveByID(model) {
+		if m.Price != nil {
+			return *m.Price, true
+		}
+	}
+	return catalog.Price{}, false
+}
+
+// RemotePriced reports whether the model's list price is the one a remote
+// jianmu's list gave, for the editor to say whose it is.
+func (p Provider) RemotePriced(model string) bool {
+	_, ok := p.remotePrice(model)
+	return ok
+}
+
+// RemoteVia is the jianmus a remote jianmu's model passes through to its
+// vendor, as its list said, that jianmu last (catalog's jianmu_via.go);
+// nil for another provider's, or a list from a jianmu from before.
+func (p Provider) RemoteVia(model string) []string {
+	if !p.IsRemoteJianmu() {
+		return nil
+	}
+	for _, m := range p.liveByID(model) {
+		if len(m.Via) > 0 {
+			return m.Via
+		}
+	}
+	return nil
+}

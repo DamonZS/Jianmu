@@ -1,0 +1,7 @@
+html, body { background: transparent; }
+body { margin: 0; padding: 10px 12px; font: 13px/1.5 var(--jianmu-font, system-ui); color: var(--jianmu-fg); }
+p { margin: 0 0 4px; }
+.muted { color: var(--jianmu-muted); }
+textarea { box-sizing: border-box; width: 100%; min-height: 56px; font: inherit; color: inherit; background: var(--jianmu-card); border: 1px solid var(--jianmu-line); border-radius: 6px; padding: 6px 8px; resize: vertical; }
+button { font: inherit; color: var(--jianmu-accent); background: none; border: 0; padding: 0; cursor: pointer; }
+ol { margin: 0; padding-left: 18px; }

@@ -1,0 +1,117 @@
+# A tag v* publishes a release: the Windows app (amd64, arm64), which
+# cross-compiles, and the terminal build for every platform, which
+# cross-compiles too. Every command here is a Makefile target, so a release
+# is made the way `make release` makes one at a terminal: the UI packed into
+# one zip first (assets.zip, `assets-pack`), the version stamped in with
+# -X main.version, and the files named as internal/update expects
+# (BinaryAsset: jianmu-cli-<os>-<arch>, and jianmu-windows-<arch>.exe for the
+# app).
+#
+# The macOS app is not built here: jianmu-darwin-<arch>.zip is a signed and
+# notarised .app, which needs a Mac and Apple's signing keys. The Linux app
+# is not built either: it links GTK 3 and WebKitGTK 4.1 through cgo and is
+# built natively (`make release-linux`; docs/reference.md), not cross-built.
+# The terminal build is the Linux download, as it is for a machine without
+# the libraries.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+# Nothing here needs to write, except publishing the release (the publish
+# job says so itself).
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  cli:
+    # `make release-cli` loops over TARGETS; one target per leg, so the
+    # builds go in parallel. android/arm64 is in the Makefile's TARGETS too
+    # (the Termux build the installer fetches) and can be appended here.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [darwin, linux, windows]
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # The tag is the version, as a release build has it: parse() in
+      # internal/update/update.go takes the leading v. Only what a version is
+      # spelled with is kept (the Makefile does the same to git describe's).
+      - name: build
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
+          make release-cli VERSION="$v" TARGETS=${{ matrix.os }}/${{ matrix.arch }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/jianmu-*
+          if-no-files-found: error
+
+  windows-desktop:
+    # The Windows app needs no cgo (WebView2 is the system's), so both arches
+    # are built on one Linux runner: release-windows makes the launcher
+    # jianmu.com for each arch first (`internal/update/launcher-<arch>.com`),
+    # which the app embeds with -tags comlauncher, then the GUI app itself.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: build
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
+          make release-windows VERSION="$v"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-windows-desktop
+          path: dist/jianmu-windows-*.exe
+          if-no-files-found: error
+
+  publish:
+    needs: [cli, windows-desktop]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+
+      # The site copies a release into R2 only with the SHA-256 this file
+      # gives, and the update feed hands each file its hash from here
+      # (site/worker.js, site/files.js).
+      - name: SHA256SUMS
+        run: cd dist && sha256sum jianmu-* > SHA256SUMS && cat SHA256SUMS
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          # v1.2.3-rc1 is a pre-release, as semver reads it
+          prerelease: ${{ contains(github.ref_name, '-') }}

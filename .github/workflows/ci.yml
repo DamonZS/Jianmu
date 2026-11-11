@@ -1,0 +1,46 @@
+# Checks on every push to main and every pull request: vet, then the tests,
+# with the tags a release is built with. A break is caught here instead of by
+# the tag that publishes it.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    # A release is built on this image (release.yml), so the checks run on
+    # the same one.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v5
+        with:
+          # go.mod's go 1.26.8, the toolchain the release is built with.
+          go-version-file: go.mod
+
+      # Makefile's TAGS on Linux are `production gtk3`, and production without
+      # nogui compiles the app, which links through cgo: GTK 3 and WebKitGTK
+      # 4.1 (docs/reference.md), wayland-client (clipboard_gtk3.go) and
+      # fontconfig (internal/fonts). The tests draw windows too, so a
+      # display: Xvfb, as internal/gui's fontdpi_gtk3_test names.
+      - name: GTK 3, WebKitGTK 4.1, Wayland, fontconfig and Xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-3-dev libwebkit2gtk-4.1-dev libwayland-dev libfontconfig1-dev xvfb
+
+      # `go vet -tags "$(TAGS)" ./...` then `go test -tags "$(TAGS)" ./...`,
+      # with the tags the Makefile picks for this system.
+      - name: vet and test
+        run: xvfb-run -a make test

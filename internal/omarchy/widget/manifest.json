@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "usejianmu.jianmu",
+  "name": "jianmu",
+  "version": "1.0.0",
+  "author": "jianmu",
+  "license": "MIT",
+  "description": "jianmu's icon in the bar: a click drops down its panel, a right click opens its window.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "jianmu",
+    "description": "Pick every agent's model from the bar: a click drops down jianmu's panel, a right click opens its window.",
+    "category": "AI",
+    "aliases": ["jianmu"],
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
