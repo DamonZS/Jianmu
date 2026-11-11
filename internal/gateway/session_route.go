@@ -95,7 +95,7 @@ func sessionRouteOf(r Route) SessionRoute {
 }
 
 // sessionRoute answers GET /v1/jianmu/route?session=<id>, or with the
-// session in X-Jianmu-Session (or the agent's own session header): the
+// session in X-Magpie-Session (or the agent's own session header): the
 // session's latest route, null before it has one. With after=<seq> and
 // wait=<seconds> it waits, up to a minute, for the route to change past
 // seq. Like the quotas, it answers this machine, and another only with the

@@ -122,7 +122,7 @@ const readsSame = (path) => /^sessions(\?|$)|^sessions\/stats\?/.test(path);
 // are one object, so the Sessions tab needn't compare ~8 MB to know
 const readTags = new WeakMap();
 
-// heads, when given, is shown the answer's headers (loadQuotas' X-Jianmu-Reading);
+// heads, when given, is shown the answer's headers (loadQuotas' X-Magpie-Reading);
 // signal, when given, cancels the request (a read the reader moved on from)
 async function api(path, body, heads, signal) {
   if (web && path === "open") { window.open(body.url, "_blank", "noopener"); return null; }
@@ -135,13 +135,13 @@ async function api(path, body, heads, signal) {
   const had = same ? sameReads.get(path) : undefined;
   const res = await fetch("/api/" + path, {
     method: body === undefined ? "GET" : "POST",
-    headers: had ? { "Content-Type": "application/json", "X-Jianmu-Had": had.tag } : { "Content-Type": "application/json" },
+    headers: had ? { "Content-Type": "application/json", "X-Magpie-Had": had.tag } : { "Content-Type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal,
   });
   if (body === undefined) await skelHold();
   heads?.(res.headers);
-  if (had && res.ok && res.headers.get("X-Jianmu-Same")) return had.data;
+  if (had && res.ok && res.headers.get("X-Magpie-Same")) return had.data;
   if (res.status === 204) return null;
   // a body that isn't JSON (a proxy's or a plain http.Error) is the error
   // itself, not WebKit's "did not match the expected pattern"
@@ -214,10 +214,10 @@ async function api(path, body, heads, signal) {
   if (data && typeof data === "object" && !/^(sessions|library|skills|plugins|market)/.test(path)) noteAccounts(data);
   // a list changed since the one the page has (writeJSONRows in api.go):
   // only its new rows are sent, and [from, count] for each run of the old
-  const delta = had && res.headers.get("X-Jianmu-Delta");
+  const delta = had && res.headers.get("X-Magpie-Delta");
   const was = delta && had.data?.[delta];
   if (Array.isArray(was) && Array.isArray(data?.[delta])) data[delta] = data[delta].flatMap((r) => Array.isArray(r) ? was.slice(r[0], r[0] + r[1]) : [r]);
-  const tag = same && res.headers.get("X-Jianmu-Tag");
+  const tag = same && res.headers.get("X-Magpie-Tag");
   if (tag) {
     sameReads.set(path, { tag, data });
     if (data && typeof data === "object") readTags.set(data, tag);
@@ -8257,9 +8257,9 @@ function extraBodyText(obj) {
 }
 // headers never passed on: ReplyHeaderPassable's (#4145), RequestHeaderPassable's
 const REPLY_NEVER = ["alt-svc", "api-key", "authentication-info", "authorization", "cache-control", "clear-site-data", "connection", "content-security-policy", "cookie", "date", "host", "keep-alive", "link", "location", "origin", "refresh", "retry-after", "server", "set-cookie", "set-cookie2", "strict-transport-security", "te", "trailer", "transfer-encoding", "upgrade", "vary", "www-authenticate", "x-accel-buffering", "x-api-key"];
-const REPLY_NEVER_PREFIX = ["content-", "proxy-", "access-control-", "sec-", "x-jianmu-"];
+const REPLY_NEVER_PREFIX = ["content-", "proxy-", "access-control-", "sec-", "x-magpie-"];
 const REQUEST_NEVER = ["accept", "accept-encoding", "api-key", "authentication-info", "authorization", "connection", "cookie", "expect", "host", "keep-alive", "origin", "set-cookie", "set-cookie2", "te", "trailer", "transfer-encoding", "upgrade", "www-authenticate", "x-api-key", "x-goog-api-key"];
-const REQUEST_NEVER_PREFIX = ["content-", "proxy-", "sec-", "x-jianmu-"];
+const REQUEST_NEVER_PREFIX = ["content-", "proxy-", "sec-", "x-magpie-"];
 // replyHeadersOf is the list a save sends, or why it can't
 function replyHeadersOf(text, req) {
   const value = (text || "").split(",").map((x) => x.trim()).filter(Boolean);
@@ -15830,7 +15830,7 @@ function quotasOpened() {
 }
 
 // A load is never swallowed by a lesser one on its way. A stale answer
-// (X-Jianmu-Reading) is asked again every 1.5s, 30s at most (#959).
+// (X-Magpie-Reading) is asked again every 1.5s, 30s at most (#959).
 let quotasLoading = null, quotasLater = 0, quotasTries = 0;
 let quotaRefreshVersion = 0;
 const quotaRefreshVersions = new Map();
@@ -15846,7 +15846,7 @@ function loadQuotas(asked, again) {
       // the curves come on their own: the allowances now never wait for
       // them (a remote jianmu's history can take seconds; #3192)
       loadQuotaHist();
-      return api("usage/quotas" + (asked ? "?asked=1" + (asked === "all" ? "&all=1" : "") : ""), undefined, (h) => { reading = h.get("X-Jianmu-Reading") === "1"; });
+      return api("usage/quotas" + (asked ? "?asked=1" + (asked === "all" ? "&all=1" : "") : ""), undefined, (h) => { reading = h.get("X-Magpie-Reading") === "1"; });
     })
     .then((q) => {
       // an answer that isn't a list of cards is a read that failed: what
@@ -21661,7 +21661,7 @@ const REPLY_MODELS = [
 function replyModelRow(s, keep) {
   const r = el("div", "row pref"), who = el("div", "who"), val = el("div", "val"), n = t("Model name in replies");
   r.id = "replyModelRow";
-  who.append(el("div", "name", n), el("div", "sub", t("What a reply's model says when the request went out under another name than the agent asked for. The X-Jianmu-Model header names the member to every agent, and a request's X-Jianmu-Response-Model (asked, member or vendor) picks for itself")));
+  who.append(el("div", "name", n), el("div", "sub", t("What a reply's model says when the request went out under another name than the agent asked for. The X-Magpie-Model header names the member to every agent, and a request's X-Magpie-Response-Model (asked, member or vendor) picks for itself")));
   const cur = REPLY_MODELS.find(([v]) => v === (s.replyModel || "")) || REPLY_MODELS[0], b = el("button", "sess-pick reply-model");
   b.type = "button";
   b.title = n;

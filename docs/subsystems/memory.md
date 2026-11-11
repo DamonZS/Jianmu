@@ -51,8 +51,8 @@ away (`TestMemoryMCPGuarded`).
   ([market.go](../../internal/library/market.go)), run as
   `jianmu mcp memory` ([browsermcp.RunMemory](../../internal/browsermcp/browsermcp.go)),
   which relays stdio to the gateway with the folder the agent started it in
-  (`X-Jianmu-Cwd`) and the client name from `initialize`
-  (`X-Jianmu-Mcp-Client`).
+  (`X-Magpie-Cwd`) and the client name from `initialize`
+  (`X-Magpie-Mcp-Client`).
 - Behind the [MCP router](mcp-router.md) the hub passes the caller in the
   call's `_meta` instead (`HubRootsMeta`, `HubClientMeta`;
   `TestMemoryMCPHubMetaNamesTheProject`).

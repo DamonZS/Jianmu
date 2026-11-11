@@ -39,7 +39,7 @@ type Record struct {
 	// ProviderAccount is the subscription account that answered the call,
 	// as the Routing trace names it (provider.Account.User: an email, a
 	// login): the one that took over after a failover, the one pinned by
-	// X-Jianmu-Account. Never a token. "" for a key or a provider without
+	// X-Magpie-Account. Never a token. "" for a key or a provider without
 	// an account, and in a record written before it was kept (#557).
 	ProviderAccount string `json:"providerAccount,omitempty"`
 	CallerKeyID     string `json:"callerKeyId,omitempty"`
@@ -168,10 +168,10 @@ type Record struct {
 	// upstream's own end_turn or a cut (蓝猫 on Discord).
 	Stop string `json:"stop,omitempty"`
 	// Session is the conversation the call was part of, as its agent names
-	// it (X-Jianmu-Session, or the session header Claude Code, Codex or
+	// it (X-Magpie-Session, or the session header Claude Code, Codex or
 	// OpenCode sends): several sessions on one model told apart
 	Session string `json:"session,omitempty"`
-	// NativeSession retains the client header when X-Jianmu-Session overrides it.
+	// NativeSession retains the client header when X-Magpie-Session overrides it.
 	NativeSession string `json:"native_session,omitempty"`
 	// Subagent is the subagent that made the call, as its agent names it
 	// (Claude Code's x-claude-code-agent-id, the agentId of its

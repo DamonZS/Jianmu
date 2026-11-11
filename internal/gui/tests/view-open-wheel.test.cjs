@@ -64,7 +64,7 @@ function server(lang, gate) {
       if (gate.on) await gate.wait;
       const n = gate.quotaReads = (gate.quotaReads || 0) + 1;
       const q = QUOTAS.map((x, i) => ({ ...x, windows: x.windows.map((w) => ({ ...w, used: w.used + n })) }));
-      return route.fulfill({ json: q, headers: { "X-Jianmu-Reading": n < 6 ? "1" : "0", "Access-Control-Expose-Headers": "X-Jianmu-Reading" } });
+      return route.fulfill({ json: q, headers: { "X-Magpie-Reading": n < 6 ? "1" : "0", "Access-Control-Expose-Headers": "X-Magpie-Reading" } });
     }
     if (url.pathname === "/api/usage") return json(USAGE, true);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] }, true);

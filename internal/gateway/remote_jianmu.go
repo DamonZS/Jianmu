@@ -27,20 +27,20 @@ import (
 // agent by its User-Agent as well. No vendor is ever sent them: they come
 // off every request as it arrives, and go on only to a remote jianmu.
 const (
-	AgentHeader = "X-Jianmu-Agent"
-	ViaHeader   = "X-Jianmu-Via"
+	AgentHeader = "X-Magpie-Agent"
+	ViaHeader   = "X-Magpie-Via"
 	// HopsHeader is how many jianmus a request was passed on through
 	// before it came here. Two jianmus each the other's remote (cdredfox
 	// on Discord), or one that is its own (a Remote jianmu provider sync
 	// brought to the computer it names, hanslin1666), could pass a request
 	// round and round, masked again on each pass: one passed on through
 	// catalog.MaxVia jianmus is answered 508 Loop Detected instead.
-	HopsHeader = "X-Jianmu-Hops"
+	HopsHeader = "X-Magpie-Hops"
 	// ClientUAHeader is the User-Agent the agent sent, on a request
 	// passed on to a remote jianmu as jianmu's own: that jianmu sends its
 	// key+URL providers the agent's, as this one would have (nb5p on
 	// Discord). Taken, like AgentHeader, only from a jianmu's request.
-	ClientUAHeader = "X-Jianmu-User-Agent"
+	ClientUAHeader = "X-Magpie-User-Agent"
 	// ClaudeCacheTTLHeader is how long the prompt cache of a Claude Code
 	// request is to be kept, as the user of the computer Claude Code runs
 	// on picked it: "5m", "1h", or "default" for no pick. Claude Code
@@ -48,17 +48,17 @@ const (
 	// jianmu's Claude relay can't tell a pick from its marks
 	// (claudeTTLOf, runTTLFor; linkaww). Taken only from a jianmu's
 	// request.
-	ClaudeCacheTTLHeader = "X-Jianmu-Claude-Cache-TTL"
+	ClaudeCacheTTLHeader = "X-Magpie-Claude-Cache-TTL"
 	// MaskedAsHeader says the jianmu that passed a request on masked it
 	// already, by the settings masking.Fingerprint names: this one masks
 	// it again only when its own differ (maskedBefore). Taken only from a
 	// jianmu's request.
-	MaskedAsHeader = "X-Jianmu-Masked-As"
+	MaskedAsHeader = "X-Magpie-Masked-As"
 )
 
 // caller is who a request is recorded as: its agent, and the computer it
 // was passed on from, "" for this one. session and native are the session
-// the caller named (sessionOf's X-Jianmu-Session, and the agent's own
+// the caller named (sessionOf's X-Magpie-Session, and the agent's own
 // header nativeSessionOf takes, by its name), passed on to a remote jianmu
 // with the request (#672).
 type caller struct {
@@ -212,7 +212,7 @@ func boundedSession(v string) string {
 // passOnCaller names, on a request to a remote jianmu, the agent it is for
 // and the computer it comes from: the one it was passed on from, else this.
 // The session the caller named goes on too, as it named it — jianmu's
-// X-Jianmu-Session and the agent's own header (session_id, …) — so the
+// X-Magpie-Session and the agent's own header (session_id, …) — so the
 // other jianmu records the call under it and keeps a conversation on its
 // account by it rather than by its first message (#672). Only a remote
 // jianmu is sent them; a vendor never is. It is asked, too, to name the

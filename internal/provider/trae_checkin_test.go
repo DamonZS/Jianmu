@@ -36,11 +36,11 @@ func (f *fakeTraeCheckin) serve(t *testing.T) *httptest.Server {
 		}
 		f.paths = append(f.paths, r.Method+" "+strings.TrimPrefix(r.URL.Path, "/trae/api/v2/ug/checkin_credits"))
 		if f.expired {
-			w.Header().Set("X-Jianmu-Sign-In", "expired")
+			w.Header().Set("X-Magpie-Sign-In", "expired")
 			json.NewEncoder(w).Encode(map[string]any{"code": 1001, "message": "We're sorry, but we are not able to authenticate you"})
 			return
 		}
-		w.Header().Set("X-Jianmu-Sign-In", "kept")
+		w.Header().Set("X-Magpie-Sign-In", "kept")
 		switch r.URL.Path {
 		case "/trae/api/v2/ug/checkin_credits/status":
 			json.NewEncoder(w).Encode(map[string]any{"code": 0, "message": "success", "enable": f.enable, "checked_in": f.checked, "credits": 100})

@@ -33,7 +33,7 @@ const pluginBase = "plugin://"
 
 // ConversationHeader carries the conversation a request belongs to, to a
 // plugin's chat.headers hook as its session; it goes no further.
-const ConversationHeader = "X-Jianmu-Conversation"
+const ConversationHeader = "X-Magpie-Conversation"
 
 // WorkDirHeader and WorkGitHeader tell a plugin's fetch where the agent
 // that asked works, as the agent says it in its request: the folder,
@@ -42,8 +42,8 @@ const ConversationHeader = "X-Jianmu-Conversation"
 // known. The plugin host takes them off whatever the plugin sends on
 // (host.js), so they reach no vendor as headers.
 const (
-	WorkDirHeader = "X-Jianmu-Work-Dir"
-	WorkGitHeader = "X-Jianmu-Work-Git"
+	WorkDirHeader = "X-Magpie-Work-Dir"
+	WorkGitHeader = "X-Magpie-Work-Git"
 )
 
 // FallbackHeader, "1", tells a plugin's fetch that jianmu needn't have the
@@ -53,14 +53,14 @@ const (
 // sends it, so a queued model's test says it is queued instead of running
 // out of time. The plugin host takes it off whatever the plugin sends on
 // (host.js), as it does the two above.
-const FallbackHeader = "X-Jianmu-Fallback"
+const FallbackHeader = "X-Magpie-Fallback"
 
 // WaitHeader tells a jianmu's gateway how many seconds its client waits
 // for the answer: a model test asking a remote jianmu sends its own wait,
 // and the gateway takes no retry pause or patience round that would end
 // past it, so the test is told the error rather than running out of time
-// (plugins#827). Like every X-Jianmu- header it goes no further.
-const WaitHeader = "X-Jianmu-Wait"
+// (plugins#827). Like every X-Magpie- header it goes no further.
+const WaitHeader = "X-Magpie-Wait"
 
 // SessionToPluginHeader and SubagentToPluginHeader tell a plugin's fetch
 // the session the agent named (sessionOf: Claude Code's
@@ -74,8 +74,8 @@ const WaitHeader = "X-Jianmu-Wait"
 // none. The plugin host takes them off whatever the plugin sends on, as it
 // does the ones above.
 const (
-	SessionToPluginHeader  = "X-Jianmu-Session"
-	SubagentToPluginHeader = "X-Jianmu-Subagent"
+	SessionToPluginHeader  = "X-Magpie-Session"
+	SubagentToPluginHeader = "X-Magpie-Subagent"
 )
 
 // warmPlugin starts p's plugin host and runs its account's loader, which
@@ -660,7 +660,7 @@ func (p Provider) Origin(ctx context.Context) string {
 // EffortHeader is the header a plugin's fetch is told the request's
 // effort in: one of the efforts its model's variants named, or another the
 // client asked for (minimal, xhigh), for the plugin to pick its variant by.
-const EffortHeader = "X-Jianmu-Effort"
+const EffortHeader = "X-Magpie-Effort"
 
 type effortKey struct{}
 
@@ -794,7 +794,7 @@ func pluginRequestBase(pp plugin.Provider, m plugin.Model, loader string) string
 // the mark, as a built-in whose sign-in renewed took it off whatever the
 // request then met. Without it a 401 marks the account and a success
 // clears the mark.
-const SignInHeader = "X-Jianmu-Sign-In"
+const SignInHeader = "X-Magpie-Sign-In"
 
 // ModelUnserved are how a vendor says the model isn't one it serves this
 // key, or this way — words another provider, or key, may not answer with

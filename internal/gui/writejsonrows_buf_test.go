@@ -61,14 +61,14 @@ func TestWriteJSONRowsWritesWhatMarshalDid(t *testing.T) {
 	// a row that changed goes in a delta as its own bytes, and the rest as runs
 	w := httptest.NewRecorder()
 	writeJSONRows(w, httptest.NewRequest("GET", "/x", nil), "rows", rows, struct{}{})
-	tag := w.Header().Get("X-Jianmu-Tag")
+	tag := w.Header().Get("X-Magpie-Tag")
 	changed := append([]rowsBufRow(nil), rows...)
 	changed[1].Name = "new"
 	r := httptest.NewRequest("GET", "/x", nil)
-	r.Header.Set("X-Jianmu-Had", tag)
+	r.Header.Set("X-Magpie-Had", tag)
 	w = httptest.NewRecorder()
 	writeJSONRows(w, r, "rows", changed, struct{}{})
-	if w.Header().Get("X-Jianmu-Delta") != "rows" {
+	if w.Header().Get("X-Magpie-Delta") != "rows" {
 		t.Fatalf("no delta: %q", w.Body)
 	}
 	mid, _ := json.Marshal(changed[1])
@@ -91,7 +91,7 @@ func TestJSONRowsNotCopiedEach(t *testing.T) {
 	w := httptest.NewRecorder()
 	writeJSONRows(w, httptest.NewRequest("GET", "/x", nil), "rows", rows, struct{}{})
 	r := httptest.NewRequest("GET", "/x", nil)
-	r.Header.Set("X-Jianmu-Had", w.Header().Get("X-Jianmu-Tag"))
+	r.Header.Set("X-Magpie-Had", w.Header().Get("X-Magpie-Tag"))
 	allocs := testing.AllocsPerRun(5, func() {
 		writeJSONRows(httptest.NewRecorder(), r, "rows", rows, struct{}{})
 	})

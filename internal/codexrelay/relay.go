@@ -46,7 +46,7 @@ const Command = "codex-relay"
 // TokenHeader holding the token the relay wrote in its state file.
 const (
 	LeavePath   = "/.jianmu-codex-relay/leave"
-	TokenHeader = "X-Jianmu-Relay-Token"
+	TokenHeader = "X-Magpie-Relay-Token"
 )
 
 // Timings, vars for tests.

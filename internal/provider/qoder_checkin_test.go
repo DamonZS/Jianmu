@@ -34,7 +34,7 @@ func (f *fakeQoderCampaigns) serve(t *testing.T, site string) {
 		b, _ := io.ReadAll(r.Body)
 		f.asked = append(f.asked, r.Method+" "+strings.TrimPrefix(r.URL.Path, "/sash/api/v1/me/campaigns"))
 		if f.expired {
-			w.Header().Set("X-Jianmu-Sign-In", "expired")
+			w.Header().Set("X-Magpie-Sign-In", "expired")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

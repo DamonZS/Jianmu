@@ -1910,7 +1910,7 @@ func List(limit int) []Session {
 // listKeptFor. When that number is made, the listing is still the one
 // the caller had it with, and no copy of it is given (same). The Sessions
 // page asks for every session each 15 s, and an unchanged list was
-// copied, rowed, encoded and hashed again, only to answer X-Jianmu-Same.
+// copied, rowed, encoded and hashed again, only to answer X-Magpie-Same.
 func ListUnless(limit, made int) (out []Session, now int, same bool) {
 	// read before the locks: it reads settings.json
 	alias := provider.UsageAlias()

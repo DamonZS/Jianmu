@@ -24,7 +24,7 @@ import (
 const HeapPath = "/v1/jianmu/heap"
 
 // HeapStatsHeader carries HeapStats, as JSON, beside the profile.
-const HeapStatsHeader = "X-Jianmu-Heap-Stats"
+const HeapStatsHeader = "X-Magpie-Heap-Stats"
 
 // HeapStats is what Go's runtime says of the process's memory when the
 // profile was taken. HeapAlloc and the others are read before the

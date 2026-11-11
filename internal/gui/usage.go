@@ -296,7 +296,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 		// an account's card may be the stale copy a read under way will
 		// replace: the page asks again until it has landed (#959)
 		if provider.SubscriptionUsageReading() {
-			rw.Header().Set("X-Jianmu-Reading", "1")
+			rw.Header().Set("X-Magpie-Reading", "1")
 		}
 		writeJSON(rw, qs)
 	})

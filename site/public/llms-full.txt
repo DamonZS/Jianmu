@@ -4419,7 +4419,7 @@ A vendor’s own fields: `/v1/images/generations` and `/v1/videos` take OpenAI�
 
 ### Optional
 
-Send `X-Jianmu-Session: <id>` with a conversation’s requests and `GET /v1/jianmu/route?session=<id>` says which model a routing group picked for the turn and the fallbacks it tried, before the first token (long-poll with `after=<seq>&wait=<s>`). `GET /v1/jianmu/quotas` lists the user’s subscription allowances, and `GET /v1/jianmu/usage` and `/v1/jianmu/usage/requests` the Usage page’s numbers and its requests (with `session`, and `subagent`/`parent_agent` for a Claude Code subagent’s call). They answer only this machine, or another with a gateway key; a key held to a budget, models or accounts sees its own calls and routes alone, and is refused the quotas unless its owner lets it see those of what it may use (`jianmu gateway-key quotas <id> on`; its own limit is `GET /v1/jianmu/limit`). Calls your app makes to its vendor itself can be reported with `POST /v1/jianmu/usage/requests` (one record or up to 5000 a post, in `usage.jsonl`’s shape, each with a `rid`; past times are kept, so a history can be backfilled). They show on the Usage page as reported, and never count against a key’s limit. The [reference](https://github.com/DamonZS/Jianmu/blob/main/docs/reference.md#connecting-anything-else) has the details.
+Send `X-Magpie-Session: <id>` with a conversation’s requests and `GET /v1/jianmu/route?session=<id>` says which model a routing group picked for the turn and the fallbacks it tried, before the first token (long-poll with `after=<seq>&wait=<s>`). `GET /v1/jianmu/quotas` lists the user’s subscription allowances, and `GET /v1/jianmu/usage` and `/v1/jianmu/usage/requests` the Usage page’s numbers and its requests (with `session`, and `subagent`/`parent_agent` for a Claude Code subagent’s call). They answer only this machine, or another with a gateway key; a key held to a budget, models or accounts sees its own calls and routes alone, and is refused the quotas unless its owner lets it see those of what it may use (`jianmu gateway-key quotas <id> on`; its own limit is `GET /v1/jianmu/limit`). Calls your app makes to its vendor itself can be reported with `POST /v1/jianmu/usage/requests` (one record or up to 5000 a post, in `usage.jsonl`’s shape, each with a `rid`; past times are kept, so a history can be backfilled). They show on the Usage page as reported, and never count against a key’s limit. The [reference](https://github.com/DamonZS/Jianmu/blob/main/docs/reference.md#connecting-anything-else) has the details.
 
 > **Keep the user’s providers.** Add jianmu as one more provider (named Jianmu) beside the ones the user set up in your app, rather than replacing them, so turning jianmu off is picking another provider.
 
@@ -4858,7 +4858,7 @@ OpenCode’s `chat.headers` hook runs for every request. Its `input.sessionID` i
 
 ## Sign-in state
 
-jianmu marks an account whose sign-in the vendor refused. It shows the mark to the user and stops sending to the account until it works again. By default a 401 marks the account and a success clears the mark. A plugin can say more precisely what an answer means with the `X-Jianmu-Sign-In` response header, which jianmu removes before the answer goes on:
+jianmu marks an account whose sign-in the vendor refused. It shows the mark to the user and stops sending to the account until it works again. By default a 401 marks the account and a success clears the mark. A plugin can say more precisely what an answer means with the `X-Magpie-Sign-In` response header, which jianmu removes before the answer goes on:
 
 | Value | Meaning |
 | --- | --- |
@@ -4901,7 +4901,7 @@ throw Object.assign(new Error("Acme refused the sign-in; sign in again"), { sign
     balance: 6291,              // a prepaid wallet: what is left, in unit; no used or limit
   }],
   resets: { count: 2, until: "…", byWindow: false, fiveHour: 1, weekly: 1 }, // resets the account may spend
-  signIn: "kept",               // as X-Jianmu-Sign-In
+  signIn: "kept",               // as X-Magpie-Sign-In
 }
 ```
 
@@ -5375,7 +5375,7 @@ The host also sends events of its own: `log`, `toast`, `auth` (a sign-in saved o
 
 ### Does my OpenCode plugin work in jianmu unchanged?
 
-Yes, as long as it signs in and makes requests through `auth`, `config`, `provider` and `chat.headers`. What jianmu adds (`auth.usage`, `auth.refresh`, `jianmu.icon`, `maxConcurrency`, `free`, `rate`, `X-Jianmu-Sign-In`) is ignored by OpenCode, so one package serves both.
+Yes, as long as it signs in and makes requests through `auth`, `config`, `provider` and `chat.headers`. What jianmu adds (`auth.usage`, `auth.refresh`, `jianmu.icon`, `maxConcurrency`, `free`, `rate`, `X-Magpie-Sign-In`) is ignored by OpenCode, so one package serves both.
 
 ### Does my pi package work in jianmu?
 

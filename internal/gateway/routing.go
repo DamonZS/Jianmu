@@ -2186,7 +2186,7 @@ func keepRetryOut(dst, src http.Header, body []byte) {
 
 // keyLimitThereHeader carries, from keepRetry to restAfter, that another
 // jianmu refused with its gateway key's own limit (remoteKeyLimitHeader).
-const keyLimitThereHeader = "X-Jianmu-Key-Limit-There"
+const keyLimitThereHeader = "X-Magpie-Key-Limit-There"
 
 // routedThere says a failure was another jianmu's (a Remote jianmu's)
 // answer after its own routing had its turn: its same-one retries, its
@@ -2204,16 +2204,16 @@ func routedThere(header http.Header) bool {
 // answeredThereHeader carries, from keepRetry to restAfter, the provider
 // another jianmu named on its refusal (providerHeader): the refusal is
 // that jianmu's model's (remoteModelRest).
-const answeredThereHeader = "X-Jianmu-Answered-There"
+const answeredThereHeader = "X-Magpie-Answered-There"
 
 // refusedHeader carries, from keepRetry to settle, that an error status
 // was the safety filter refusing the request, and what it said.
-const refusedHeader = "X-Jianmu-Refused"
+const refusedHeader = "X-Magpie-Refused"
 
 // resetsHeader carries, from keepRetry to restAfter, when a subscription
 // out of quota said it's back. A held error that is passed on after all
 // leaves it out; one written straight to the agent carries it, harmlessly.
-const resetsHeader = "X-Jianmu-Resets-At"
+const resetsHeader = "X-Magpie-Resets-At"
 
 // namedStatusHeader carries, from a relayed stream's error frame to the
 // routing loop and restAfter, the status the frame named for itself
@@ -2221,7 +2221,7 @@ const resetsHeader = "X-Jianmu-Resets-At"
 // wrong in the frame, and the status it names there — not the one its
 // message's words guess — is what the failure rests as. The client never
 // sees it.
-const namedStatusHeader = "X-Jianmu-Named-Status"
+const namedStatusHeader = "X-Magpie-Named-Status"
 
 // failedNamed is status, or the status a relayed stream's error frame named
 // for itself (#4855, namedStatusHeader), which the failure reads as.

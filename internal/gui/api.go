@@ -3231,8 +3231,8 @@ func writeJSON(rw http.ResponseWriter, v any) {
 }
 
 // writeJSONSame is writeJSON for a read the page asks for again and again:
-// the answer's X-Jianmu-Tag is a hash of its bytes, and a request whose
-// X-Jianmu-Had is that tag gets X-Jianmu-Same and no body, which the page
+// the answer's X-Magpie-Tag is a hash of its bytes, and a request whose
+// X-Magpie-Had is that tag gets X-Magpie-Same and no body, which the page
 // reads as the answer it has (api in app.js). The Sessions tab read a long
 // history's ~8 MB list and ~0.7 MB of stats every 15 s, and parsed and
 // compared them whole to find them the same. Not an ETag and a 304:
@@ -3254,9 +3254,9 @@ func writeSame(rw http.ResponseWriter, r *http.Request, write func(w io.Writer) 
 		return ""
 	}
 	tag := hex.EncodeToString(h.Sum(nil)[:16])
-	rw.Header().Set("X-Jianmu-Tag", tag)
-	if r.Header.Get("X-Jianmu-Had") == tag {
-		rw.Header().Set("X-Jianmu-Same", "1")
+	rw.Header().Set("X-Magpie-Tag", tag)
+	if r.Header.Get("X-Magpie-Had") == tag {
+		rw.Header().Set("X-Magpie-Same", "1")
 		rw.WriteHeader(http.StatusOK)
 		return tag
 	}
@@ -3280,7 +3280,7 @@ const sentRowsKept = 4
 
 // writeJSONRows is writeJSONSame for an answer that is a long list, key,
 // beside the fields of rest: one asked with the tag of a list sent before
-// that changed since gets X-Jianmu-Delta: key, and its list holds only the
+// that changed since gets X-Magpie-Delta: key, and its list holds only the
 // rows not in that one, each run of rows that was, in its order, written
 // [from, count] of the list the page has. While an agent works, its
 // session's row changes every poll, and the Sessions tab read all ~5000
@@ -3338,10 +3338,10 @@ func writeJSONRows[T any](rw http.ResponseWriter, r *http.Request, key string, r
 	}
 	whole.Write(end)
 	tag := hex.EncodeToString(whole.Sum(nil)[:16])
-	rw.Header().Set("X-Jianmu-Tag", tag)
-	had := r.Header.Get("X-Jianmu-Had")
+	rw.Header().Set("X-Magpie-Tag", tag)
+	had := r.Header.Get("X-Magpie-Had")
 	if had == tag {
-		rw.Header().Set("X-Jianmu-Same", "1")
+		rw.Header().Set("X-Magpie-Same", "1")
 		rw.WriteHeader(http.StatusOK)
 		return tag
 	}
@@ -3387,7 +3387,7 @@ func writeJSONRows[T any](rw http.ResponseWriter, r *http.Request, key string, r
 	for j, s := range was {
 		at[s] = append(at[s], j)
 	}
-	rw.Header().Set("X-Jianmu-Delta", key)
+	rw.Header().Set("X-Magpie-Delta", key)
 	from, n := 0, 0
 	run := func() {
 		if n > 0 {

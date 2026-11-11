@@ -18,7 +18,7 @@ const { watchSettingsReads, settingsDrawn, reach, pickItem } = require("./reader
 
 const assets = path.resolve(__dirname, "../assets");
 const words = {
-  en: { name: "Model name in replies", head: "Replies", sub: "X-Jianmu-Response-Model (asked, member or vendor)", asked: "The model asked for", member: "The member that answered", vendor: "The vendor's own name", note: "for every agent" },
+  en: { name: "Model name in replies", head: "Replies", sub: "X-Magpie-Response-Model (asked, member or vendor)", asked: "The model asked for", member: "The member that answered", vendor: "The vendor's own name", note: "for every agent" },
   zh: { name: "回复里的模型名", head: "回复", sub: "只为该请求指定", asked: "所要的模型", member: "作答的成员", vendor: "厂商自己的名字", note: "对所有 agent" },
   "zh-TW": { name: "回覆裡的模型名稱", head: "回覆", sub: "只為該請求指定", asked: "所要的模型", member: "作答的成員", vendor: "廠商自己的名稱", note: "對所有 agent" },
   ja: { name: "応答のモデル名", head: "応答", sub: "そのリクエストだけを決めます", asked: "求めたモデル", member: "答えたメンバー", vendor: "ベンダー自身の名前", note: "どのエージェントにも" },

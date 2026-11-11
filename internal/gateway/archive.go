@@ -7,7 +7,7 @@ package gateway
 // has no bucket and RequestArchiveLocal is on, in the same file on this
 // computer (archive_local.go): the call's date,
 // in UTC, and an id of its own, sent back on the response as
-// X-Jianmu-Archive-Id. The call, and its rows in the usage log, carry
+// X-Magpie-Archive-Id. The call, and its rows in the usage log, carry
 // "<date>/<id>", for the Gateway and Usage pages to read it back by.
 //
 // The bodies are kept whole, not as Recent calls has them (the first 256
@@ -47,7 +47,7 @@ type Putter interface {
 var ArchiveBucket func() (Putter, bool)
 
 // ArchiveHeader carries a call's archive id on its response.
-const ArchiveHeader = "X-Jianmu-Archive-Id"
+const ArchiveHeader = "X-Magpie-Archive-Id"
 
 // archiveQueue is how many calls wait for their upload at most: their
 // bodies wait in files, so only their headers are held, however fast calls

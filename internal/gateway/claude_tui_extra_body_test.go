@@ -137,7 +137,7 @@ func TestClaudeTUIClientCacheKeepsItsOwn(t *testing.T) {
 	tail := `"cache_control":{"type":"ephemeral","ttl":"1h"},`
 	first := `{"role":"user","content":[{"type":"text","text":"hello","cache_control":{"type":"ephemeral","ttl":"1h"}},{"type":"text","text":"there"}]}`
 	w := cacheAsk(t, h, system+tool+tail, `[`+first+`]`, "client")
-	if got := w.Header().Get("X-Jianmu-Cache-Marks-Dropped"); got != "tools:1,system:1,messages:2" {
+	if got := w.Header().Get("X-Magpie-Cache-Marks-Dropped"); got != "tools:1,system:1,messages:2" {
 		t.Fatalf("dropped %q", got)
 	}
 	for _, log := range h.runs() {
@@ -147,7 +147,7 @@ func TestClaudeTUIClientCacheKeepsItsOwn(t *testing.T) {
 	}
 	// the next turn goes on in the run
 	w = cacheAsk(t, h, system+tool+tail, `[`+first+`,{"role":"assistant","content":"ok"},{"role":"user","content":"again"}]`, "client")
-	if got := w.Header().Get("X-Jianmu-Cache-Marks-Dropped"); got != "tools:1,system:1,messages:2" {
+	if got := w.Header().Get("X-Magpie-Cache-Marks-Dropped"); got != "tools:1,system:1,messages:2" {
 		t.Fatalf("next turn dropped %q", got)
 	}
 	if n := len(h.runs()); n != 1 {
@@ -223,7 +223,7 @@ func TestClaudeTUIClassifierKeepsLongMarksAsPrint(t *testing.T) {
 		}
 		r := httptest.NewRequest("POST", "/v1/messages", bytes.NewReader(body))
 		if header != "" {
-			r.Header.Set("X-Jianmu-Cache-Marks", header)
+			r.Header.Set("X-Magpie-Cache-Marks", header)
 		}
 		w := httptest.NewRecorder()
 		if code, msg := h.s.serveClaudeSubscription(w, r, provider.Anthropic, h.p, "claude-sonnet-5", body, &Usage{}); code != 200 {

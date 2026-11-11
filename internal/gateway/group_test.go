@@ -163,7 +163,7 @@ func TestOpenRouterSharedPoolRateLimitRestsOneModel(t *testing.T) {
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "from b") {
 		t.Fatalf("group reply: %d %s", rec.Code, rec.Body.String())
 	}
-	if rec.Header().Get("X-Jianmu-OpenRouter-Limit-Source") != "" {
+	if rec.Header().Get("X-Magpie-OpenRouter-Limit-Source") != "" {
 		t.Fatal("internal OpenRouter routing detail reached the client")
 	}
 	if first := s.trace.routes[len(s.trace.routes)-1].Tries[0]; first.Rest == nil || first.Rest.Key != "orf/x/a:free" {
@@ -199,7 +199,7 @@ func TestOpenRouterSharedPoolDirectReplyHidesRoutingHeader(t *testing.T) {
 	if rec.Code != http.StatusTooManyRequests {
 		t.Fatalf("direct reply: %d %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Header().Get("X-Jianmu-OpenRouter-Limit-Source"); got != "" {
+	if got := rec.Header().Get("X-Magpie-OpenRouter-Limit-Source"); got != "" {
 		t.Fatalf("internal routing header leaked: %q", got)
 	}
 }

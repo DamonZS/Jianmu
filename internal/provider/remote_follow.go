@@ -30,7 +30,7 @@ import (
 // ListWaitHeader asks a jianmu's model list to be answered once it is
 // other than the one If-None-Match names, waiting up to the seconds it
 // says; at the end of the wait, 304 says it is the same.
-const ListWaitHeader = "X-Jianmu-List-Wait"
+const ListWaitHeader = "X-Magpie-List-Wait"
 
 // listWaitAsk is how many seconds a follower asks the other jianmu to
 // wait, which holds it under a minute (the gateway's listWaitMost).

@@ -14,7 +14,7 @@ import (
 )
 
 // TestSessionsSameWithoutRows: an unchanged Sessions poll made every row,
-// encoded and hashed the whole list again only to answer X-Jianmu-Same,
+// encoded and hashed the whole list again only to answer X-Magpie-Same,
 // ~135 ms of CPU and ~22 MB a poll over ~17k real sessions. While the
 // listing, the usage log and the aliases stand, an ask with the last
 // tag is answered without the rows; a gateway call, an alias and a
@@ -43,21 +43,21 @@ func TestSessionsSameWithoutRows(t *testing.T) {
 	poll := func(what string, wantSame bool) {
 		t.Helper()
 		r := httptest.NewRequest("GET", "/api/sessions", nil)
-		r.Header.Set("X-Jianmu-Had", tag)
+		r.Header.Set("X-Magpie-Had", tag)
 		w := httptest.NewRecorder()
 		rowed := listsRowed.Load()
 		mux.ServeHTTP(w, r)
 		if w.Code != 200 {
 			t.Fatalf("%s: %d %s", what, w.Code, w.Body)
 		}
-		same, made := w.Header().Get("X-Jianmu-Same") == "1", listsRowed.Load()-rowed
+		same, made := w.Header().Get("X-Magpie-Same") == "1", listsRowed.Load()-rowed
 		if same != wantSame || wantSame && (made != 0 || w.Body.Len() != 0) || !wantSame && made != 1 {
 			t.Fatalf("%s: same %v, rows made %d times, %d bytes; want same %v", what, same, made, w.Body.Len(), wantSame)
 		}
-		if got := w.Header().Get("X-Jianmu-Tag"); got == "" || wantSame && got != tag {
+		if got := w.Header().Get("X-Magpie-Tag"); got == "" || wantSame && got != tag {
 			t.Fatalf("%s: tag %q, had %q", what, got, tag)
 		}
-		tag = w.Header().Get("X-Jianmu-Tag")
+		tag = w.Header().Get("X-Magpie-Tag")
 	}
 	poll("the first ask", false)
 	for range 3 {

@@ -24,7 +24,7 @@ import (
 
 // SearchingHeader marks a request a jianmu made to search for another
 // model, to a remote jianmu, which then searches only by the model itself.
-const SearchingHeader = "X-Jianmu-Searching"
+const SearchingHeader = "X-Magpie-Searching"
 
 // Web search as a Remote jianmu's list says it.
 const (

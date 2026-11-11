@@ -1896,7 +1896,7 @@ func zdrRefused(status int, body []byte) bool {
 // that a vendor's error was zdrRefused: the error the agent gets keeps
 // Command Code's words but, in Anthropic's shape or for the 400 whose
 // code is a number, not its code.
-const zdrHeader = "X-Jianmu-ZDR-Refused"
+const zdrHeader = "X-Magpie-ZDR-Refused"
 
 // notMates is, of the candidates left, those not c's model at c's
 // provider: its other accounts are sent the same Zero Data Retention
@@ -3301,8 +3301,8 @@ func (h *holdWriter) keepAlive() {
 				return
 			}
 			a.cacheReportUntil = time.Time{}
-			h.header.Del("X-Jianmu-Cache-Marks-Dropped")
-			h.notes.Del("X-Jianmu-Cache-Marks-Dropped")
+			h.header.Del("X-Magpie-Cache-Marks-Dropped")
+			h.notes.Del("X-Magpie-Cache-Marks-Dropped")
 			log.Printf("claude: cache-mark report timed out before run selection; streaming without the dropped-mark header")
 		}
 		// the try's header is whole once it has its status (WriteHeader,

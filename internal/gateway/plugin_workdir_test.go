@@ -131,7 +131,7 @@ func TestPluginToldWhereTheAgentWorks(t *testing.T) {
 // the fake plugin echoes it) and that none of it reached the vendor.
 func sawWorkPlace(t *testing.T, name string, h http.Header, wantDir, wantGit string) {
 	t.Helper()
-	for _, k := range []string{"X-Jianmu-Work-Dir", "X-Jianmu-Work-Git"} {
+	for _, k := range []string{"X-Magpie-Work-Dir", "X-Magpie-Work-Git"} {
 		if v := h.Values(k); len(v) > 0 {
 			t.Errorf("%s: the vendor got %s: %q", name, k, v)
 		}

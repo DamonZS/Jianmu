@@ -419,7 +419,7 @@ type Settings struct {
 	// asked-for name (ZoeCats on Discord). One the vendor named as asked
 	// keeps the vendor's name, a dated one too. Each is for every agent,
 	// Claude Code, Claude Desktop and Codex included (gateway's
-	// replyNamingOf). A request's X-Jianmu-Response-Model says it for
+	// replyNamingOf). A request's X-Magpie-Response-Model says it for
 	// that request alone. "asked" is read as "".
 	ReplyModel string `json:"replyModel,omitempty"`
 	// MemberModel is ReplyModel "member" as a jianmu before ReplyModel

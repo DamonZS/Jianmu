@@ -16,7 +16,7 @@ import (
 // openCodeSeed names the conversation a request to OpenCode's gateway is a
 // turn of, for its x-opencode-session (provider.OpenCodeClient): the
 // client's own x-opencode-session when it sent one, else the session the
-// client names (X-Jianmu-Session, Codex's session_id, Claude Code's
+// client names (X-Magpie-Session, Codex's session_id, Claude Code's
 // session, Pi's affinity: sessionOf), else the body's prompt_cache_key
 // (Codex's thread), else how the conversation opens
 // (conversationID). OpenCode itself sends one session id for every turn of

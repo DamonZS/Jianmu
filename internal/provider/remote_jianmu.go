@@ -50,20 +50,20 @@ import (
 // whose names aren't Jev's.
 
 // DrawersHeader asks a jianmu's model list for its image models as well.
-const DrawersHeader = "X-Jianmu-Drawers"
+const DrawersHeader = "X-Magpie-Drawers"
 
 // VideomakersHeader asks a jianmu's model list for its video models as
 // well: a jianmu that doesn't send it would take grok-imagine-video, whose
 // id says "imagine", for an image model.
-const VideomakersHeader = "X-Jianmu-Videomakers"
+const VideomakersHeader = "X-Magpie-Videomakers"
 
 // PricesHeader asks a jianmu's model list for what each model costs
 // there ("jianmu_price"): a jianmu that doesn't send it is told nothing
 // more than before.
-const PricesHeader = "X-Jianmu-Prices"
+const PricesHeader = "X-Magpie-Prices"
 
 // DecidersHeader asks a jianmu's model list for its decision models too.
-const DecidersHeader = "X-Jianmu-Deciders"
+const DecidersHeader = "X-Magpie-Deciders"
 
 // RemoteJianmuPreset is the preset's id.
 const RemoteJianmuPreset = "remote-jianmu"

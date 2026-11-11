@@ -11,7 +11,7 @@ import (
 )
 
 // Each call's record names the subscription account that answered it, as
-// the Routing trace names it (#557): the one X-Jianmu-Account pinned, on
+// the Routing trace names it (#557): the one X-Magpie-Account pinned, on
 // jianmu's endpoint and on Codex's own, and never a token of the account's.
 func TestUsageNamesPinnedAccount(t *testing.T) {
 	twoAccounts(t)

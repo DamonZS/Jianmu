@@ -260,12 +260,12 @@ export const FakePlugin = async ({ client }) => ({
         // where jianmu said the agent works, as the plugin read it; its own
         // headers go on too, as a plugin that sends on what it got sends
         // them, for the host to take off
-        for (const k of ["x-jianmu-work-dir", "x-jianmu-work-git", "x-jianmu-fallback", "x-jianmu-session", "x-jianmu-subagent", "x-jianmu-effort"]) if (h.has(k)) h.set("x-saw-" + k.slice(9), h.get(k))
+        for (const k of ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent", "x-magpie-effort"]) if (h.has(k)) h.set("x-saw-" + k.slice(9), h.get(k))
         // $FAKE_QUEUE: that model is queued at the vendor, as Qoder's free
         // models are: waited out (here until jianmu gives up) unless jianmu
         // said it needn't be, then said at once with the queue's 503
         if (process.env.FAKE_QUEUE && typeof init.body === "string" && JSON.parse(init.body).model === process.env.FAKE_QUEUE) {
-          if (h.get("x-jianmu-fallback") === "1") {
+          if (h.get("x-magpie-fallback") === "1") {
             return new Response(JSON.stringify({ error: { message: `FakeCo queued the request for ${process.env.FAKE_QUEUE}; try again in 30s`, type: "queued" } }), { status: 503, headers: { "content-type": "application/json", "retry-after": "30" } })
           }
           await new Promise((_, no) => {

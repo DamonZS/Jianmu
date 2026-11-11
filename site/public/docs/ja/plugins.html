@@ -568,7 +568,7 @@ jianmu quota                             <span class="c"># acme · Pro · 5h 37%
     </div>
 
     <h2 id="signin-state"><a class="anchor" href="#signin-state">サインイン状態</a></h2>
-    <p>jianmu は、ベンダーにサインインを拒否されたアカウントに記録を付けます。その記録をユーザーに表示し、再び使えるようになるまでそのアカウントには送信しません。デフォルトでは 401 で記録が付き、成功すると消えます。プラグインは <code>X-Jianmu-Sign-In</code> レスポンスヘッダーで、応答の意味をより正確に伝えられます。このヘッダーは応答が先に渡される前に jianmu が取り除きます：</p>
+    <p>jianmu は、ベンダーにサインインを拒否されたアカウントに記録を付けます。その記録をユーザーに表示し、再び使えるようになるまでそのアカウントには送信しません。デフォルトでは 401 で記録が付き、成功すると消えます。プラグインは <code>X-Magpie-Sign-In</code> レスポンスヘッダーで、応答の意味をより正確に伝えられます。このヘッダーは応答が先に渡される前に jianmu が取り除きます：</p>
     <div class="table-wrap"><table>
       <tr><th>値</th><th>意味</th></tr>
       <tr><td><code>expired</code></td><td>ステータスにかかわらず、サインインが拒否された（そのために 403 や 502 を返すベンダー）。</td></tr>
@@ -608,7 +608,7 @@ jianmu quota                             <span class="c"># acme · Pro · 5h 37%
     balance: 6291,              <span class="c">// a prepaid wallet: what is left, in unit; no used or limit</span>
   }],
   resets: { count: 2, until: <span class="s">"…"</span>, byWindow: false, fiveHour: 1, weekly: 1 }, <span class="c">// resets the account may spend</span>
-  signIn: <span class="s">"kept"</span>,               <span class="c">// as X-Jianmu-Sign-In</span>
+  signIn: <span class="s">"kept"</span>,               <span class="c">// as X-Magpie-Sign-In</span>
 }</pre>
     </div>
     <p>時刻は ISO 文字列か、秒またはミリ秒のエポック数値です。<code>signIn</code> がない場合、再サインインを求める <code>error</code> はアカウントに記録を付け、問題なく読み取れれば記録は消えます。</p>
@@ -1063,7 +1063,7 @@ document.getElementById(<span class="s">"calls"</span>).textContent = `${s.calls
 
     <h2 id="faq"><a class="anchor" href="#faq">よくある質問</a></h2>
     <h3>OpenCode のプラグインは jianmu でそのまま動きますか？</h3>
-    <p>はい。<code>auth</code>、<code>config</code>、<code>provider</code>、<code>chat.headers</code> を通してサインインとリクエストを行っていれば動きます。jianmu が追加するもの（<code>auth.usage</code>、<code>auth.refresh</code>、<code>jianmu.icon</code>、<code>maxConcurrency</code>、<code>free</code>、<code>rate</code>、<code>X-Jianmu-Sign-In</code>）は OpenCode が無視するので、ひとつのパッケージで両方に対応できます。</p>
+    <p>はい。<code>auth</code>、<code>config</code>、<code>provider</code>、<code>chat.headers</code> を通してサインインとリクエストを行っていれば動きます。jianmu が追加するもの（<code>auth.usage</code>、<code>auth.refresh</code>、<code>jianmu.icon</code>、<code>maxConcurrency</code>、<code>free</code>、<code>rate</code>、<code>X-Magpie-Sign-In</code>）は OpenCode が無視するので、ひとつのパッケージで両方に対応できます。</p>
     <h3>pi のパッケージは jianmu で動きますか？</h3>
     <p>はい。<code>pi.registerProvider</code> でサインインとモデルを提供していれば動きます。jianmu が使うのは登録されたプロバイダだけです。<a href="#pi">pi パッケージ</a>を参照してください。<code>pi-package</code> キーワードを付ければ検索で見つかります。</p>
     <h3>プロバイダの名前が <code>…-plugin</code> になるのはなぜですか？</h3>

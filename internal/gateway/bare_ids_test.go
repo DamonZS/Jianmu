@@ -99,8 +99,8 @@ func TestBareModelIDsReporterCase(t *testing.T) {
 		req.Header.Set("User-Agent", "python-requests/2.31") // a client jianmu doesn't know, as CLIProxyAPI's are
 		rec := httptest.NewRecorder()
 		New().Handler().ServeHTTP(rec, req)
-		if rec.Code != 200 || !strings.Contains(rec.Body.String(), "pong") || rec.Header().Get("X-Jianmu-Provider") != "codex" {
-			t.Fatalf("%s: %d by %q %s", c.path, rec.Code, rec.Header().Get("X-Jianmu-Provider"), rec.Body.String())
+		if rec.Code != 200 || !strings.Contains(rec.Body.String(), "pong") || rec.Header().Get("X-Magpie-Provider") != "codex" {
+			t.Fatalf("%s: %d by %q %s", c.path, rec.Code, rec.Header().Get("X-Magpie-Provider"), rec.Body.String())
 		}
 		if !slices.Equal(asked, []string{"gpt-5.6-sol"}) {
 			t.Fatalf("%s asked the backend for %v", c.path, asked)
@@ -173,7 +173,7 @@ func TestBareModelIDsShared(t *testing.T) {
 		if rec.Code != 200 {
 			t.Fatalf("%s: %d %s", model, rec.Code, rec.Body.String())
 		}
-		return rec.Header().Get("X-Jianmu-Provider")
+		return rec.Header().Get("X-Magpie-Provider")
 	}
 
 	for _, found := range []bool{true, false} {

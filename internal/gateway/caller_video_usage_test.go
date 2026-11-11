@@ -26,7 +26,7 @@ func TestCallerUsageVideos(t *testing.T) {
 				r := httptest.NewRequest("POST", "/v1/videos", strings.NewReader(`{"model":"grok/grok-imagine-video","prompt":"`+tc.prompt+`"}`))
 				r.RemoteAddr = "192.168.1.9:5000"
 				r.Header.Set("Content-Type", "application/json")
-				r.Header.Set("X-Jianmu-Session", "video-session")
+				r.Header.Set("X-Magpie-Session", "video-session")
 				if header == "query" {
 					r.URL.RawQuery = "key=" + secrets[0]
 				} else if header == "Authorization" {

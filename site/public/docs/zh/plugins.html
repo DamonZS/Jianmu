@@ -568,7 +568,7 @@ jianmu quota                             <span class="c"># acme · Pro · 5h 37%
     </div>
 
     <h2 id="signin-state"><a class="anchor" href="#signin-state">登录状态</a></h2>
-    <p>厂商拒绝了某个账号的登录时，jianmu 会给它打上标记，告诉用户，并且在它恢复之前不再往它发请求。默认情况下，401 打标记，成功清除标记。插件可以用 <code>X-Jianmu-Sign-In</code> 响应头更准确地说明一个回答的含义，jianmu 会在转发前去掉这个头：</p>
+    <p>厂商拒绝了某个账号的登录时，jianmu 会给它打上标记，告诉用户，并且在它恢复之前不再往它发请求。默认情况下，401 打标记，成功清除标记。插件可以用 <code>X-Magpie-Sign-In</code> 响应头更准确地说明一个回答的含义，jianmu 会在转发前去掉这个头：</p>
     <div class="table-wrap"><table>
       <tr><th>值</th><th>含义</th></tr>
       <tr><td><code>expired</code></td><td>登录被拒绝，无论状态码是什么（有些厂商为此返回 403 或 502）。</td></tr>
@@ -608,7 +608,7 @@ jianmu quota                             <span class="c"># acme · Pro · 5h 37%
     balance: 6291,              <span class="c">// 预付钱包：剩余多少（按 unit 计），不写 used 和 limit</span>
   }],
   resets: { count: 2, until: <span class="s">"…"</span>, byWindow: false, fiveHour: 1, weekly: 1 }, <span class="c">// 账号可用的重置次数</span>
-  signIn: <span class="s">"kept"</span>,               <span class="c">// 同 X-Jianmu-Sign-In</span>
+  signIn: <span class="s">"kept"</span>,               <span class="c">// 同 X-Magpie-Sign-In</span>
 }</pre>
     </div>
     <p>时间可以是 ISO 字符串，也可以是以秒或毫秒为单位的时间戳。没有 <code>signIn</code> 时，提示要重新登录的 <code>error</code> 会标记账号，一次正常读取会清除标记。</p>
@@ -1063,7 +1063,7 @@ document.getElementById(<span class="s">"calls"</span>).textContent = `${s.calls
 
     <h2 id="faq"><a class="anchor" href="#faq">答疑</a></h2>
     <h3>我的 OpenCode 插件不改就能在 jianmu 里用吗？</h3>
-    <p>可以，只要它通过 <code>auth</code>、<code>config</code>、<code>provider</code> 和 <code>chat.headers</code> 来登录和发请求。jianmu 增加的部分（<code>auth.usage</code>、<code>auth.refresh</code>、<code>jianmu.icon</code>、<code>maxConcurrency</code>、<code>free</code>、<code>rate</code>、<code>X-Jianmu-Sign-In</code>）OpenCode 都会忽略，所以一个包能同时服务两边。</p>
+    <p>可以，只要它通过 <code>auth</code>、<code>config</code>、<code>provider</code> 和 <code>chat.headers</code> 来登录和发请求。jianmu 增加的部分（<code>auth.usage</code>、<code>auth.refresh</code>、<code>jianmu.icon</code>、<code>maxConcurrency</code>、<code>free</code>、<code>rate</code>、<code>X-Magpie-Sign-In</code>）OpenCode 都会忽略，所以一个包能同时服务两边。</p>
     <h3>我的 pi 扩展包能在 jianmu 里用吗？</h3>
     <p>能，只要它通过 <code>pi.registerProvider</code> 登录并提供模型。jianmu 只使用它注册的供应商，见 <a href="#pi">pi 扩展包</a>。给它加上 <code>pi-package</code> 关键词，搜索就能找到它。</p>
     <h3>为什么我的供应商叫 <code>…-plugin</code>？</h3>

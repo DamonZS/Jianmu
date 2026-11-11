@@ -5,8 +5,8 @@ package gateway
 // names neither the provider nor the group's member, so an agent that
 // counts usage by it puts every provider's glm-5.3-flash in one bucket.
 //
-// Every reply carries X-Jianmu-Provider (the provider's id) and
-// X-Jianmu-Model (jianmu's provider/model id of the member that answered).
+// Every reply carries X-Magpie-Provider (the provider's id) and
+// X-Magpie-Model (jianmu's provider/model id of the member that answered).
 // The body's model is the one the agent asked for whenever the request
 // went out under another name — a group's member, an alias, a fallback,
 // a provider/model id, a name the user gave the model upstream — since
@@ -25,7 +25,7 @@ package gateway
 // asked-for name). Both were asked for by ZoeCats on Discord, whose
 // Claude Code was given the name asked for under "member" until it named
 // the member to Claude Code, Claude Desktop and Codex too: the user's
-// pick wins, and the id is a provider/model as a name asked for is. A request's X-Jianmu-Response-Model (asked,
+// pick wins, and the id is a provider/model as a name asked for is. A request's X-Magpie-Response-Model (asked,
 // member or vendor) says it for that request alone. The vendor's
 // own name is still in the usage log (Record.Served) and on the Routing
 // page: the request's capture is inside this writer.
@@ -44,9 +44,9 @@ import (
 )
 
 const (
-	providerHeader      = "X-Jianmu-Provider"
-	modelHeader         = "X-Jianmu-Model"
-	responseModelHeader = "X-Jianmu-Response-Model" // a request's: asked, member or vendor
+	providerHeader      = "X-Magpie-Provider"
+	modelHeader         = "X-Magpie-Model"
+	responseModelHeader = "X-Magpie-Response-Model" // a request's: asked, member or vendor
 )
 
 type memberKey struct{}
@@ -73,7 +73,7 @@ func noteMember(w http.ResponseWriter, r *http.Request, p provider.Provider, mod
 // replyNaming is what the reply to r has its body's model say: the
 // member's id, the vendor's own text, or else the model
 // the agent asked for, when the request went out under another name.
-// The request's X-Jianmu-Response-Model says which, else Settings'
+// The request's X-Magpie-Response-Model says which, else Settings'
 // ReplyModel.
 type replyNaming int
 

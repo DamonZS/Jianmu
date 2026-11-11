@@ -52,7 +52,7 @@ func pinnedPost(t *testing.T, s *Server, path, model, account string) (int, stri
 
 var pinPaths = map[string]string{"/v1/responses": "codex/gpt-5.5", CodexPath + "/responses": "gpt-5.5"}
 
-// X-Jianmu-Account names the account that answers, over the one routing
+// X-Magpie-Account names the account that answers, over the one routing
 // would pick first (acct-1, Codex's own), on jianmu's endpoint and on
 // Codex's; the header isn't sent on, and the trace says it was pinned.
 func TestAccountPinned(t *testing.T) {

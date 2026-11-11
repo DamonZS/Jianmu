@@ -1650,7 +1650,7 @@ function routingPage(part) {
   const groupSession = (r) => r.parentSession || r.session || "";
   const sessionKey = (r) => groupSession(r) ? JSON.stringify([r.agent || "other", groupSession(r)]) : "";
   // Other agents' sessions are named from their own files, by the id the
-  // agent gave (jianmu's X-Jianmu-Session can stand in front of it), so a
+  // agent gave (jianmu's X-Magpie-Session can stand in front of it), so a
   // Claude Code session heads its group with its title, not its UUID
   // (#1293). Kept here by agent:id, as each trace update brings its rows
   // anew; a key not asked about yet is asked about at once. Codex's are

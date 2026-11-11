@@ -18,7 +18,7 @@ import (
 
 // Claude Code's and Codex's requests, through this jianmu, reach a Remote
 // jianmu as jianmu's own (linkaww: #179's copy of Claude Code's headers put
-// claude-cli/… over jianmu/…, so the remote, which takes X-Jianmu-* from a
+// claude-cli/… over jianmu/…, so the remote, which takes X-Magpie-* from a
 // jianmu alone, dropped the cache lifetime, the agent, the computer, the
 // hops and the agent's User-Agent). The remote takes each of them, and
 // still sends its relay the agent's own client headers (#179) and ?beta=true.
@@ -124,7 +124,7 @@ func TestRemoteJianmuTakesClientsHeaders(t *testing.T) {
 				t.Errorf("the relay was sent x-app %q, query %q", atRelay.Header.Get("X-App"), atRelay.URL.RawQuery)
 			}
 			for k := range atRelay.Header {
-				if strings.HasPrefix(strings.ToLower(k), "x-jianmu-") {
+				if strings.HasPrefix(strings.ToLower(k), "x-magpie-") {
 					t.Errorf("the relay was sent %s", k)
 				}
 			}

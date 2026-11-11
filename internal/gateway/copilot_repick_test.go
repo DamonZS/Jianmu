@@ -263,8 +263,8 @@ func TestCopilotAutoFallsBackToBase(t *testing.T) {
 	if rec.Code != 200 || !strings.Contains(rec.Body.String(), "hello from gpt-4.1") {
 		t.Fatalf("copilot/auto: %d %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Header().Get("X-Jianmu-Model"); got != "copilot/gpt-4.1" {
-		t.Errorf("X-Jianmu-Model %q, want copilot/gpt-4.1", got)
+	if got := rec.Header().Get("X-Magpie-Model"); got != "copilot/gpt-4.1" {
+		t.Errorf("X-Magpie-Model %q, want copilot/gpt-4.1", got)
 	}
 	mu.Lock()
 	defer mu.Unlock()

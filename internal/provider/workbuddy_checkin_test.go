@@ -511,7 +511,7 @@ func TestWorkBuddyCheckinUnauthorizedThroughPlugin(t *testing.T) {
 	via := func(req *http.Request) (*http.Response, error) {
 		paths = append(paths, req.URL.Path)
 		if strings.HasSuffix(req.URL.Path, "/checkin-activity-status") {
-			return &http.Response{StatusCode: 401, Body: io.NopCloser(strings.NewReader(wbGateway401)), Header: http.Header{"X-Jianmu-Sign-In": {"kept"}}}, nil
+			return &http.Response{StatusCode: 401, Body: io.NopCloser(strings.NewReader(wbGateway401)), Header: http.Header{"X-Magpie-Sign-In": {"kept"}}}, nil
 		}
 		body := `{"code":0,"data":{"Packages":[]}}`
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{}}, nil

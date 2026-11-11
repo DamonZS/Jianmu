@@ -27,7 +27,7 @@ import (
 const CPUPath = "/v1/jianmu/cpu"
 
 // CPUStatsHeader carries CPUStats, as JSON, beside the profile.
-const CPUStatsHeader = "X-Jianmu-CPU-Stats"
+const CPUStatsHeader = "X-Magpie-CPU-Stats"
 
 // The seconds a CPU profile records: CPUSeconds unless the caller asks
 // for others, from CPUMinSeconds to CPUMaxSeconds.

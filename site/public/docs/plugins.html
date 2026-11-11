@@ -568,7 +568,7 @@ jianmu quota                             <span class="c"># acme · Pro · 5h 37%
     </div>
 
     <h2 id="signin-state"><a class="anchor" href="#signin-state">Sign-in state</a></h2>
-    <p>jianmu marks an account whose sign-in the vendor refused. It shows the mark to the user and stops sending to the account until it works again. By default a 401 marks the account and a success clears the mark. A plugin can say more precisely what an answer means with the <code>X-Jianmu-Sign-In</code> response header, which jianmu removes before the answer goes on:</p>
+    <p>jianmu marks an account whose sign-in the vendor refused. It shows the mark to the user and stops sending to the account until it works again. By default a 401 marks the account and a success clears the mark. A plugin can say more precisely what an answer means with the <code>X-Magpie-Sign-In</code> response header, which jianmu removes before the answer goes on:</p>
     <div class="table-wrap"><table>
       <tr><th>Value</th><th>Meaning</th></tr>
       <tr><td><code>expired</code></td><td>The sign-in was refused, whatever the status (a vendor that answers 403 or 502 for it).</td></tr>
@@ -608,7 +608,7 @@ jianmu quota                             <span class="c"># acme · Pro · 5h 37%
     balance: 6291,              <span class="c">// a prepaid wallet: what is left, in unit; no used or limit</span>
   }],
   resets: { count: 2, until: <span class="s">"…"</span>, byWindow: false, fiveHour: 1, weekly: 1 }, <span class="c">// resets the account may spend</span>
-  signIn: <span class="s">"kept"</span>,               <span class="c">// as X-Jianmu-Sign-In</span>
+  signIn: <span class="s">"kept"</span>,               <span class="c">// as X-Magpie-Sign-In</span>
 }</pre>
     </div>
     <p>Times are ISO strings or epoch numbers, in seconds or in milliseconds. Without <code>signIn</code>, an <code>error</code> that says to sign in again marks the account, and a clean read clears the mark.</p>
@@ -1063,7 +1063,7 @@ document.getElementById(<span class="s">"calls"</span>).textContent = `${s.calls
 
     <h2 id="faq"><a class="anchor" href="#faq">FAQ</a></h2>
     <h3>Does my OpenCode plugin work in jianmu unchanged?</h3>
-    <p>Yes, as long as it signs in and makes requests through <code>auth</code>, <code>config</code>, <code>provider</code> and <code>chat.headers</code>. What jianmu adds (<code>auth.usage</code>, <code>auth.refresh</code>, <code>jianmu.icon</code>, <code>maxConcurrency</code>, <code>free</code>, <code>rate</code>, <code>X-Jianmu-Sign-In</code>) is ignored by OpenCode, so one package serves both.</p>
+    <p>Yes, as long as it signs in and makes requests through <code>auth</code>, <code>config</code>, <code>provider</code> and <code>chat.headers</code>. What jianmu adds (<code>auth.usage</code>, <code>auth.refresh</code>, <code>jianmu.icon</code>, <code>maxConcurrency</code>, <code>free</code>, <code>rate</code>, <code>X-Magpie-Sign-In</code>) is ignored by OpenCode, so one package serves both.</p>
     <h3>Does my pi package work in jianmu?</h3>
     <p>Yes, if it signs in and serves models through <code>pi.registerProvider</code>. jianmu uses only the providers it registers; see <a href="#pi">pi packages</a>. Give it the <code>pi-package</code> keyword so the search finds it.</p>
     <h3>Why is my provider called <code>…-plugin</code>?</h3>

@@ -36,8 +36,8 @@ const MemoryMCPPath = "/mcp/jianmu/memory"
 // MemoryCwdHeader and MemoryClientHeader are the folder `jianmu mcp
 // memory` was started in and the client name the agent gave at initialize.
 const (
-	MemoryCwdHeader    = "X-Jianmu-Cwd"
-	MemoryClientHeader = "X-Jianmu-Mcp-Client"
+	MemoryCwdHeader    = "X-Magpie-Cwd"
+	MemoryClientHeader = "X-Magpie-Mcp-Client"
 )
 
 const (

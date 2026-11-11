@@ -147,14 +147,14 @@ func sessionRoutes(mux *http.ServeMux, w Windows) {
 		now := listTag{log: logV, drawn: drawn.String(), names: provider.UsageNamesKey()}
 		made := -1
 		listTags.Lock()
-		if t, ok := listTags.m[n]; ok && logKnown && t.same(now) && r.Header.Get("X-Jianmu-Had") == t.tag {
+		if t, ok := listTags.m[n]; ok && logKnown && t.same(now) && r.Header.Get("X-Magpie-Had") == t.tag {
 			made = t.made
 		}
 		listTags.Unlock()
 		list, made, same := sessions.ListUnless(sessions.All, made)
 		if same {
-			rw.Header().Set("X-Jianmu-Tag", r.Header.Get("X-Jianmu-Had"))
-			rw.Header().Set("X-Jianmu-Same", "1")
+			rw.Header().Set("X-Magpie-Tag", r.Header.Get("X-Magpie-Had"))
+			rw.Header().Set("X-Magpie-Same", "1")
 			rw.WriteHeader(http.StatusOK)
 			return
 		}
@@ -245,9 +245,9 @@ func sessionRoutes(mux *http.ServeMux, w Windows) {
 		statsTags.Lock()
 		t, ok := statsTags.m[n]
 		statsTags.Unlock()
-		if ok && t.gen == gen && maps.Equal(t.agents, agents) && r.Header.Get("X-Jianmu-Had") == t.tag {
-			rw.Header().Set("X-Jianmu-Tag", t.tag)
-			rw.Header().Set("X-Jianmu-Same", "1")
+		if ok && t.gen == gen && maps.Equal(t.agents, agents) && r.Header.Get("X-Magpie-Had") == t.tag {
+			rw.Header().Set("X-Magpie-Tag", t.tag)
+			rw.Header().Set("X-Magpie-Same", "1")
 			rw.WriteHeader(http.StatusOK)
 			return
 		}
@@ -578,7 +578,7 @@ type statsTag struct {
 }
 
 // listTags is, by ?limit, what the last list sent was made from and its
-// tag: an ask with that tag while all of it stands gets X-Jianmu-Same
+// tag: an ask with that tag while all of it stands gets X-Magpie-Same
 // without the list being made. What a row shows beyond these (a Codex
 // thread's effort, a gateway session's title) is bounded by the listing,
 // made again at least once in sessions' listKeptFor.

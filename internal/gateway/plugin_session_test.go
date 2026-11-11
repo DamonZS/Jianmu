@@ -54,7 +54,7 @@ func TestPluginToldTheSession(t *testing.T) {
 		}{
 			{"claude code's lead", map[string]string{"X-Claude-Code-Session-Id": "cc-s1"}, "cc-s1", ""},
 			{"claude code's subagent", map[string]string{"X-Claude-Code-Session-Id": "cc-s1", "X-Claude-Code-Agent-Id": "agent-7"}, "cc-s1", "agent-7"},
-			{"jianmu's own session header first", map[string]string{"X-Jianmu-Session": "mine", "X-Claude-Code-Session-Id": "cc-s1"}, "mine", ""},
+			{"jianmu's own session header first", map[string]string{"X-Magpie-Session": "mine", "X-Claude-Code-Session-Id": "cc-s1"}, "mine", ""},
 			{"opencode", map[string]string{"X-Opencode-Session": "ses_1"}, "ses_1", ""},
 			{"no session named", nil, "", ""},
 		} {

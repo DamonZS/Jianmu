@@ -1043,7 +1043,7 @@ func withSession(scope, key string, named bool, a *Affinity, own stick, had bool
 }
 
 // sessionNamed reports whether the request names its session in a header
-// (sessionHeaders or X-Jianmu-Session), where affinityID would otherwise
+// (sessionHeaders or X-Magpie-Session), where affinityID would otherwise
 // be the hash of how the conversation opens.
 func sessionNamed(in http.Header) bool {
 	for _, h := range sessionHeaders {

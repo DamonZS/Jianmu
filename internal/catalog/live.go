@@ -876,7 +876,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 		// groups (#5339); another jianmu's list keeps them as it lists
 		// them
 		serves := ""
-		if !drawer && !films && !decision && headers["X-Jianmu-Drawers"] == "" {
+		if !drawer && !films && !decision && headers["X-Magpie-Drawers"] == "" {
 			serves = ServesOf(id)
 		}
 		// Vercel's AI Gateway says what each row is (its "type"), which
@@ -907,7 +907,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 				serves = ServesTranscription
 			}
 		}
-		if !drawer && !films && !decision && serves == "" && headers["X-Jianmu-Drawers"] == "" && !textModel(md) {
+		if !drawer && !films && !decision && serves == "" && headers["X-Magpie-Drawers"] == "" && !textModel(md) {
 			continue
 		}
 		name, plain := r.DisplayName, ""
@@ -1037,7 +1037,7 @@ type liveModel struct {
 	// mustn't lose the whole list
 	Tiers any `json:"service_tiers"`
 	// what another jianmu counts a call to the model at, asked for with
-	// its X-Jianmu-Prices header: the price its user set, else its list
+	// its X-Magpie-Prices header: the price its user set, else its list
 	// price. Raw, as an odd value mustn't lose the whole list
 	Price json.RawMessage `json:"jianmu_price"`
 	// the jianmus another jianmu's model passes through to its vendor,

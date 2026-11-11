@@ -74,7 +74,7 @@ func TestImageIsOnRouting(t *testing.T) {
 	req := httptest.NewRequest("POST", "/v1/images/generations", strings.NewReader(`{"model":"art/gpt-image-1","prompt":"a jianmu"}`))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "claude-code/2.1.0 "+DrawAgent)
-	req.Header.Set("X-Jianmu-Session", "draw-session")
+	req.Header.Set("X-Magpie-Session", "draw-session")
 	s.Handler().ServeHTTP(rec, req)
 	if rec.Code != 200 {
 		t.Fatalf("%d %s", rec.Code, rec.Body)

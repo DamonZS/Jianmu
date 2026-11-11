@@ -3,8 +3,8 @@
 The Sessions API combines file-backed native sessions with a read-only
 projection of gateway usage records. A gateway session identity is exactly
 `AgentOf(record.Agent) + record.Session`, where the session is the one the
-client sent (`X-Jianmu-Session`, or its own session header), whatever it starts
-with. The response returns that id in `X-Jianmu-Session`; listed browser
+client sent (`X-Magpie-Session`, or its own session header), whatever it starts
+with. The response returns that id in `X-Magpie-Session`; listed browser
 origins can read this header through CORS. jianmu never makes up an id for a
 request without one, so such a request has no session and its text is not
 recorded: text kept under an id nothing lists couldn't be opened. Prompt text,
@@ -25,7 +25,7 @@ lookups use the cached identity index. Native exclusions are applied per caller.
 
 WorkBuddy and CodeBuddy Code name their conversation in `X-Conversation-ID`.
 The gateway reads it as a native session header, after the existing native
-headers; `X-Jianmu-Session` still overrides the recorded session without
+headers; `X-Magpie-Session` still overrides the recorded session without
 changing its native identity. The per-turn `X-Conversation-Request-ID`,
 per-message `X-Conversation-Message-ID` and `X-Parent-Conversation-ID` do not
 identify the current session. This lets Routing group requests by the same id
@@ -408,7 +408,7 @@ answer turns it resets the sessions' caches and the stats
 nothing, its empty state says the sessions shown are those of other
 computers' agents that use this gateway, and Settings › Privacy leaves
 *Agents' session history* out. A session is listed only when its
-requests name one in a header (`sessionOf`: `X-Jianmu-Session`, or the
+requests name one in a header (`sessionOf`: `X-Magpie-Session`, or the
 agent's own, `sessionHeaders`), under the agent its User-Agent names
 (`usage.AgentOf`, jianmu's agents and plugins' agents; another client by
 its product name).

@@ -10,11 +10,11 @@ import (
 // #4145: the list is kept canonical and once each, never with a header
 // jianmu doesn't pass on; matching ignores case.
 func TestReplyHeadersList(t *testing.T) {
-	got := cleanReplyHeaders([]string{" x-oneapi-request-id ", "X-OneAPI-Request-ID", "set-cookie", "content-length", "access-control-allow-origin", "x-jianmu-rest", "bad name", "", "x-trace"})
+	got := cleanReplyHeaders([]string{" x-oneapi-request-id ", "X-OneAPI-Request-ID", "set-cookie", "content-length", "access-control-allow-origin", "x-magpie-rest", "bad name", "", "x-trace"})
 	if want := []string{"X-Oneapi-Request-Id", "X-Trace"}; !slices.Equal(got, want) {
 		t.Errorf("cleaned %q, want %q", got, want)
 	}
-	for _, bad := range [][]string{{"Set-Cookie"}, {"Content-Encoding"}, {"Transfer-Encoding"}, {"Authorization"}, {"Proxy-Authenticate"}, {"X-Jianmu-Note"}, {"a b"}, {"a:b"}} {
+	for _, bad := range [][]string{{"Set-Cookie"}, {"Content-Encoding"}, {"Transfer-Encoding"}, {"Authorization"}, {"Proxy-Authenticate"}, {"X-Magpie-Note"}, {"a b"}, {"a:b"}} {
 		if ReplyHeadersOK(bad) == "" {
 			t.Errorf("%q passed as OK", bad)
 		}
@@ -42,12 +42,12 @@ func TestReplyHeadersList(t *testing.T) {
 // never one that carries jianmu's key or the connection's own (3jRzfF52Qx
 // on X).
 func TestRequestHeadersList(t *testing.T) {
-	got := cleanRequestHeaders([]string{" x-tenant ", "X-TENANT", "authorization", "x-api-key", "host", "content-length", "x-jianmu-agent", "bad name", "", "x-trace"})
+	got := cleanRequestHeaders([]string{" x-tenant ", "X-TENANT", "authorization", "x-api-key", "host", "content-length", "x-magpie-agent", "bad name", "", "x-trace"})
 	if want := []string{"X-Tenant", "X-Trace"}; !slices.Equal(got, want) {
 		t.Errorf("cleaned %q, want %q", got, want)
 	}
 	for _, bad := range [][]string{{"Authorization"}, {"x-api-key"}, {"X-Goog-Api-Key"}, {"api-key"}, {"Cookie"}, {"Host"}, {"Content-Length"},
-		{"Connection"}, {"Transfer-Encoding"}, {"Proxy-Authorization"}, {"Accept-Encoding"}, {"X-Jianmu-Session"}, {"a b"}} {
+		{"Connection"}, {"Transfer-Encoding"}, {"Proxy-Authorization"}, {"Accept-Encoding"}, {"X-Magpie-Session"}, {"a b"}} {
 		if RequestHeadersOK(bad) == "" {
 			t.Errorf("%q passed as OK", bad)
 		}

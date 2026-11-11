@@ -98,7 +98,7 @@ func TestClaudeAppendInTheInteractiveMode(t *testing.T) {
 	}{
 		{"tools", true, true, `{"model":"claude-sonnet-5","max_tokens":64,"system":"` + classifierRules + `","tools":[{"name":"read","input_schema":{"type":"object"}}],"messages":[{"role":"user","content":"hi"}]}`, nil},
 		{"reply", true, true, `{"model":"claude-sonnet-5","max_tokens":64,"system":"` + classifierRules + `","messages":[{"role":"user","content":"hi"},{"role":"assistant","content":"ok"},{"role":"user","content":"again"}]}`, nil},
-		{"client marks", true, false, `{"model":"claude-sonnet-5","max_tokens":64,"system":[{"type":"text","text":"` + classifierRules + `","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"hi"}]}`, []string{"X-Jianmu-Cache-Marks", "client"}},
+		{"client marks", true, false, `{"model":"claude-sonnet-5","max_tokens":64,"system":[{"type":"text","text":"` + classifierRules + `","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"hi"}]}`, []string{"X-Magpie-Cache-Marks", "client"}},
 		{"print", false, false, `{"model":"claude-sonnet-5","max_tokens":64,"system":"` + classifierRules + `","messages":[{"role":"user","content":"hi"}]}`, nil},
 	} {
 		t.Run(c.name, func(t *testing.T) {

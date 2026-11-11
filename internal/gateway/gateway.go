@@ -6142,7 +6142,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 	}
 	if p.IsRemoteJianmu() {
 		// as jianmu, whatever a copy above put on (Claude Code's or
-		// Codex's own, #179): the other jianmu takes X-Jianmu-* — the
+		// Codex's own, #179): the other jianmu takes X-Magpie-* — the
 		// agent, the computer, the hops that stop a loop, the cache
 		// lifetime, the agent's User-Agent — only from a jianmu's request
 		// (jianmuAsks; linkaww)
@@ -8090,7 +8090,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		fctx := ctx
 		if p.IsPlugin() && req.Effort != "" {
 			// the effort picked, which a plugin's model with variants is
-			// told in X-Jianmu-Effort: the body says only what Gemini's
+			// told in X-Magpie-Effort: the body says only what Gemini's
 			// thinkingConfig can, and loses minimal and xhigh
 			fctx = provider.WithEffort(ctx, req.Effort)
 		}
@@ -9695,14 +9695,14 @@ func dshCompacts(h http.Header) bool {
 // SessionHeader names the session a call is part of, for the usage log to
 // tell several sessions on one model apart; without it, the session an
 // agent names itself in sessionHeaders is taken.
-const SessionHeader = "X-Jianmu-Session"
+const SessionHeader = "X-Magpie-Session"
 
 // AccountHeader pins a request to one of a subscription's accounts, by its
 // user (an email, a login) or its id in the routing trace, percent-encoded
 // when it isn't ASCII (pinnedName): only it is tried, and when it can't take the request the caller is told why rather
 // than another account answering — a probe of one account needs that one.
 // It goes no further than jianmu.
-const AccountHeader = "X-Jianmu-Account"
+const AccountHeader = "X-Magpie-Account"
 
 // sessionOf is the session a request names, "" when it names none.
 func sessionOf(in http.Header) string {
@@ -9756,11 +9756,11 @@ func nativeSessionOf(in http.Header) string {
 // it always was; several are hashed as writeOpening reads them, so the
 // cache mark an agent moves on from turn to turn doesn't move the id.
 // affinityID is the conversation a turn's account is kept for: an agent's
-// own session (conversationID), else the caller's X-Jianmu-Session, else
+// own session (conversationID), else the caller's X-Magpie-Session, else
 // the conversation's hash. Two callers that send the same opening with
-// their own X-Jianmu-Session are two conversations (#5242). It is jianmu's
+// their own X-Magpie-Session are two conversations (#5242). It is jianmu's
 // own key and never goes upstream: conversationID, which a vendor or a
-// plugin is sent (Kilo, ConversationHeader), doesn't read X-Jianmu-Session.
+// plugin is sent (Kilo, ConversationHeader), doesn't read X-Magpie-Session.
 func affinityID(in http.Header, body []byte) string {
 	for _, h := range sessionHeaders {
 		if v := strings.TrimSpace(in.Get(h)); v != "" {

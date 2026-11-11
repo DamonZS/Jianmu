@@ -14,7 +14,7 @@ import (
 // one not on this computer or the local network, which a signed-in
 // account's or a plugin's vendor never is, and nothing here looks one up.
 // Another jianmu (a Remote jianmu) set so is sent the request as written,
-// with no X-Jianmu-Masked-As, so it masks by its own Settings › Privacy
+// with no X-Magpie-Masked-As, so it masks by its own Settings › Privacy
 // and its own providers' switches before anything reaches a vendor
 // (CrazyMouse_TT on X: a model of the user's own behind that jianmu);
 // left off, it is sent the request masked here, as before.
