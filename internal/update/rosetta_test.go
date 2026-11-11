@@ -36,11 +36,11 @@ func TestRosettaUpdatesToAppleSilicon(t *testing.T) {
 	}{
 		{"darwin", "amd64", true, true, "jianmu-darwin-arm64.zip", "jianmu-cli-darwin-arm64"},
 		{"darwin", "amd64", true, false, "jianmu-darwin-arm64.zip", "jianmu-cli-darwin-arm64"},
-		{"darwin", "amd64", false, true, "jianmu-darwin-amd64.zip", "jianmu-cli-darwin-amd64"},
+		{"darwin", "amd64", false, true, "jianmu-darwin-x64.zip", "jianmu-cli-darwin-x64"},
 		{"darwin", "arm64", false, true, "jianmu-darwin-arm64.zip", "jianmu-cli-darwin-arm64"},
 		// only macOS has Rosetta: a translated answer elsewhere changes nothing
-		{"windows", "amd64", true, true, "jianmu-darwin-amd64.zip", "jianmu-windows-amd64.exe"},
-		{"linux", "amd64", true, false, "jianmu-darwin-amd64.zip", "jianmu-cli-linux-amd64"},
+		{"windows", "amd64", true, true, "jianmu-darwin-x64.zip", "jianmu-windows-x64.exe"},
+		{"linux", "amd64", true, false, "jianmu-darwin-x64.zip", "jianmu-cli-linux-x64"},
 		{"linux", "arm64", false, true, "jianmu-darwin-arm64.zip", "jianmu-linux-arm64"},
 	} {
 		onSystem(t, c.os, c.arch, c.tr)
@@ -70,7 +70,7 @@ func TestRosettaStagesAppleSiliconsApp(t *testing.T) {
 		w.Write(zips[strings.TrimPrefix(r.URL.Path, "/")])
 	}))
 	defer srv.Close()
-	for _, a := range []string{"amd64", "arm64"} {
+	for _, a := range []string{"x64", "arm64"} {
 		src := filepath.Join(root, "src-"+a)
 		fakeApp(t, filepath.Join(src, "jianmu.app"), "2.0-"+a)
 		name := "jianmu-darwin-" + a + ".zip"
@@ -89,7 +89,7 @@ func TestRosettaStagesAppleSiliconsApp(t *testing.T) {
 		assets[name] = Asset{URL: srv.URL + "/" + name, SHA256: hex.EncodeToString(sum[:])}
 	}
 	bundle := filepath.Join(root, "Applications", "jianmu.app")
-	fakeApp(t, bundle, "1.0-amd64")
+	fakeApp(t, bundle, "1.0-x64")
 	staged, err := Stage(context.Background(), &Release{Version: "2.0", Assets: assets}, bundle)
 	if err != nil {
 		t.Fatal(err)

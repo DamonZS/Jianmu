@@ -250,12 +250,20 @@ func arch() string {
 	return goarch
 }
 
+// assetArch is arch as a release file names it: amd64 is x64 there.
+func assetArch() string {
+	if a := arch(); a != "amd64" {
+		return a
+	}
+	return "x64"
+}
+
 // AppAsset and BinaryAsset name the files this machine would install.
-func AppAsset() string { return "jianmu-darwin-" + arch() + ".zip" }
+func AppAsset() string { return "jianmu-darwin-" + assetArch() + ".zip" }
 func BinaryAsset() string {
-	name := "jianmu-cli-" + goos + "-" + arch()
+	name := "jianmu-cli-" + goos + "-" + assetArch()
 	if GUI && goos != "darwin" {
-		name = "jianmu-" + goos + "-" + arch()
+		name = "jianmu-" + goos + "-" + assetArch()
 	}
 	if goos == "windows" {
 		name += ".exe"
