@@ -9,20 +9,19 @@ package gui
 #import <objc/runtime.h>
 #include <stdlib.h>
 
-// The Dock tile flaps as the header logo does: the icon the system draws
-// for jianmu (its glass tile and glossy bird, light) is cut into body, tail
-// and wing by the logo's clip paths, and each frame turns the pieces over
-// the tile with the bird taken out. Drawn at mpDockPx; the tile's view
-// scales it to the Dock's size.
+// The Dock tile pulses as the header logo does: the icon the system draws
+// for jianmu (its glass tile and glossy mark, light) has the mark cut out
+// of it, and each frame draws that mark over the tile swelled or settled
+// about its middle. Drawn at mpDockPx; the tile's view scales it to the
+// Dock's size.
 static const int mpDockPx = 512;
-// where the system puts the bird on the canvas: centred, 0.64 of it across
+// where the system puts the mark on the canvas: centred, 0.64 of it across
 // (a 0.8 tile, the glyph 0.8 of that), as build/icon/gen.go's app() and
 // AppIcon.icon lay it
 static const CGFloat mpDockBird = 0.64;
 
-static CGImageRef mpDockClean;   // the tile, the bird taken out
-static CGImageRef mpDockPiece[3]; // body, tail, wing, each with alpha
-static CGPathRef mpDockBirdPath;
+static CGImageRef mpDockClean; // the tile, the mark taken out
+static CGImageRef mpDockMark;  // the mark, with alpha
 static NSImageView *mpDockView;
 
 static CGPathRef mpDockPath(const char *ops, int nops, const double *pts) {
@@ -46,31 +45,26 @@ static CGContextRef mpDockContext(void) {
 }
 
 // mpDockUnits puts the viewBox's 44 units, y down, where the system draws
-// the bird.
+// the mark.
 static void mpDockUnits(CGContextRef c) {
 	CGFloat k = mpDockPx * mpDockBird / 44, o = mpDockPx / 2.0 - 22 * k;
 	CGContextTranslateCTM(c, o, mpDockPx - o);
 	CGContextScaleCTM(c, k, -k);
 }
 
-// The bird's ink reaches a little past its path: its antialiased and glossy
-// edge. Each cut takes this much more, in pixels, so no edge is left on the
-// tile.
+// The mark's ink reaches a little past its path: its antialiased and glossy
+// edge. Each cut takes this much more, in pixels, so no edge is left on
+// the tile.
 static const CGFloat mpDockEdge = 4;
 
-// Next pieces overlap by this much, in pixels, so no seam shows where
-// their cuts' antialiased edges meet.
-static const CGFloat mpDockSeam = 1;
-
 // mpDockFill is a grey mask, in the canvas's pixels, of path filled
-// even-odd and stroked out by edge pixels, within the mask within if any.
-static CGImageRef mpDockFill(CGPathRef path, CGFloat edge, CGImageRef within) {
+// even-odd and stroked out by edge pixels.
+static CGImageRef mpDockFill(CGPathRef path, CGFloat edge) {
 	CGColorSpaceRef g = CGColorSpaceCreateDeviceGray();
 	CGContextRef c = CGBitmapContextCreate(NULL, mpDockPx, mpDockPx, 8, 0, g, (CGBitmapInfo)kCGImageAlphaNone);
 	CGColorSpaceRelease(g);
 	CGContextSetGrayFillColor(c, 0, 1);
 	CGContextFillRect(c, CGRectMake(0, 0, mpDockPx, mpDockPx));
-	if (within) CGContextClipToMask(c, CGRectMake(0, 0, mpDockPx, mpDockPx), within);
 	mpDockUnits(c);
 	CGContextSetGrayFillColor(c, 1, 1);
 	CGContextSetGrayStrokeColor(c, 1, 1);
@@ -85,19 +79,10 @@ static CGImageRef mpDockFill(CGPathRef path, CGFloat edge, CGImageRef within) {
 	return m;
 }
 
-// mpDockMask is the bird and its edge, within clip (none: the whole bird)
-// grown by mpDockSeam.
-static CGImageRef mpDockMask(CGPathRef clip, CGFloat edge) {
-	CGImageRef within = clip ? mpDockFill(clip, mpDockSeam, NULL) : NULL;
-	CGImageRef m = mpDockFill(mpDockBirdPath, edge, within);
-	if (within) CGImageRelease(within);
-	return m;
-}
-
-// mpDockReady cuts the icon up once: the pieces, and the tile with the
-// bird filled with the tile's own colour, read either side of it on each
-// row and blended across. 0 when the icon can't be had.
-static int mpDockReady(const char *app, const char *bops, int nb, const double *bpts, const char **cops, const int *nc, const double **cpts) {
+// mpDockReady cuts the icon up once: the mark, and the tile with the mark
+// filled with the tile's own colour, read either side of it on each row and
+// blended across. 0 when the icon can't be had.
+static int mpDockReady(const char *app, const char *ops, int nops, const double *pts) {
 	if (mpDockClean) return 1;
 	@autoreleasepool {
 	NSString *path = app ? [NSString stringWithUTF8String:app] : [[NSBundle mainBundle] bundlePath];
@@ -113,30 +98,26 @@ static int mpDockReady(const char *app, const char *bops, int nb, const double *
 	}];
 	[NSGraphicsContext restoreGraphicsState];
 	CGImageRef full = CGBitmapContextCreateImage(c);
-	mpDockBirdPath = mpDockPath(bops, nb, bpts);
+	mpDockMarkPath = mpDockPath(ops, nops, pts);
 
-	for (int i = 0; i < 3; i++) {
-		CGPathRef clip = mpDockPath(cops[i], nc[i], cpts[i]);
-		CGImageRef m = mpDockMask(clip, mpDockEdge);
-		CGContextRef p = mpDockContext();
-		CGContextClipToMask(p, CGRectMake(0, 0, mpDockPx, mpDockPx), m);
-		CGContextDrawImage(p, CGRectMake(0, 0, mpDockPx, mpDockPx), full);
-		mpDockPiece[i] = CGBitmapContextCreateImage(p);
-		CGContextRelease(p);
-		CGImageRelease(m);
-		CGPathRelease(clip);
-	}
+	CGImageRef m = mpDockFill(mpDockMarkPath, mpDockEdge);
+	CGContextRef p = mpDockContext();
+	CGContextClipToMask(p, CGRectMake(0, 0, mpDockPx, mpDockPx), m);
+	CGContextDrawImage(p, CGRectMake(0, 0, mpDockPx, mpDockPx), full);
+	mpDockMark = CGBitmapContextCreateImage(p);
+	CGContextRelease(p);
+	CGImageRelease(m);
 
-	// the bird out: a wider cut than the pieces take, so a piece turned
-	// away leaves the tile's colour, not its old edge
-	CGImageRef m = mpDockMask(NULL, mpDockEdge + 1);
+	// the mark out: a wider cut than the mark takes, so its swelled edges
+	// leave the tile's colour, not its old edge
+	m = mpDockFill(mpDockMarkPath, mpDockEdge + 1);
 	CFDataRef md = CGDataProviderCopyData(CGImageGetDataProvider(m));
 	size_t mrow = CGImageGetBytesPerRow(m);
 	CGImageRelease(m);
 	const uint8_t *mask = CFDataGetBytePtr(md);
 	uint8_t *px = CGBitmapContextGetData(c);
 	size_t row = CGBitmapContextGetBytesPerRow(c);
-	// either side of the bird, inside the tile and its rim: the bird spans
+	// either side of the mark, inside the tile and its rim: the mark spans
 	// 0.18 to 0.82 of the canvas, the tile 0.1 to 0.9
 	int l0 = mpDockPx * 0.12, l1 = mpDockPx * 0.16, r0 = mpDockPx * 0.84, r1 = mpDockPx * 0.87;
 	CGFloat lx = (l0 + l1) / 2.0, rx = (r0 + r1) / 2.0;
@@ -165,44 +146,28 @@ static int mpDockReady(const char *app, const char *bops, int nb, const double *
 	}
 }
 
-// mpDockTurn turns the context deg degrees about (x, y) in the viewBox,
-// clockwise on screen as CSS's rotate() is (the units run y down).
-static void mpDockTurn(CGContextRef c, double x, double y, double deg) {
-	CGContextTranslateCTM(c, x, y);
-	CGContextRotateCTM(c, deg * M_PI / 180);
-	CGContextTranslateCTM(c, -x, -y);
-}
-
-// mpDockFrameImage draws a frame: the bob outside, each piece's own turn
-// inside, as the logo's groups nest.
-static CGImageRef mpDockFrameImage(double bob, double tail, double wing, const double *at) {
+// mpDockFrameImage draws a frame: the tile, and the mark over it scaled
+// about the canvas's middle, as CSS's scale() about the viewBox's (22, 22)
+// does.
+static CGImageRef mpDockFrameImage(double size) {
 	CGContextRef c = mpDockContext();
 	if (!c) return NULL;
 	CGContextSetInterpolationQuality(c, kCGInterpolationHigh);
 	CGRect all = CGRectMake(0, 0, mpDockPx, mpDockPx);
 	CGContextDrawImage(c, all, mpDockClean);
-	double deg[3] = {0, tail, wing};
-	for (int i = 0; i < 3; i++) {
-		CGContextSaveGState(c);
-		mpDockUnits(c);
-		mpDockTurn(c, at[4], at[5], bob);
-		// its own turn: the body none, the tail about at[0..1], the wing at[2..3]
-		if (i) mpDockTurn(c, at[2*i-2], at[2*i-1], deg[i]);
-		// back to pixels, y up, to draw the image upright
-		CGFloat k = mpDockPx * mpDockBird / 44, o = mpDockPx / 2.0 - 22 * k;
-		CGContextScaleCTM(c, 1 / k, -1 / k);
-		CGContextTranslateCTM(c, -o, -(mpDockPx - o));
-		CGContextDrawImage(c, all, mpDockPiece[i]);
-		CGContextRestoreGState(c);
-	}
+	CGFloat mid = mpDockPx / 2.0;
+	CGContextTranslateCTM(c, mid, mid);
+	CGContextScaleCTM(c, size, size);
+	CGContextTranslateCTM(c, -mid, -mid);
+	CGContextDrawImage(c, all, mpDockMark);
 	CGImageRef im = CGBitmapContextCreateImage(c);
 	CGContextRelease(c);
 	return im;
 }
 
 // mpDockPNG writes a frame to a file, to look at.
-static int mpDockPNG(const char *file, double bob, double tail, double wing, const double *at) {
-	CGImageRef im = mpDockFrameImage(bob, tail, wing, at);
+static int mpDockPNG(const char *file, double size) {
+	CGImageRef im = mpDockFrameImage(size);
 	if (!im) return 0;
 	@autoreleasepool {
 		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithCGImage:im] autorelease];
@@ -215,7 +180,7 @@ static int mpDockPNG(const char *file, double bob, double tail, double wing, con
 // mpDockFrameNS is a frame as an NSImage, retained. It is made on a Go
 // thread, which has no autorelease pool: without one of its own, what
 // AppKit autoreleases in making it (its NSCGImageSnapshotRep, holding the
-// frame's 1 MB of pixels) was never let go, 29 frames a flap, for as long
+// frame's 1 MB of pixels) was never let go, 29 frames a pulse, for as long
 // as jianmu ran (#4162).
 static NSImage *mpDockFrameNS(CGImageRef im) {
 	@autoreleasepool {
@@ -251,8 +216,8 @@ static int mpDockFrameFreed(void) {
 	return freed;
 }
 
-static void mpDockShow(double bob, double tail, double wing, const double *at) {
-	CGImageRef im = mpDockFrameImage(bob, tail, wing, at);
+static void mpDockShow(double size) {
+	CGImageRef im = mpDockFrameImage(size);
 	if (!im) return;
 	NSImage *ns = mpDockFrameNS(im);
 	CGImageRelease(im);
@@ -274,7 +239,7 @@ static void mpDockStill(void) {
 	dispatch_async(dispatch_get_main_queue(), ^{
 		NSDockTile *tile = NSApp.dockTile;
 		tile.contentView = nil;
-		mpDockView.image = nil; // the last frame's pixels, until the next flap
+		mpDockView.image = nil; // the last frame's pixels, until the next pulse
 		[tile display];
 	});
 }
@@ -307,13 +272,13 @@ import (
 )
 
 var (
-	dockOnce     sync.Once
-	dockGood     bool
-	dockFlapping atomic.Bool
+	dockOnce    sync.Once
+	dockGood    bool
+	dockPulsing atomic.Bool
 )
 
 // dockReady cuts the icon of app (jianmu's own bundle when "") up the first
-// time the tile flaps, by the header logo's paths; false when it can't, or
+// time the tile pulses, by the header logo's paths; false when it can't, or
 // the Dock shows icons another way.
 func dockReady(app string) bool {
 	if C.mpDockPlain() == 0 {
@@ -324,33 +289,26 @@ func dockReady(app string) bool {
 		if err != nil {
 			return
 		}
-		bird, clips, ok := logoPaths(string(page))
+		rings, ok := logoPaths(string(page))
 		if !ok {
 			return
+		}
+		mark := rings[0]
+		// The rings are separate subpaths, and C fills the whole path
+		// even-odd, so the bands come out as they do in the page.
+		for _, r := range rings[1:] {
+			mark.ops = append(mark.ops, r.ops...)
+			mark.pts = append(mark.pts, r.pts...)
 		}
 		var capp *C.char
 		if app != "" {
 			capp = C.CString(app)
 			defer C.free(unsafe.Pointer(capp))
 		}
-		// C copies of each path, the bird first
-		var ops, pts [4]unsafe.Pointer
-		for i, p := range append([]flapPath{bird}, clips[:]...) {
-			ops[i], pts[i] = C.CBytes(p.ops), C.CBytes(floats(p.pts))
-			defer C.free(ops[i])
-			defer C.free(pts[i])
-		}
-		cops := (*[3]*C.char)(C.malloc(C.size_t(3 * unsafe.Sizeof(uintptr(0)))))
-		cpts := (*[3]*C.double)(C.malloc(C.size_t(3 * unsafe.Sizeof(uintptr(0)))))
-		nc := (*[3]C.int)(C.malloc(C.size_t(3 * unsafe.Sizeof(C.int(0)))))
-		defer C.free(unsafe.Pointer(cops))
-		defer C.free(unsafe.Pointer(cpts))
-		defer C.free(unsafe.Pointer(nc))
-		for i := range 3 {
-			cops[i], cpts[i], nc[i] = (*C.char)(ops[i+1]), (*C.double)(pts[i+1]), C.int(len(clips[i].ops))
-		}
-		dockGood = C.mpDockReady(capp, (*C.char)(ops[0]), C.int(len(bird.ops)), (*C.double)(pts[0]),
-			(**C.char)(unsafe.Pointer(cops)), (*C.int)(unsafe.Pointer(nc)), (**C.double)(unsafe.Pointer(cpts))) != 0
+		ops, pts := C.CBytes(mark.ops), C.CBytes(floats(mark.pts))
+		defer C.free(ops)
+		defer C.free(pts)
+		dockGood = C.mpDockReady(capp, (*C.char)(ops), C.int(len(mark.ops)), (*C.double)(pts)) != 0
 	})
 	return dockGood
 }
@@ -363,51 +321,35 @@ func floats(f []float64) []byte {
 	return unsafe.Slice((*byte)(unsafe.Pointer(&f[0])), len(f)*8)
 }
 
-// dockAt is the turn points, tail, wing and bob, as the C side reads them.
-func dockAt() *C.double {
-	at := (*[6]C.double)(C.malloc(C.size_t(6 * unsafe.Sizeof(C.double(0)))))
-	for i, v := range [6]float64{tailAt[0], tailAt[1], wingAt[0], wingAt[1], bobAt[0], bobAt[1]} {
-		at[i] = C.double(v)
-	}
-	return &at[0]
-}
-
-// dockFlap plays the logo's flap on the Dock tile, a frame every
+// dockFlap plays the logo's pulse on the Dock tile, a frame every
 // flapEvery, and gives the tile back to the system's icon after. A click
 // while it plays doesn't start another.
 func dockFlap() {
-	if !dockFlapping.CompareAndSwap(false, true) {
+	if !dockPulsing.CompareAndSwap(false, true) {
 		return
 	}
-	defer dockFlapping.Store(false)
+	defer dockPulsing.Store(false)
 	if !dockReady("") {
 		return
 	}
-	at := dockAt()
-	defer C.free(unsafe.Pointer(at))
-	secs := flapSecs
-	n := int(secs/flapEvery + 0.5)
+	n := int(flapSecs/flapEvery + 0.5)
 	start := time.Now()
 	for f := 1; f < n; f++ {
-		bob, tail, wing := flapAt(float64(f) / float64(n))
-		C.mpDockShow(C.double(bob), C.double(tail), C.double(wing), at)
-		// on the flap's clock, not the frames': a slow frame is skipped past
+		C.mpDockShow(C.double(markAt(float64(f) / float64(n))))
+		// on the pulse's clock, not the frames': a slow frame is skipped past
 		time.Sleep(time.Until(start.Add(time.Duration(float64(f+1) * flapEvery * float64(time.Second)))))
 	}
 	C.mpDockStill()
 }
 
-// dockFramePNG writes the tile at t, 0..1 of the flap, cut from app's icon.
+// dockFramePNG writes the tile at t, 0..1 of the pulse, cut from app's icon.
 func dockFramePNG(app, file string, t float64) bool {
 	if !dockReady(app) {
 		return false
 	}
-	at := dockAt()
-	defer C.free(unsafe.Pointer(at))
 	cf := C.CString(file)
 	defer C.free(unsafe.Pointer(cf))
-	bob, tail, wing := flapAt(t)
-	return C.mpDockPNG(cf, C.double(bob), C.double(tail), C.double(wing), at) != 0
+	return C.mpDockPNG(cf, C.double(markAt(t))) != 0
 }
 
 // dockFrameFreed makes a Dock frame's image on this goroutine's thread, as

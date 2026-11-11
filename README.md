@@ -2,7 +2,7 @@
 
 一个本地网关，把每个 Agent 的模型、供应商、额度和路由收在一个地方管。
 
-Jianmu 基于 [magpie](https://github.com/yetone/magpie) 的源码改造而来，界面、网关、插件运行时、Library、共享记忆与同步备份都继承自它，品牌与发行方式独立。它兼容 magpie 社区的插件（`@magpie-community/*`），但不再跟随上游同步。
+Jianmu 是一个本地网关，把每个 Agent 的模型、供应商、额度和路由收在一个地方管。兼容 `@magpie-community/*` 社区插件。
 
 ## 它能做什么
 
@@ -84,4 +84,4 @@ macOS 桌面版（`jianmu-darwin-<arch>.zip`，已签名并公证）不在 CI �
 
 ## 许可
 
-第三方组件的许可见 `THIRD_PARTY_NOTICES`，构建产物在「设置 › 关于 › 开源许可」中显示同一份内容。
+MIT。见 [LICENSE](LICENSE)。第三方组件的许可见 `THIRD_PARTY_NOTICES`，构建产物在「设置 › 关于 › 开源许可」中显示同一份内容。

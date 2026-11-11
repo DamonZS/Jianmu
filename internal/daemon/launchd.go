@@ -12,8 +12,8 @@ import (
 // login, and again when it stops with a failure.
 type launchd struct{}
 
-// Label is the launch agent's; the tray's at login is com.yetone.jianmu.
-const Label = "com.yetone.jianmu.serve"
+// Label is the launch agent's; the tray's at login is com.jianmu.
+const Label = "com.jianmu.serve"
 
 func home() string {
 	h, _ := os.UserHomeDir()

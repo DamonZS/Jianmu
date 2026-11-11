@@ -48,7 +48,7 @@ func TestProjectOfIsTheRepository(t *testing.T) {
 	}
 	for _, dir := range []string{main, deep} {
 		p := ProjectOf(dir)
-		if p == nil || p.Key != "github.com/DamonZS/Jianmu" || p.Name != "jianmu" {
+		if p == nil || p.Key != "github.com/DamonZS/Jianmu" || p.Name != "Jianmu" {
 			t.Fatalf("ProjectOf(%s) = %+v", dir, p)
 		}
 	}

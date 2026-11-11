@@ -1,48 +1,59 @@
 package gui
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 )
 
-// TestDockFlapIsTheLogos holds the Dock tile's flap to the header logo's:
-// the same keyframes, turn points, length and easing as app.css plays,
-// and the bird and clip paths read from index.html.
+// TestDockFlapIsTheLogos holds the Dock tile's pulse to the header logo's:
+// the same keyframes, length and easing as app.css plays, and the mark
+// read from index.html.
 func TestDockFlapIsTheLogos(t *testing.T) {
 	css, err := assets.ReadFile("assets/app.css")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, c := range []struct {
-		name, part string
-		keys       []flapKey
-		at         [2]float64
-	}{{"wing-flap", "wing", wingKeys, wingAt}, {"tail-flick", "tail", tailKeys, tailAt}, {"bird-bob", "bird", bobKeys, bobAt}} {
-		body := regexp.MustCompile(`@keyframes ` + c.name + ` \{\n((?:  .*\n)+)\}`).FindSubmatch(css)
-		if body == nil {
-			t.Fatalf("no @keyframes %s in app.css", c.name)
+	body := regexp.MustCompile(`@keyframes mark-pulse \{\n((?:  .*\n)+\})`).FindSubmatch(css)
+	if body == nil {
+		t.Fatal("no @keyframes mark-pulse in app.css")
+	}
+	// a keyframe line names one or two fractions: "0%, 100% { … }", so the
+	// page's keys are read as a set and the Dock's order checked on its own
+	got := map[flapKey]bool{}
+	n := 0
+	for _, m := range regexp.MustCompile(`(?m)^  ([\d%, ]+) \{ transform: scale\((-?[\d.]+)\); \}$`).FindAllSubmatch(body[1], -1) {
+		size, _ := strconv.ParseFloat(string(m[2]), 64)
+		for _, f := range strings.Split(string(m[1]), ",") {
+			at, _ := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSpace(f), "%"), 64)
+			got[flapKey{at / 100, size}] = true
+			n++
 		}
-		got := []flapKey{{0, 0}}
-		for _, m := range regexp.MustCompile(`(?m)^  (\d+)% \{ transform: rotate\((-?\d+)deg\); \}$`).FindAllSubmatch(body[1], -1) {
-			at, _ := strconv.ParseFloat(string(m[1]), 64)
-			deg, _ := strconv.ParseFloat(string(m[2]), 64)
-			got = append(got, flapKey{at / 100, deg})
+	}
+	if n != len(markKeys) {
+		t.Errorf("app.css has %d keys, the Dock plays %d", n, len(markKeys))
+	}
+	for _, k := range markKeys {
+		if !got[k] {
+			t.Errorf("app.css has no key %v", k)
 		}
-		got = append(got, flapKey{1, 0})
-		if fmt.Sprint(got) != fmt.Sprint(c.keys) {
-			t.Errorf("%s: app.css has %v, the Dock plays %v", c.name, got, c.keys)
+	}
+	for i := 1; i < len(markKeys); i++ {
+		if markKeys[i].at < markKeys[i-1].at {
+			t.Errorf("the Dock's keys are out of order at %d", i)
 		}
-		origin := fmt.Sprintf(`.logo .%s { transform-box: view-box; transform-origin: %vpx %vpx; }`, c.part, c.at[0], c.at[1])
-		if !regexp.MustCompile(regexp.QuoteMeta(origin)).Match(css) {
-			t.Errorf("app.css has no %q", origin)
-		}
-		anim := fmt.Sprintf(`.logo.wag .%s { animation: %s %ss cubic-bezier(.3, 0, .3, 1); }`, c.part, c.name, strings.TrimPrefix(fmt.Sprint(flapSecs), "0"))
-		if !regexp.MustCompile(regexp.QuoteMeta(anim)).Match(css) {
-			t.Errorf("app.css has no %q", anim)
-		}
+	}
+	origin := `.logo svg { display: block; overflow: visible; transform-box: view-box; transform-origin: 22px 22px; }`
+	if !regexp.MustCompile(regexp.QuoteMeta(origin)).Match(css) {
+		t.Errorf("app.css has no %q", origin)
+	}
+	anim := `.logo.wag svg { animation: mark-pulse .9s cubic-bezier(.3, 0, .3, 1); }`
+	if !regexp.MustCompile(regexp.QuoteMeta(anim)).Match(css) {
+		t.Errorf("app.css has no %q", anim)
+	}
+	if flapSecs != 0.9 {
+		t.Errorf("the Dock plays %v s, app.css .9s", flapSecs)
 	}
 	for x, prev := 0.0, -1.0; x <= 1; x += .01 {
 		if e := flapEase(x); e < prev || e < -1e-9 || e > 1+1e-9 {
@@ -55,16 +66,16 @@ func TestDockFlapIsTheLogos(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bird, clips, ok := logoPaths(string(page))
+	rings, ok := logoPaths(string(page))
 	if !ok {
-		t.Fatal("index.html's bird or a clip path didn't parse")
+		t.Fatal("index.html's mark didn't parse")
 	}
-	if len(bird.ops) < 100 || bird.ops[0] != 'M' {
-		t.Errorf("the bird read as %d ops", len(bird.ops))
+	if len(rings) != 2 {
+		t.Fatalf("the mark read as %d paths, want the two rings", len(rings))
 	}
-	for i, c := range clips {
-		if len(c.ops) < 4 {
-			t.Errorf("clip %d read as %v", i, c.ops)
+	for i, r := range rings {
+		if len(r.ops) < 4 || r.ops[0] != 'M' {
+			t.Errorf("ring %d read as %d ops", i, len(r.ops))
 		}
 	}
 	if _, ok := parseFlapPath("M1 2Q3 4 5 6"); ok {

@@ -27,7 +27,7 @@ func fakeBundle(t *testing.T, exe string) (bundle, started string) {
 <plist version="1.0"><dict>
 	<key>CFBundleExecutable</key>
 	<string>` + exe + `</string>
-	<key>CFBundleIdentifier</key><string>com.yetone.jianmu</string>
+	<key>CFBundleIdentifier</key><string>com.jianmu</string>
 </dict></plist>
 `
 	if err := os.WriteFile(filepath.Join(bundle, "Contents", "Info.plist"), []byte(plist), 0o644); err != nil {

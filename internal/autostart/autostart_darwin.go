@@ -12,11 +12,41 @@ import (
 	"github.com/DamonZS/Jianmu/internal/lazyre"
 )
 
-const label = "com.yetone.jianmu"
+const label = "com.jianmu"
+
+// before is the launch agent's label in builds published under another
+// bundle id (com.yetone.jianmu). The app reads it so an upgrade keeps the
+// login item the user turned on instead of silently losing it: the old
+// record is moved to label's.
+const before = "com.yetone.jianmu"
 
 func record() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, "Library", "LaunchAgents", label+".plist")
+}
+
+func earlier() string {
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, "Library", "LaunchAgents", before+".plist")
+}
+
+// adopt moves a record written under the earlier label to this one, the
+// first time this version runs with the login item on. A record this
+// version already wrote is left alone, and the earlier one removed: two
+// jobs running the same program at login would open it twice. A record
+// with no program in it names nothing to run, so nothing is carried.
+func adopt() error {
+	old := earlier()
+	b, err := os.ReadFile(old)
+	if err != nil {
+		return nil // never had it: nothing to carry over
+	}
+	if m := program.FindSubmatch(b); m != nil {
+		if err := enable(html.UnescapeString(string(m[1]))); err != nil {
+			return err
+		}
+	}
+	return os.Remove(old)
 }
 
 // launchd loads no job that names neither its own label nor a program to
@@ -119,6 +149,9 @@ var program = lazyre.New(`<key>ProgramArguments</key>\s*<array><string>([^<]+)</
 // would, for the program it names: the path stays the one the user turned
 // it on for, whichever copy of jianmu is running now.
 func refresh() error {
+	if err := adopt(); err != nil {
+		return err
+	}
 	p := record()
 	b, err := os.ReadFile(p)
 	if err != nil {

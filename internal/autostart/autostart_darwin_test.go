@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -13,7 +14,7 @@ const olderPlist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Label</key><string>com.yetone.jianmu</string>
+	<key>Label</key><string>com.jianmu</string>
 	<key>ProgramArguments</key>
 	<array><string>/Applications/Tom &amp; Jerry/jianmu.app/Contents/MacOS/jianmu</string><string>tray</string></array>
 	<key>RunAtLoad</key><true/>
@@ -85,6 +86,55 @@ func TestRefreshOlderLaunchAgent(t *testing.T) {
 	}
 }
 
+// A login item turned on in a build published under another bundle id
+// (com.yetone.jianmu) is carried to this one's label rather than lost: the
+// program stays the one the user turned it on for, and the old record goes,
+// so login doesn't open jianmu twice.
+func TestAdoptsTheEarlierLabel(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	old := earlier()
+	if err := os.MkdirAll(filepath.Dir(old), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	exe := "/Applications/Tom & Jerry/jianmu.app/Contents/MacOS/jianmu"
+	was := strings.Replace(olderPlist, "<string>"+label+"</string>", "<string>"+before+"</string>", 1)
+	if err := os.WriteFile(old, []byte(was), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Refresh(); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(record())
+	if err != nil {
+		t.Fatalf("no launch agent under this label: %v", err)
+	}
+	if want := plist(exe); string(b) != string(want) {
+		t.Fatalf("the carried record isn't this version's:\n%s\nwant:\n%s", b, want)
+	}
+	if _, err := os.Stat(old); !os.IsNotExist(err) {
+		t.Fatalf("the earlier label's record is still there: %v", err)
+	}
+
+	// a record with no program names nothing to run: nothing is carried,
+	// and nothing loops on the rewrite
+	bare := regexp.MustCompile(`(?s)\t<key>ProgramArguments</key>.*?</array>\n`).ReplaceAllString(was, "")
+	if strings.Contains(bare, "ProgramArguments") {
+		t.Fatalf("the test's record still names a program:\n%s", bare)
+	}
+	if err := os.WriteFile(old, []byte(bare), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	os.Remove(record())
+	if err := Refresh(); err != nil {
+		t.Fatalf("a record with no program: %v", err)
+	}
+	if _, err := os.Stat(record()); !os.IsNotExist(err) {
+		t.Fatalf("a record with no program was carried over: %v", err)
+	}
+}
+
 // fakeApp lays out an app bundle as a release's: Contents/MacOS/jianmu
 // beside Contents/Info.plist carrying the bundle id.
 func fakeApp(t *testing.T, dir, id string) string {
@@ -122,9 +172,9 @@ func TestLaunchAgentNamesItsApp(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
-	exe := fakeApp(t, home, "com.yetone.jianmu")
+	exe := fakeApp(t, home, "com.jianmu")
 
-	key := "<key>AssociatedBundleIdentifiers</key>\n\t<array><string>com.yetone.jianmu</string></array>"
+	key := "<key>AssociatedBundleIdentifiers</key>\n\t<array><string>com.jianmu</string></array>"
 	if b := string(plist(exe)); !strings.Contains(b, key) {
 		t.Fatalf("the launch agent doesn't name jianmu's app:\n%s", b)
 	}
@@ -146,7 +196,7 @@ func TestLaunchAgentNamesItsApp(t *testing.T) {
 		t.Fatalf("not a valid plist: %s", out)
 	}
 	out, err := exec.Command("plutil", "-extract", "AssociatedBundleIdentifiers.0", "raw", p).CombinedOutput()
-	if err != nil || strings.TrimSpace(string(out)) != "com.yetone.jianmu" {
+	if err != nil || strings.TrimSpace(string(out)) != "com.jianmu" {
 		t.Fatalf("plutil reads AssociatedBundleIdentifiers as %q (%v)", out, err)
 	}
 
@@ -253,7 +303,7 @@ func TestEnabledFollowsTheSystemsSwitch(t *testing.T) {
 }
 
 // The system's switch is kept by the launch agent's label, wherever its
-// plist is: a test's record under a sandbox home is com.yetone.jianmu
+// plist is: a test's record under a sandbox home is com.jianmu
 // too, and the system would answer for the user's own. The tests ask a
 // stand-in that knows nothing; askSystem is the real question.
 var askSystem func(string) int
@@ -273,8 +323,8 @@ func TestLegacyStatusAsksTheSystem(t *testing.T) {
 		t.Skip("no sw_vers")
 	}
 	dir := t.TempDir()
-	p := filepath.Join(dir, "com.yetone.jianmu-test.plist")
-	b := strings.Replace(string(plist("/usr/bin/true")), "<string>"+label+"</string>", "<string>com.yetone.jianmu-test-"+filepath.Base(dir)+"</string>", 1)
+	p := filepath.Join(dir, "com.jianmu-test.plist")
+	b := strings.Replace(string(plist("/usr/bin/true")), "<string>"+label+"</string>", "<string>com.jianmu-test-"+filepath.Base(dir)+"</string>", 1)
 	if err := os.WriteFile(p, []byte(b), 0o644); err != nil {
 		t.Fatal(err)
 	}
