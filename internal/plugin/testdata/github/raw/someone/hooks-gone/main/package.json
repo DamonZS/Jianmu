@@ -1,0 +1,9 @@
+{
+  "name": "jianmu-recall-built",
+  "version": "0.1.0",
+  "type": "module",
+  "files": ["dist/"],
+  "jianmu": {
+    "hooks": "./dist/recall.hooks.mjs"
+  }
+}
