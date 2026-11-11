@@ -316,6 +316,30 @@ func TestLaunchdInstall(t *testing.T) {
 	}
 }
 
+// A service installed under the earlier label (com.yetone.jianmu.serve)
+// is not left running beside this one's: installing takes it out of
+// launchd and off disk, so login doesn't start two gateways on one port.
+func TestLaunchdHandsOverTheEarlierLabel(t *testing.T) {
+	log, _ := fakes(t, "darwin")
+	old := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.yetone.jianmu.serve.plist")
+	os.MkdirAll(filepath.Dir(old), 0o755)
+	write(t, old, plist("/Applications/jianmu.app/Contents/MacOS/jianmu", []string{"serve"}, nil))
+	if err := Install(Options{}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(old); !os.IsNotExist(err) {
+		t.Errorf("the earlier label's plist is still there: %v", err)
+	}
+	uid := strconv.Itoa(os.Getuid())
+	got := strings.Join(calls(t, log), "\n")
+	want := "launchctl bootout gui/" + uid + "/com.yetone.jianmu.serve\n" +
+		"launchctl print gui/" + uid + "/com.jianmu.serve\n" +
+		"launchctl bootstrap gui/" + uid + " " + filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.jianmu.serve.plist")
+	if got != want {
+		t.Errorf("install ran\n%s\nwant\n%s", got, want)
+	}
+}
+
 // Windows and Android have no service of this kind: the error points to
 // what they have.
 func TestUnsupported(t *testing.T) {
