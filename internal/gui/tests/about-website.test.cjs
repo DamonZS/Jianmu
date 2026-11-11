@@ -28,10 +28,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await openPart(page, "about");
         const row = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang] }) });
         await row.waitFor();
-        assert.equal(await row.locator("code").textContent(), "usejianmu.ai");
+        assert.equal(await row.locator("code").textContent(), "toporeduce.cn");
         const opened = page.waitForRequest((r) => r.url().includes("/api/open"));
         await row.locator("button.text").click();
-        assert.equal(JSON.parse((await opened).postData()).url, "https://usejianmu.ai");
+        assert.equal(JSON.parse((await opened).postData()).url, "https://toporeduce.cn");
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "About wider than the window");
         assert.deepEqual(errors, []);
       });

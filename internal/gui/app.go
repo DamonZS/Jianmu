@@ -489,7 +489,7 @@ func Run(version string, showMain bool, link string) error {
 		appMenu := application.DefaultApplicationMenu()
 		help := appMenu.FindByRole(application.HelpMenu).GetSubmenu()
 		help.Clear()
-		help.Add("Learn More").OnClick(func(*application.Context) { _ = h.OpenURL("https://usejianmu.ai") })
+		help.Add("Learn More").OnClick(func(*application.Context) { _ = h.OpenURL("https://toporeduce.cn") })
 		// Command-Q asks first while agents are connected (quitask.go). The
 		// role's item sends terminate:, which logging out and shutting down
 		// send too, so it is replaced rather than the app's ShouldQuit set

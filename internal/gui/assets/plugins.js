@@ -1081,7 +1081,7 @@
     // the docs in the reader's language: the site has en, zh and ja, and
     // Chinese is nearer a zh-TW reader than English is
     const how = el("a", "pm-link pm-write", "");
-    how.href = "https://usejianmu.ai/docs/" + ({ zh: "zh/", "zh-TW": "zh/", ja: "ja/" }[lang()] || "") + "plugins";
+    how.href = "https://toporeduce.cn/jianmu/";
     how.append(el("span", "", t("Write a plugin")), glyph(OUTL, 11, 1.5));
     how.onclick = (ev) => { ev.preventDefault(); api("open", { url: how.href }).catch(() => {}); };
     box.append(trust, how);

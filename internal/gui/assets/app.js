@@ -20184,8 +20184,9 @@ function renderSettings() {
     row(who, t("JIANMU_PUBLIC_URL: where other computers reach the gateway, with a gateway key"), s.publicURL, copyBtn(s.publicURL, who)).id = "publicURLRow";
   }
   const site = el("button", "text", t("Open"));
-  site.onclick = () => api("open", { url: "https://usejianmu.ai" }).catch(() => {});
-  row(t("Website"), t("downloads, docs and what's new"), "usejianmu.ai", site);
+  site.onclick = () => api("open", { url: "https://toporeduce.cn" }).catch(() => {});
+  row(t("Website"), t("downloads, docs and what's new"), "toporeduce.cn", site);
+  row(t("Author"), "", "Damon · 1032428220@qq.com");
   const lic = el("button", "text", t("View"));
   lic.onclick = showNotices;
   row(t("Open-source licenses"), t("the notices of the code and data jianmu is built with"), "", lic);
