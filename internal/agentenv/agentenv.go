@@ -54,6 +54,8 @@ var Vars = []string{
 	"STEP_CODING_AGENT_DIR", "STEPCODE_CONFIG_DIR",
 	// MothX's config folder ($MOTHX_DIR/settings.json)
 	"MOTHX_DIR",
+	// Kiro Crew's CLI search path adds $BUN_INSTALL/bin
+	"BUN_INSTALL",
 	// Shelley's socket ($SHELLEY_SOCKET), which jianmu tells it through
 	"SHELLEY_SOCKET",
 	// PenguinHarness's data root and the Project its CLI works in
@@ -67,8 +69,6 @@ var Vars = []string{
 	"GROK_HOME", "GROK_BIN_DIR",
 	// Grok App's data folder (its agent-home/config.toml), else the OS's app-data one
 	"GROK_APP_HOME",
-	// Bun's install folder, whose bin/ holds the agents installed with it
-	"BUN_INSTALL",
 	// Kimi Code and its shared folder
 	"KIMI_CODE_HOME", "KIMI_SHARE_DIR",
 	// Qwen Code's home, ~/.qwen without it
@@ -89,13 +89,15 @@ var Vars = []string{
 	"KUN_DATA_DIR",
 	// AstrBot's root, the folder holding its data/ (else ~/.astrbot, the desktop app's)
 	"ASTRBOT_ROOT",
+	// Mistral Vibe's folder (config.toml, skills, AGENTS.md), ~/.vibe without it
+	"VIBE_HOME",
 	// jcode's folder, ~/.jcode without it
 	"JCODE_HOME",
 	// OpenClaw: its config file, its state folder (openclaw.json in it), a
 	// named profile's folder (~/.openclaw-<profile>) and its own ~
 	"OPENCLAW_CONFIG_PATH", "OPENCLAW_STATE_DIR", "OPENCLAW_PROFILE", "OPENCLAW_HOME",
 	// MiMo Code, MiniMax Code, OpenHanako, Hermes, dsh, WorkBuddy, CodeBuddy Code
-	"MIMOCODE_HOME", "MINIMAX_DATA_DIR", "MAVIS_DATA_DIR", "HANA_HOME", "HERMES_HOME", "DSH_HOME",
+	"MIMOCODE_HOME", "MINIMAX_DATA_DIR", "MAVIS_DATA_DIR", "HANA_HOME", "PASEO_HOME", "HERMES_HOME", "DSH_HOME",
 	"WORKBUDDY_CONFIG_DIR", "CODEBUDDY_CONFIG_DIR",
 	// DS Bot's data folder, and its Electron userData holding locations.json
 	"DS_BOT_HOME", "DS_BOT_SHELL_DATA",

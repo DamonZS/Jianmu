@@ -140,8 +140,9 @@ func agentHelp(a *agent.Agent) string {
 	fmt.Fprintf(&b, "  jianmu %s <field> <value>  set another field\n", id)
 	fmt.Fprintf(&b, "  jianmu %s default          take jianmu out: back on what it had before\n", id)
 	fmt.Fprintf(&b, "  jianmu %s <field> default  that field back to its own default\n", id)
-	if a.ID == "agy" {
-		fmt.Fprintf(&b, "  jianmu %s run [args…]      start agy, on jianmu while its model is jianmu's (what your shell's agy runs)\n", id)
+	if a.Start != nil {
+		bin := a.Start().Bin
+		fmt.Fprintf(&b, "  jianmu %s run [args…]      start %s, on jianmu while its model is jianmu's (what your shell's %s runs)\n", id, bin, bin)
 		fmt.Fprintf(&b, "  jianmu %s env              the variables and model it is started with\n", id)
 	}
 	if a.ID == "claude" {

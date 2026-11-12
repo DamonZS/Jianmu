@@ -19,6 +19,8 @@ import (
 // in readOnlyRoutes fails TestReadOnlyKeyEveryRoute, so a new one is
 // classified before it ships: the guard refuses it until then.
 var readOnlyRefused = []string{
+	// the Library's skills and prompts: a held key is a display, not a client
+	"GET /v1/jianmu/library",
 	// model lists and their Ollama spellings: what the key could use
 	"GET /v1/models", "GET /models", "GET /v1/models/{id...}", "GET /muse-code/models",
 	"GET /api/hello", "GET /api/version", "GET /api/tags",
@@ -32,7 +34,7 @@ var readOnlyRefused = []string{
 	"GET /v1/jianmu/route", "GET /v1/jianmu/trace",
 	"GET " + ClaudeRunsPath, "GET " + HeapPath, "GET " + CPUPath, "GET " + GoroutinesPath,
 	"POST " + RestartPath,
-	"POST " + KeysPath, "GET " + KeysPath, "DELETE " + KeysPath + "/{id}", "POST " + OIDCKeysPath,
+	AdminPath, "POST " + KeysPath, "GET " + KeysPath, "DELETE " + KeysPath + "/{id}", "POST " + OIDCKeysPath,
 	"GET /v1/jianmu/omarchy", "OPTIONS /v1/jianmu/omarchy",
 	// models, a WebSocket's upgrade and count_tokens among them
 	"POST /v1/chat/completions", "POST /chat/completions",

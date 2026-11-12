@@ -146,6 +146,14 @@ func targetOf(a *agent.Agent) *Target {
 	}
 	h := home()
 	t := &Target{Agent: a}
+	if strings.HasPrefix(a.ID, "hermes#") {
+		// another Hermes profile (agent.hermesProfileAgents) is a Hermes
+		// home of its own: its config.yaml holds its mcp_servers, and its
+		// skills folder is beside it
+		t.MCP = &mcpFile{Path: a.Path, Format: fmtHermes}
+		t.Skills = filepath.Join(a.Dir, "skills")
+		return t
+	}
 	if n := a.SharedName(); n != a.Name {
 		// the files are another app's too (the Cursor editor's ~/.cursor):
 		// named for both, not for the CLI alone
@@ -515,6 +523,16 @@ func targetOf(a *agent.Agent) *Target {
 		// crates/jcode-base/src/prompt.rs, jcode_dir in crates/jcode-storage,
 		// 1jehuang/jcode 0d240f1d)
 		t.Instructions = filepath.Join(a.Dir, "prompt-overlay.md")
+	case "vibe":
+		// Mistral Vibe reads $VIBE_HOME/AGENTS.md (else ~/.vibe/AGENTS.md)
+		// into its system prompt as the user-level instructions, and loads
+		// a skill from $VIBE_HOME/skills/<name>/SKILL.md, beside the
+		// ~/.agents/skills it also reads (vibe/core/system_prompt.py,
+		// vibe/core/config/harness_files/_paths.py, mistralai/mistral-vibe
+		// 3.1.2). Its MCP servers are [[mcp_servers]] entries in
+		// config.toml, a shape the library doesn't write.
+		t.Instructions = filepath.Join(a.Dir, "AGENTS.md")
+		t.Skills = filepath.Join(a.Dir, "skills")
 	case "atomcode":
 		// AtomCode reads ~/.atomcode/ATOMCODE.md before every conversation
 		// (its ATOMCODE.md, beside AGENTS.md and CLAUDE.md), its MCP servers
@@ -990,12 +1008,13 @@ func (l *Library) held(have []*Target) []*Target {
 		in[t.Agent.ID] = true
 	}
 	has := func(id string) bool {
-		if a := l.Applied[id]; a != nil && (len(a.Skills) > 0 || len(a.MCP) > 0 || len(a.Hooks) > 0 || a.Router || len(a.RouterRules) > 0) {
+		if a := l.Applied[id]; a != nil && (len(a.Skills) > 0 || len(a.MCP) > 0 || len(a.Hooks) > 0 || len(a.Env) > 0 || a.Router || len(a.RouterRules) > 0) {
 			return true
 		}
 		return slices.ContainsFunc(l.Skills, func(s *Skill) bool { return s.gives(id) }) ||
 			slices.ContainsFunc(l.MCP, func(s *Server) bool { return slices.Contains(s.Agents, id) }) ||
-			slices.ContainsFunc(l.Hooks, func(h *Hook) bool { return slices.Contains(h.Agents, id) })
+			slices.ContainsFunc(l.Hooks, func(h *Hook) bool { return slices.Contains(h.Agents, id) }) ||
+			slices.ContainsFunc(l.Env, func(e *EnvVar) bool { return slices.Contains(e.Agents, id) })
 	}
 	var out []*Target
 	for _, a := range append(apps(), agent.All()...) {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/DamonZS/Jianmu/internal/agent"
 	"github.com/DamonZS/Jianmu/internal/gateway"
 	"github.com/DamonZS/Jianmu/internal/mtls"
 	"github.com/DamonZS/Jianmu/internal/settings"
@@ -74,6 +75,9 @@ func httpsRoutes(mux *http.ServeMux, w Windows) {
 			fail(rw, errFarPage)
 			return
 		}
+		// Claude Desktop pointed at this computer's https address follows
+		// the scheme (agent.Rekey)
+		on := agent.OnGateway()
 		if in.On {
 			if c, _ := gateway.ImportedFiles(); c == "" {
 				if _, _, err := gateway.CA(); err != nil {
@@ -86,6 +90,7 @@ func httpsRoutes(mux *http.ServeMux, w Windows) {
 			fail(rw, err)
 			return
 		}
+		_, _ = agent.Rekey(on)
 		writeJSON(rw, httpsNow())
 	})
 	// the user's own certificate and key: the PEM files' text, any split

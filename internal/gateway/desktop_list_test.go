@@ -9,6 +9,7 @@ import (
 
 	"github.com/DamonZS/Jianmu/internal/provider"
 	"github.com/DamonZS/Jianmu/internal/settings"
+	"github.com/DamonZS/Jianmu/internal/usage"
 )
 
 // moer2831 on Discord: a model picked for one of Claude Desktop's tiers ran
@@ -228,5 +229,23 @@ func TestDesktopInferenceModelsNamed(t *testing.T) {
 	}
 	if mythos < 2 {
 		t.Fatalf("the reporter's shape needs models listed as %s<n>: %v", desktopEffortAlias, list)
+	}
+}
+
+// usage.JianmuAlias reads the alias ids this package lists, so the
+// Usage page counts a call under one as the gateway's own: it must agree with
+// jianmuAliasAsked on every form claudeLooking makes.
+func TestUsageKnowsEveryAliasForm(t *testing.T) {
+	for _, id := range []string{
+		"anthropic/jianmu-" + aliasNumber("sub/m"),
+		"mythos-jianmu-" + aliasNumber("sub/m"),
+		"claude-jianmu-" + aliasNumber("sub/m"),
+		"jianmu-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
+		"jianmu-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
+		"claude-opus-5-5", "gpt-6", "jianmu",
+	} {
+		if got, want := usage.JianmuAlias(id), jianmuAliasAsked(id); got != want {
+			t.Errorf("usage.JianmuAlias(%q) = %v, gateway says %v", id, got, want)
+		}
 	}
 }

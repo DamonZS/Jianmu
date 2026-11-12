@@ -74,6 +74,9 @@ const modelUsage = `usage:
   jianmu model api <provider/model>... <api>     ask the model(s) on one API of the provider's: chat,
                                                  responses, anthropic, gemini, or auto (--reset) for the
                                                  vendor's list and every URL it has (jianmu model api --help)
+  jianmu model tier <provider/model> [fast|ultrafast|usual]
+                                                 the speed it is sent at: Codex's Fast or Ultrafast, for every
+                                                 agent with no fast pick of its own (jianmu model tier --help)
   jianmu model apis [<provider>]                 the models you set an API for, or each of a provider's
   jianmu model names                             the models you named or narrowed
   jianmu model alias <model> <name>              count the model's usage under another model id in Usage,
@@ -171,6 +174,8 @@ func modelCmd(args []string) error {
 		return modelID(args[1:])
 	case "api", "protocol":
 		return modelAPICmd(args[1:])
+	case "tier", "speed", "fast":
+		return modelTierCmd(args[1:])
 	case "apis", "protocols":
 		return modelAPIs(args[1:])
 	case "ids":

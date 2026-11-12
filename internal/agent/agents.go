@@ -44,8 +44,10 @@ func init() {
 	// an agy conversation started on jianmu's gateway is picked up again
 	// there, with the variables and --model it was started with
 	sessions.AgyStart = func() string {
-		home, _ := homes()
-		return agy(home).Launch()
+		if a, _ := FindIn(local(), "agy"); a != nil && a.Launch != nil {
+			return a.Launch()
+		}
+		return ""
 	}
 	// a Copilot CLI signed in inside a running distro (#723)
 	provider.CopilotWSLDirs = copilotWSLDirs
@@ -248,8 +250,27 @@ func local() []*Agent {
 	return append(own, pluggedAgents(home, own, nil)...)
 }
 
-// onMachine are builtins but those in WSL.
-func onMachine(home, cfg string) []*Agent {
+// Starter is the agent on this machine typed as q, by its id or an alias
+// (no prefix: every argument after it is the agent's), that jianmu starts
+// from the command line (Agent.Start); nil for none.
+func Starter(q string) *Agent {
+	for _, a := range local() {
+		if a.Start == nil {
+			continue
+		}
+		if strings.EqualFold(a.ID, q) || slices.Contains(a.Aliases, strings.ToLower(q)) {
+			return a
+		}
+	}
+	return nil
+}
+
+// onMachine are builtins but those in WSL, and but those a plugin serves
+// now (agentMovers).
+func onMachine(home, cfg string) []*Agent { return dropMoved(onMachineAll(home, cfg)) }
+
+// onMachineAll is onMachine with every built-in.
+func onMachineAll(home, cfg string) []*Agent {
 	return append([]*Agent{
 		claude(home),
 		claudeDesktop(home),
@@ -304,6 +325,7 @@ func onMachine(home, cfg string) []*Agent {
 		qwenpaw(home),
 		openClaw(home),
 		jcode(home),
+		vibe(home),
 		miniMax(home),
 		droid(home),
 		cline(home),
@@ -316,6 +338,7 @@ func onMachine(home, cfg string) []*Agent {
 		workbuddyAI(home),
 		codebuddy(home),
 		pencil(home),
+		paseo(home),
 		openPencil(home, cfg),
 		openBot(home, cfg),
 		craftAgents(home),
@@ -338,7 +361,7 @@ func onMachine(home, cfg string) []*Agent {
 		aionui(),
 		cherryStudio(home),
 		lody(home),
-	}, append(ompProfiles(home), qwenpawAgents(home)...)...)
+	}, append(append(append(ompProfiles(home), qwenpawAgents(home)...), hermesProfileAgents(home)...), claudeDirAgents(home)...)...)
 }
 
 // ---- accessors -------------------------------------------------------------
@@ -626,7 +649,7 @@ func jianmuProviderJSONAt(shape, catalog, gw string) any {
 		for _, m := range models {
 			window := m.Context
 			if window == 0 {
-				window = 200000
+				window = unknownWindow(200000)
 			}
 			// without it Crush caps every reply at 16384 tokens, a model
 			// that can write more of them never asked for it; an output
@@ -905,13 +928,8 @@ func piModelJSON(m catalog.Model, gw string, native bool) map[string]any {
 		// (addedMark). That short lifetime the group declares; long stays
 		// out, the gateway marks an hour only where a session's turns are
 		// often far apart, so it isn't always true.
-		if _, ms, ok := provider.GroupFinder()(m.ID); ok {
-			for _, g := range ms {
-				if g.Provider.Native(g.Model) == provider.Anthropic {
-					e["promptCache"] = map[string]any{"short": 300}
-					break
-				}
-			}
+		if provider.GroupHasNative(m.ID, provider.Anthropic) {
+			e["promptCache"] = map[string]any{"short": 300}
 		}
 	}
 	return e

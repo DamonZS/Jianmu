@@ -155,6 +155,7 @@ const usage = `jianmu — one place to pick every agent's model
   jianmu gateway-key concurrency <id> [<n>|off]   at most n of a key's requests at once; the rest wait their turn
   jianmu gateway-key mcp <id> [all|none|<server>|<server>/<tool> ...]   the MCP servers and tools a key may use
   jianmu gateway-key access <id> [read-only|full]   read-only: the key reads quotas and usage (GET /, /v1/jianmu/quotas, /v1/jianmu/usage) and uses no model, MCP server or write
+  jianmu gateway-key admin <id> [off|local|any]   let the key manage providers, accounts and gateway keys through /v1/jianmu/admin/ (local: from this computer only)
   jianmu gateway-key move <id> <place>   put a key at a place in the list (from 1), the order list and the app show them in
   jianmu gateway-key issue --ttl 1h [--name n] [--models a,b] [--accounts a,b] [--tokens N] [--cost USD] [--read-only] [--from <id>] [--json]
                                          a short-lived key (1m to 30 days) that stops working by itself; --from holds it to a key that issues keys; prints the key
@@ -336,14 +337,15 @@ func run(args []string) error {
 		agent.SyncCatalogSettled()
 		catalog.Changed = was
 	}()
-	// what a shell's agy runs (agy_cli.go): every argument after run is
-	// agy's, --help too, and nothing is moved or started first
-	if ok, err := agyCmd(args); ok {
-		return err
-	}
 	// claude-jianmu (claude_launch_cli.go): every argument after run is
 	// claude's, --help too
 	if ok, err := claudeLaunchCmd(args); ok {
+		return err
+	}
+	// what a shell's agy, or another agent's function, runs
+	// (start_cli.go): every argument after run is the agent's, --help
+	// too, and nothing is moved or started first
+	if ok, err := startCmd(args); ok {
 		return err
 	}
 	// Claude Jianmu.app (claude_desktop_launch_cli.go), --help too
