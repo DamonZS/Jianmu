@@ -34,6 +34,23 @@
 // only when nobody can still be using it.
 export const PARTNERS = [
   {
+    id: "toporeduce",
+    name: "拓扑API",
+    chat: "https://api.toporeduce.cn/v1",
+    responses: "https://api.toporeduce.cn/v1",
+    anthropic: "https://api.toporeduce.cn/anthropic",
+    keysUrl: "https://api.toporeduce.cn/",
+    website: "https://api.toporeduce.cn/",
+    notes: {
+      en: "OpenAI, Claude, and Gemini compatible APIs",
+      zh: "兼容 OpenAI、Claude、Gemini 接口",
+    },
+  },
+  // The six below ended when 拓扑API became the one listed. They stay, as the
+  // header says, because providers users added from them keep their
+  // usejianmu.ai/go/… key and site links: /api/partners leaves them out now,
+  // /go still sends those clicks on.
+  {
     id: "kimi",
     name: "Kimi Code",
     regionLabel: "Plan",
@@ -55,6 +72,7 @@ export const PARTNERS = [
       de: "Ein Abo, ein K3-Kontingent für alle Agents",
     },
     from: "2026-10-23T00:00:00+08:00",
+    until: "2026-11-15T00:00:00+08:00",
   },
   {
     id: "apikeyfan",
@@ -76,7 +94,7 @@ export const PARTNERS = [
     },
     langs: ["zh", "en"],
     from: "2026-10-24T00:00:00+08:00",
-    until: "2026-11-24T00:00:00+08:00",
+    until: "2026-11-15T00:00:00+08:00",
   },
   {
     id: "wandapi",
@@ -93,7 +111,7 @@ export const PARTNERS = [
       "zh-TW": "企業級 AI 閘道，暢連全球 AI 大模型",
     },
     from: "2026-10-25T00:00:00+08:00",
-    until: "2026-11-25T00:00:00+08:00",
+    until: "2026-11-15T00:00:00+08:00",
   },
   {
     id: "corecode",
@@ -110,7 +128,7 @@ export const PARTNERS = [
       "zh-TW": "滿血 Claude，超低折扣，企業級快取優化，可開票。jianmu 用戶註冊送 $3。",
     },
     from: "2026-10-26T00:00:00+08:00",
-    until: "2026-11-26T00:00:00+08:00",
+    until: "2026-11-15T00:00:00+08:00",
   },
   {
     id: "sidrune",
@@ -129,7 +147,7 @@ export const PARTNERS = [
     },
     langs: ["zh", "en"],
     from: "2026-10-26T00:00:00+08:00",
-    until: "2026-11-26T00:00:00+08:00",
+    until: "2026-11-15T00:00:00+08:00",
   },
   {
     id: "fastai",
@@ -146,6 +164,6 @@ export const PARTNERS = [
       "zh-TW": "Claude / GPT / Deepseek 一站式接入方案，最低0.6折，支援對公",
     },
     from: "2026-10-26T00:00:00+08:00",
-    until: "2026-11-26T00:00:00+08:00",
+    until: "2026-11-15T00:00:00+08:00",
   },
 ];

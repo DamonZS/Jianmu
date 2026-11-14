@@ -5464,7 +5464,7 @@ function routingPage(part) {
           if (go.length) sync(); // the stage once for them all (#308)
           for (const id of go) play(id, true);
           // back in sight, those still under way fly, not all that came
-          if (pBox) for (const id of (back ? fresh.filter((id) => !routes.get(id).done) : fresh).slice(-4)) pPlay(id);
+          for (const id of (back ? fresh.filter((id) => !routes.get(id).done) : fresh).slice(-4)) pPlay(id);
           if (back && seen && shown()) for (const u of underWay()) if (!playing.has(u.id)) play(u.id);
           pWake();
           renderAll();

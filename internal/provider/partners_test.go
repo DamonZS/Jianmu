@@ -69,7 +69,7 @@ func TestPartnersFromTheFeed(t *testing.T) {
 	future := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
 	var body atomic.Value
 	body.Store(`{"partners":[
-		{"id":"acme","name":"Acme AI","chat":"https://api.acme.example/v1","keysUrl":"https://acme.example/keys?ref=jianmu",
+		{"id":"acme","name":"Acme AI","chat":"https://api.acme.example/v1","responses":"https://api.acme.example/v1","anthropic":"https://api.acme.example/anthropic","keysUrl":"https://acme.example/keys?ref=jianmu",
 		 "website":"https://toporeduce.cn/go/acme/site","siteHost":"www.acme.example",
 		 "iconUrl":"https://acme.example/logo.png","notes":{"en":"Fast relay","zh":"快速中转"},"langs":["zh"],
 		 "decide":"https://api.acme.example/decide","noKey":true},
@@ -118,7 +118,7 @@ func TestPartnersFromTheFeed(t *testing.T) {
 
 	// a provider is added from it as from a preset
 	p, err := FromPreset("acme")
-	if err != nil || p.Chat != "https://api.acme.example/v1" || p.KeysURL != "https://acme.example/keys?ref=jianmu" || p.Decide != "" {
+	if err != nil || p.Chat != "https://api.acme.example/v1" || p.Responses != "https://api.acme.example/v1" || p.Anthropic != "https://api.acme.example/anthropic" || p.KeysURL != "https://acme.example/keys?ref=jianmu" || p.Decide != "" {
 		t.Fatalf("FromPreset(acme) = %+v, %v", p, err)
 	}
 	if pr := Preset("acme"); pr == nil || !pr.Sponsored {

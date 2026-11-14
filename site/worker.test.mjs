@@ -419,6 +419,9 @@ test("partners", async () => {
     for (const u of urls.filter(Boolean)) assert.equal(new URL(u).protocol, "https:", p.id + ": " + u);
     for (const t of [p.from, p.until].filter(Boolean)) assert(!isNaN(Date.parse(t)), p.id + ": " + t);
   }
+  const topo = PARTNERS.find((p) => p.id === "toporeduce");
+  assert.equal(topo?.responses, "https://api.toporeduce.cn/v1");
+  assert.equal(topo?.anthropic, "https://api.toporeduce.cn/anthropic");
 });
 
 // The website and key links the app gets go through /go, which counts the
