@@ -23523,13 +23523,12 @@ else { $("#nav").remove(); $("#side").remove(); }
 if (mode !== "window" || !document.body.classList.contains("linux")) $("#winclose").remove();
 
 // reload the config files when the panel comes back into view
-// The jianmu in the corner flaps and wags its tail as the window opens and
-// when the pointer comes over it.
+// The corner logo animates as the window opens and when the pointer comes over it.
 function wag() {
   const logo = document.querySelector(".brand .logo");
   if (!logo || logo.classList.contains("wag") || calm()) return;
   logo.classList.add("wag");
-  logo.querySelector(".tail").addEventListener("animationend", () => logo.classList.remove("wag"), { once: true });
+  (logo.querySelector(".tail") || logo.querySelector("svg")).addEventListener("animationend", () => logo.classList.remove("wag"), { once: true });
 }
 document.querySelector(".brand")?.addEventListener("mouseenter", wag);
 setTimeout(wag, 250);
