@@ -2228,42 +2228,19 @@ function routingPage(part) {
       return v;
     };
     const h = hubBox = b(hub);
-    // the golden vein in tree.webp, as fractions of the square trunk: it enters at the top and leaves at the foot, where branches and roots join it
-    const hw = h.r - h.l, hh = h.b - h.t, vt = { x: h.l + hw * .517, y: h.t + hh * .02 }, vb = { x: h.l + hw * .522, y: h.b - hh * .05 };
-    const vein = [[.517, .03], [.49, .30], [.555, .48], [.57, .60], [.535, .74], [.522, .93]].map(([x, y]) => [h.l + hw * x, h.t + hh * y]);
-    const veinD = () => vein.reduce((d, p, i) => { if (!i) return `M${p[0]} ${p[1]}`; const q = vein[i - 1], a0 = vein[i - 2] || q, a3 = vein[i + 1] || p; return d + ` C${q[0] + (p[0] - a0[0]) / 6} ${q[1] + (p[1] - a0[1]) / 6} ${p[0] - (a3[0] - q[0]) / 6} ${p[1] - (a3[1] - q[1]) / 6} ${p[0]} ${p[1]}`; }, '');
     // a key off screen is not drawn, and its content is as tall as a drawn
     // key's (routing.css, #3164)
     let row = list.firstElementChild;
     while (row && (row.matches(".rt-fold, .rt-sub, .idle") || !row.firstElementChild?.checkVisibility?.({ contentVisibilityAuto: true }))) row = row.nextElementSibling;
     const pad = row && getComputedStyle(row), rowH = row && Math.round((b(row).b - b(row).t - parseFloat(pad.paddingTop) - parseFloat(pad.paddingBottom) - parseFloat(pad.borderTopWidth) - parseFloat(pad.borderBottomWidth)) * 100) / 100;
-    // The tree, read bottom to top: the accounts are its roots, jianmu's
-    // trunk rises from them, and each agent sits on a branch over it. A
-    // branch leaves the trunk's top as two cubic bends: the first, wide,
-    // where it forks off, the second narrower out to the agent's foot, so
-    // two agents fan as evenly as eight. It is one d, as sets.push has
-    // always taken it, and .rt-branch (routing.css) strokes it wide where
-    // it forks and thin where it runs on; a root is two bends, the first
-    // wider than the last, as it leaves the trunk's foot.
-    const branch = (x1, y1, x2, y2, w1, w2) =>
-      `M${vt.x} ${vt.y} C${vt.x - hw * .12} ${vt.y - hh * .02} ${x2 + hw * .04} ${y2 - hh * .06} ${x2} ${y2}`;
+    // Wires join each agent to Jianmu and fan from Jianmu to its provider rows.
     for (const a of agents.values()) {
-      const s = b(a.node), drop = s.b - h.t;
-      a.wire.classList.toggle("rt-branch", drop > 70);
-      const my = h.t + drop * .5;
-      if (drop > 70) {
-        const fx = h.cx + (s.cx - h.cx) * .55, fy = my + drop * .15;
-        sets.push([a.wire, branch(fx, fy, s.cx, s.b, Math.max(24, Math.min(64, drop * .3)), Math.max(12, drop * .15))]);
-      } else sets.push([a.wire, branch(s.cx, my, s.cx, s.b, Math.max(14, drop * .55), 14)]);
+      const s = b(a.node), my = (h.t + s.b) / 2;
+      sets.push([a.wire, `M${s.r} ${s.cy} C${s.r + 16} ${s.cy} ${h.l - 16} ${h.cy} ${h.l} ${h.cy}`]);
     }
-    // A root leaves the trunk's foot and bends out to its row's edge, as
-    // two bends, the first wider than the last; rows are stacked below it,
-    // so a root is as short as the row is near.
     const fromHub = (wire, a) => {
-      const x = a.l, y = a.cy, k = Math.max(14, Math.min(90, (y - h.b) * .5));
-      const fx = h.cx + (x - h.cx) * .5, fy = h.b + k * .6;
-      wire.classList.toggle("rt-root", y - h.b > 46);
-      return veinD() + ` L${a.cx} ${a.t}`;
+      const my = (h.cy + a.cy) / 2;
+      return `M${h.r} ${h.cy} C${h.r + 16} ${h.cy} ${a.l - 16} ${my} ${a.l} ${a.cy}`;
     };
     // a group in the group: its models hang from its heading, a lane down
     // from where the wire to it ends (under the heading) to each
@@ -2273,19 +2250,19 @@ function routingPage(part) {
     };
     for (const s of subs.values()) {
       const up = s.up && subs.get(s.up);
-      sets.push([s.wire, up ? (s.wire.classList.remove("rt-root"), fromSub(up, b(s.li))) : fromHub(s.wire, b(s.li))]);
+      sets.push([s.wire, up ? fromSub(up, b(s.li)) : fromHub(s.wire, b(s.li))]);
     }
     for (const f of folds.values()) {
       if (!f.li.isConnected) { sets.push([f.wire, null]); continue; }
       const up = f.up && subs.get(f.up);
-      sets.push([f.wire, up ? (f.wire.classList.remove("rt-root"), fromSub(up, b(f.li))) : fromHub(f.wire, b(f.li))]);
+      sets.push([f.wire, up ? fromSub(up, b(f.li)) : fromHub(f.wire, b(f.li))]);
     }
     for (const row of rows.values()) {
       // a key folded away has no wire: its fold's is the way to it
       if (!row.li.isConnected && !gapOf.has(row.li)) { sets.push([row.wire, null]); continue; }
       const f = row.fold && folds.get(row.fold);
       const up = f?.open ? f : row.up && subs.get(row.up), a = b(row.li);
-      sets.push([row.wire, up ? (row.wire.classList.remove("rt-root"), fromSub(up, a)) : fromHub(row.wire, a)]);
+      sets.push([row.wire, up ? fromSub(up, a) : fromHub(row.wire, a)]);
     }
     // set after this frame: the keys not drawn changing size resize the
     // stage, which in its own ResizeObserver WebKit reports as a loop
@@ -5219,7 +5196,7 @@ function routingPage(part) {
     if (still() || !shown()) return null;
     const g = document.createElementNS(NS, "g");
     g.setAttribute("class", "rt-flier " + kind);
-    g.innerHTML = '<g class="rt-lift"><circle r="6" fill="#f6d27a" style="filter:drop-shadow(0 0 6px #ED9834)"/><circle r="2.5" fill="#fff8e0"/></g>';
+    g.innerHTML = FLIER;
     sky.appendChild(g);
     return g;
   }

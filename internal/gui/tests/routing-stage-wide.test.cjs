@@ -1,13 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// refeccd on Discord: in a full-screen window the Routing stage kept the
-// agent and jianmu in columns of 124px each, the agent cut to "Claude
-// Desk…", while the group's member rows ran on across the rest of the
-// screen. The two columns are as wide as their words now, at least 124px
-// and at most 15% of the stage: at 2560px and 1920px the agent's name, its
-// model and jianmu's address read whole, the wires still start and end at
-// the cards, and at 1100px down to a phone's width nothing is wider than
-// it was (124px each, or the narrow layout's two halves) and nothing
-// scrolls sideways. Every language, both engines.
+// Compact stage: Agents left, Jianmu in a circular center, providers right.
+// Request/response paths still join the cards; narrow layouts keep the same
+// two-column arrangement above provider rows. Every language, both engines.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -67,11 +61,12 @@ const measure = () => {
   const wire = [...document.querySelectorAll(".rt-wires path")].find((p) => (p.getAttribute("d") || "").startsWith("M"));
   const xs = (wire?.getAttribute("d") || "").match(/-?\d+(\.\d+)?/g)?.map(Number) || [];
   const list = document.querySelector(".rt-accts").getBoundingClientRect();
+  const ring = getComputedStyle(hub).borderRadius;
   return {
     stageW: s.width, cols: getComputedStyle(stage).gridTemplateColumns.split(" ").map(parseFloat),
     narrow: document.querySelector(".rt").classList.contains("max560"),
     name: src.querySelector("b").textContent, nameCut: cut(src.querySelector("b")), modelCut: cut(src.querySelector("small")), hubCut: cut(hub.querySelector("small")),
-    srcW: sr.width, hubW: hr.width, listW: list.width,
+    srcW: sr.width, hubW: hr.width, listW: list.width, ring,
     wireFrom: xs[0], srcRight: sr.right - s.left, wireTo: xs[xs.length - 2], hubLeft: hr.left - s.left,
     sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
@@ -80,7 +75,7 @@ const measure = () => {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
     for (const width of [2560, 1920, 1100, 800, 560, 390]) {
-      test(`${engine} ${lang} ${width}px: the agent and jianmu take the room a wide stage has, and no more than before on a narrow one`, async (t) => {
+      test(`${engine} ${lang} ${width}px: routing stage stays compact and connected`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         const page = await (await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" })).newPage();
         page.setDefaultTimeout(8000);
@@ -103,21 +98,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const msg = JSON.stringify(m);
         assert.equal(m.sideways, 0, `no sideways scroll: ${msg}`);
         if (m.narrow) {
-          // the narrow layout: the agent and jianmu side by side, halves of the stage
           assert.equal(m.cols.length, 2, msg);
+          assert(Math.abs(m.wireFrom - m.srcRight) <= 1, `the agent's wire starts at its card: ${msg}`);
         } else {
           assert.equal(m.cols.length, 3, msg);
-          const most = Math.max(124, m.stageW * .15);
-          for (const c of m.cols.slice(0, 2)) {
-            assert(c >= 124 - .5, `a card's column keeps its 124px: ${msg}`);
-            assert(c <= most + .5, `a card's column is at most 15% of the stage: ${msg}`);
-          }
-          // where 15% is no more than 124px, as before: the member rows lose nothing
-          if (m.stageW * .15 <= 124) for (const c of m.cols.slice(0, 2)) assert(Math.abs(c - 124) <= .5, `as wide as before: ${msg}`);
-          // the agent's wire runs from its card to jianmu's
           assert(Math.abs(m.wireFrom - m.srcRight) <= 1, `the agent's wire starts at its card: ${msg}`);
-          assert(Math.abs(m.wireTo - m.hubLeft) <= 1, `the agent's wire ends at jianmu's card: ${msg}`);
+          assert(Math.abs(m.wireTo - m.hubLeft) <= 1, `the agent's wire ends at Jianmu: ${msg}`);
+          assert(m.cols[2] > m.cols[0] && m.cols[2] > m.cols[1], `provider rows get the widest lane: ${msg}`);
         }
+        assert.match(m.ring, /50%/, `Jianmu has a circular center: ${msg}`);
+        assert(m.hubW <= 148, `the center stays compact: ${msg}`);
         if (width >= 1920) {
           assert(!m.nameCut, `the agent's name reads whole: ${msg}`);
           assert(!m.modelCut, `the agent's model reads whole: ${msg}`);

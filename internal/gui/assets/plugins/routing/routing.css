@@ -6,32 +6,14 @@
 .rt-what { font-size: 13px; color: var(--muted); }
 .rt-what b { color: var(--fg); font-weight: 600; }
 .rt-mode { margin: 0; font-size: 12.5px; color: var(--fg-2); line-height: 1.45; }
-/* the agents' and jianmu's columns at least 124px, and as wide as their
-   words up to 15% of the stage: at 124px a full-screen window cut an agent
-   to "Claude Desk…" while its keys' rows ran on across the rest (refeccd
-   on Discord) */
-/* The stage is one tree, read bottom to top: the model's accounts at the
-   foot, jianmu's trunk above them, and an agent on each branch over it.
-   One column: the trunk is held to its middle, the branches above it, and
-   the account rows run under (a grid area of their own keeps their
-   widths; layout, client.js, draws the trunk and the branches). */
-.rt-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; row-gap: 0; padding: 22px 2px 12px; }
-/* the three layers of the tree: the crown (agents) over room for the branches, the trunk, then the ground line with the roots (accounts) under it */
-.rt-stage > .rt-srcs { margin-bottom: 84px; }
-.rt-stage > .rt-accts { margin-top: 78px; padding-top: 14px; border-top: 2px dashed color-mix(in srgb, #8a6a3a 60%, var(--line)); }
-.rt-stage > .rt-srcs { order: 1; width: 100%; }
-.rt-stage > .rt-hub { order: 2; }
-.rt-stage > .rt-accts { order: 3; width: 100%; }
-.rt-stage > :is(.rt-srcs, .rt-hub) { min-width: 124px; }
+/* the agent and Jianmu columns stay compact; provider rows use the rest */
+.rt-stage { position: relative; display: grid; grid-template-columns: minmax(124px, 15%) minmax(124px, 15%) minmax(0, 1fr); column-gap: 12px; align-items: stretch; padding: 22px 2px 12px; }
+.rt-stage > .rt-srcs { align-content: center; justify-items: end; }
+.rt-stage > .rt-hub { align-self: center; width: min(100%, 148px); height: min(100%, 148px); min-width: 0; min-height: 0; box-sizing: border-box; padding: 10px; border-radius: 50%; justify-content: center; border-color: var(--line); background: var(--card); box-shadow: 0 0 0 5px var(--card-2), 0 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent); animation: rtring 2.4s ease-in-out infinite; }
+.rt-stage > .rt-accts { grid-column: 3; width: 100%; }
 .rt-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.rt-wires path { fill: none; stroke: color-mix(in srgb, #8a6a3a 55%, var(--line)); stroke-width: 3; stroke-linecap: round; transition: opacity .3s; }
-/* the tree: a branch (an agent's way to jianmu) is a wider limb than a
-   wire is — wide where it forks off the trunk, its glow the same as the
-   pulse's; a root, the way down to an account's row, keeps the limb's
-   weight. Both are one d the class sets the width of (client.js layout) */
-.rt-wires path.rt-branch { stroke-width: 5; }
-.rt-wires path.rt-root { stroke-width: 3.5; }
-.rt-wires path:is(.rt-branch, .rt-root) { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--agent, #8a6a3a) 20%, transparent)); }
+.rt-wires path { fill: none; stroke: var(--line); stroke-width: 1.5; transition: opacity .3s; }
+@keyframes rtring { 50% { box-shadow: 0 0 0 5px var(--card-2), 0 0 0 11px color-mix(in srgb, var(--accent) 16%, transparent); } }
 /* live: the energy on a branch, the same dots .rt-flows runs — standing
    still on the limb until one is in flight (#2386) */
 .rt-wires path.live { stroke: var(--agent, var(--muted)); stroke-dasharray: 3 5; filter: drop-shadow(0 0 4px var(--agent, var(--muted))); }
@@ -79,9 +61,8 @@
 .rt-flier.away .rt-lift { transform: translate(14px, -16px) scale(.8); opacity: 0; }
 @keyframes rtcome { from { transform: translate(-6px, -10px) scale(.85); opacity: 0; } }
 .rt-srcs { position: relative; z-index: 1; min-width: 0; display: grid; gap: 10px; justify-items: center; }
-/* an agent's branch: the trunks fan out under the agents, evenly, so two
-   agents stand as level as eight do */
-.rt-srcs { grid-auto-flow: column; grid-auto-columns: minmax(96px, 160px); align-items: start; }
+/* agents stack in the left lane so each can join Jianmu directly */
+.rt-srcs { grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; grid-auto-columns: auto; align-items: center; }
 .rt-srcs.many .rt-node { padding: 8px 8px 7px; }
 .rt-src b::before { content: ""; display: inline-block; width: 7px; height: 7px; margin: 0 6px 1px 0; border-radius: 50%; background: var(--agent); vertical-align: middle; }
 .rt-srcs.many .rt-node .rt-ic .ic, .rt-srcs.many .rt-node .rt-ic .ic img, .rt-srcs.many .rt-node .rt-ic .ic svg { width: 20px; height: 20px; }
@@ -90,12 +71,8 @@
 .rt-node .rt-ic .ic img, .rt-node .rt-ic .ic svg { width: 26px; height: 26px; }
 .rt-node b { font-size: 13px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rt-node small { font-size: 11px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* the trunk: narrow above, wider at its foot, wood grain down it */
-.rt-hub { min-height: 160px; justify-content: center; width: 46%; min-width: 124px; max-width: 190px; border-radius: 14px 14px 30px 30px; border: 1.5px solid color-mix(in srgb, var(--fg) 45%, #8a6a3a); background: linear-gradient(90deg, transparent 38%, color-mix(in srgb, #8a6a3a 24%, transparent) 50%, transparent 62%) , linear-gradient(180deg, color-mix(in srgb, #8a6a3a 10%, var(--card)) 0%, color-mix(in srgb, #8a6a3a 24%, var(--card)) 100%); box-shadow: 0 0 0 4px var(--card-2), 0 0 18px color-mix(in srgb, #ED9834 28%, transparent); animation: rttrunk 2.4s ease-in-out infinite; }
-@keyframes rttrunk { 50% { box-shadow: 0 0 0 4px var(--card-2), 0 0 28px color-mix(in srgb, #66C2CE 45%, transparent); } }
-@media (prefers-reduced-motion: reduce) { .rt-hub { animation: none; } }
-/* the trunk's shape: tall and narrow, flaring into a root crown at its foot */
-.rt-stage > .rt-hub { width: 34%; min-width: 124px; max-width: 150px; min-height: 170px; border-radius: 12px 12px 60% 60% / 12px 12px 44px 44px; padding-bottom: 14px; }
+.rt-hub { border-color: var(--line); box-shadow: 0 0 0 5px var(--card-2), 0 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent); }
+@media (prefers-reduced-motion: reduce) { .rt-hub, .rt-stage > .rt-hub { animation: none; } }
 .rt-hub i { font-style: normal; font-size: 10.5px; font-weight: 560; margin-top: 5px; padding: 1px 8px; border-radius: 999px; background: var(--fg); color: var(--card); }
 .rt-hub.tick, .rt-src.tick { animation: rttick .4s ease-out; }
 @keyframes rttick { 40% { transform: scale(1.04); } }
@@ -293,12 +270,10 @@
 .rt-accts:where(.max460) li.rt-fold { grid-template-columns: 10px minmax(0, 1fr) auto; }
 .rt-accts:where(.max460) li.rt-fold em { grid-row: 2; text-align: left; }
 .rt-accts:where(.max460) li.rt-fold .chev { grid-column: 3; grid-row: 1; }
-/* narrow (the tray panel): the same tree, its trunk and branches closer
-   together and its agents on as many columns as fit */
-:where(.rt.max560) .rt-stage { grid-template-columns: minmax(0, 1fr); row-gap: 0; padding: 16px 0; }
-:where(.rt.max560) .rt-stage > :is(.rt-srcs, .rt-hub) { min-width: 0; }
-:where(.rt.max560) .rt-srcs { grid-auto-columns: minmax(72px, 1fr); }
-:where(.rt.max560) .rt-accts { padding-left: 0; }
+/* the panel keeps the agent and Jianmu beside each other, with provider rows below */
+:where(.rt.max560) .rt-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 12px; row-gap: 12px; padding: 16px 0; }
+:where(.rt.max560) .rt-stage > .rt-hub { width: min(100%, 148px); height: min(100%, 148px); }
+:where(.rt.max560) .rt-stage > .rt-accts { grid-column: 1 / -1; padding-left: 0; }
 .rt-accts:where(.max560) li { grid-template-columns: 10px minmax(0, 1fr); }
 .rt-accts:where(.max560) em { grid-column: 2; white-space: normal; }
 .rt-accts:where(.max560) .bar { grid-column: 2; }
@@ -1173,24 +1148,3 @@ body.window .rt-gedit > .bar { --vfoot: 8px; }
 .rt-acts-foot button.text { font-size: 11px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rt-acts-foot button.text:hover { color: var(--fg); }
 .rt-acts-foot button.text[hidden] { display: none; }
-
-/* the trunk, after the owner's reference: narrow at the crown, swelling down to a flared root crown, bark grain and a vein of golden energy up its middle */
-.rt-stage > .rt-hub { width: 46%; min-width: 150px; max-width: 280px; min-height: 240px; padding: 46px 0 30px; border: 0; border-radius: 0; clip-path: polygon(35% 0, 65% 0, 60% 28%, 66% 60%, 84% 82%, 100% 100%, 0 100%, 16% 82%, 34% 60%, 40% 28%); background: repeating-linear-gradient(98deg, transparent 0 7px, rgba(0, 0, 0, .24) 7px 9px), linear-gradient(90deg, #3b2a18 0%, #8a6a3a 45%, #4a3520 70%, #2e2012 100%); box-shadow: none; animation: none; color: #fff3dc; }
-.rt-stage > .rt-hub b, .rt-stage > .rt-hub small { color: #fff3dc; }
-.rt-stage > .rt-hub::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: linear-gradient(180deg, #ED9834, #f6d27a 50%, #66C2CE); filter: drop-shadow(0 0 5px #ED9834); opacity: .85; z-index: 0; }
-.rt-stage > .rt-hub > * { position: relative; z-index: 1; }
-
-/* the trunk is the owner's tree picture: its transparent background sits on the stage, the golden vein in it is where the energy runs */
-.rt-stage > .rt-hub { width: 52%; min-width: 220px; max-width: 360px; aspect-ratio: 1 / 1; min-height: 0; padding: 0 0 6px; border: 0; border-radius: 0; clip-path: none; background: url("tree.webp") center bottom / contain no-repeat; box-shadow: none; animation: none; justify-content: flex-end; }
-.rt-stage > .rt-hub::before { content: none; }
-.rt-stage > .rt-hub > * { position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0, 0, 0, .85); }
-.rt-stage > .rt-hub .rt-bird { display: none; }
-.rt-stage > .rt-srcs { margin-bottom: 10px; }
-.rt-stage > .rt-accts { margin-top: 0; }
-
-/* the agents sit on the tree's crown: their row is laid over the trunk picture's top, as wide as it, so a card rests on a branch tip */
-.rt-stage > .rt-srcs { width: 52%; min-width: 220px; max-width: 360px; justify-self: center; justify-items: start; margin-bottom: -104px; z-index: 3; }
-
-/* the agent rests on the left branch tip of the tree picture */
-.rt-stage > .rt-srcs { margin-bottom: -36px; }
-.rt-stage > .rt-srcs > .rt-node { margin-left: -60px; }
