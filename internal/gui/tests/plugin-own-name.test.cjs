@@ -21,6 +21,9 @@ const state = { bun: true, bunVersion: "1.3.0", picker: false, movable: [], plug
   { spec: LISTED, ownName: "Not the list's", version: "0.3.0", providers: [], moved: [] },
 ] };
 const listings = [{ package: LISTED, name: "Qoder", summary: "Qoder's plan", providers: ["qoder"], community: true, github: { owner: "magpie-community", repo: "plugins" } }];
+for (const title of ["magpie-purge", "magpie-DaFeiYu", "respire-magpie", "Magpie-Rhino", "MAGPIE Tools"]) {
+  state.plugins.push({ spec: `github:example/${title}`, package: title, ownName: title, version: "0.1.0", providers: [], moved: [] });
+}
 
 function server(lang) {
   return async (route) => {
@@ -64,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).click();
         await view.locator(".pm-row").nth(2).waitFor();
         const names = await view.locator(".pm-row .name > span:first-child").allTextContents();
-        assert.deepEqual([...names].sort(), ["Qoder", "jianmu-loomy-auth", "华为云 HUAWEI"].sort(), "the package's own name, the package where it gives none, the list's where it lists one");
+        assert.deepEqual([...names].sort(), ["Qoder", "jianmu-loomy-auth", "华为云 HUAWEI", "jianmu-purge", "jianmu-DaFeiYu", "respire-jianmu", "Jianmu-Rhino", "JIANMU Tools"].sort(), "the package's own name, the package where it gives none, the list's where it lists one");
         const row = view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: "华为云 HUAWEI" }) });
         const box = await row.boundingBox();
         assert.ok(box.x >= 0 && box.x + box.width <= width, `the row fits: ${JSON.stringify(box)}`);
@@ -75,6 +78,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await dlg.waitFor();
         assert.equal(await dlg.locator(".pm-dhead .pm-name b").textContent(), "华为云 HUAWEI");
         assert.ok((await dlg.locator(".pm-dhead .pm-by").textContent()).includes(OFFICE), "the page names where it came from");
+        await page.keyboard.press("Escape");
+        await view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: "jianmu-purge" }) }).locator(".name").click();
+        await dlg.waitFor();
+        assert.equal(await dlg.locator(".pm-dhead .pm-name b").textContent(), "jianmu-purge");
+        assert.ok((await dlg.locator(".pm-dhead .pm-by").textContent()).includes("github:example/magpie-purge"), "the renamed display keeps the real install spec");
         assert.deepEqual(errors, []);
         await page.context().close();
       });

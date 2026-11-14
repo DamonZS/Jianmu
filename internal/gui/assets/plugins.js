@@ -63,8 +63,10 @@
     const u = s.replace(/^git\+/, "").replace(/\.git$/, "");
     return /^https?:\/\//.test(u) ? u : "";
   };
+  // Display aliases never change a package spec or a repository link.
+  const displayName = (text) => String(text || "").replace(/magpie/gi, (word) => word === "MAGPIE" ? "JIANMU" : word[0] === "M" ? "Jianmu" : "jianmu");
   const lang = () => (document.documentElement.lang || "en").slice(0, 2);
-  const summary = (l) => l.summary?.[lang()] || l.summary?.en || l.npm?.description || "";
+  const summary = (l) => displayName(l.summary?.[lang()] || l.summary?.en || l.npm?.description || "");
   const count = (n) => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + "k" : String(n || 0);
   // a repository tagged jianmu-plugin is installed by whichever spec
   // names it (github:owner/repo, its page's or a git URL), never by its
@@ -475,7 +477,7 @@
       const was = e.commit;
       act(pkg, "upgrade", { spec: e.spec }, () => {
         const now = mine?.plugins?.find((x) => x.spec === e.spec)?.commit;
-        status(npm ? t("{name} updated to v{v}", { name: l?.name || pkg, v: e.latest }) : now && was && !sameCommit(now, was) ? t("{name} updated to {commit}", { name: shownName(e), commit: now }) : t("{name} is up to date", { name: shownName(e) }), "ok");
+        status(npm ? t("{name} updated to v{v}", { name: displayName(l?.name || pkg), v: e.latest }) : now && was && !sameCommit(now, was) ? t("{name} updated to {commit}", { name: shownName(e), commit: now }) : t("{name} is up to date", { name: shownName(e) }), "ok");
       });
     };
     b.onkeydown = (ev) => ev.stopPropagation();
@@ -575,11 +577,11 @@
     const top = el("div", "pm-top");
     const who = el("div", "pm-who");
     const nm = el("div", "pm-name");
-    nm.append(el("b", "", l.name));
+    nm.append(el("b", "", displayName(l.name)));
     who.append(nm);
     who.append(byline(l));
     if (l.github) c.classList.add("gh");
-    const go = actionFor(l.package, l.name, l);
+    const go = actionFor(l.package, displayName(l.name), l);
     top.append(logo(l.icon || l.npm?.icon, false, kindOf(l)), who, go);
     const sum = el("p", "pm-sum", summary(l));
     const meta = el("div", "pm-meta");
@@ -735,7 +737,7 @@
     const top = el("div", "pm-htop");
     const who = el("div", "pm-who");
     const nm = el("div", "pm-name");
-    nm.append(el("b", "", l.name));
+    nm.append(el("b", "", displayName(l.name)));
     who.append(nm, byline(l));
     const lg = logo(l.icon || l.npm?.icon, true, kindOf(l));
     lg.classList.add("hero");
@@ -751,7 +753,7 @@
     const more = el("button", "pm-act ghost", t("Details"));
     more.type = "button";
     more.onclick = (ev) => { ev.stopPropagation(); detail(l); };
-    acts.append(actionFor(l.package, l.name, l), more);
+    acts.append(actionFor(l.package, displayName(l.name), l), more);
     box.append(el("div", "pm-eyebrow", t("Today's pick")), top, el("p", "pm-hsum", summary(l)), stats, acts);
     return box;
   }
@@ -764,8 +766,8 @@
       const row = el("div", "pm-rrow");
       opens(row, l);
       const who = el("div", "pm-rwho");
-      who.append(el("b", "", l.name), el("span", "", line(l)));
-      row.append(el("span", "pm-rnum", String(i + 1)), logo(l.icon || l.npm?.icon, false, kindOf(l)), who, actionFor(l.package, l.name, l));
+      who.append(el("b", "", displayName(l.name)), el("span", "", line(l)));
+      row.append(el("span", "pm-rnum", String(i + 1)), logo(l.icon || l.npm?.icon, false, kindOf(l)), who, actionFor(l.package, displayName(l.name), l));
       box.append(row);
     });
     return box;
@@ -1037,7 +1039,7 @@
       return;
     }
     const f = query.trim().toLowerCase();
-    const match = (l) => !f || [l.name, l.package, summary(l), (l.providers || []).join(" "), l.npm?.publisher || "", l.github?.owner || "", l.github?.repo || ""].join(" ").toLowerCase().includes(f);
+    const match = (l) => !f || [l.name, displayName(l.name), l.package, summary(l), (l.providers || []).join(" "), l.npm?.publisher || "", l.github?.owner || "", l.github?.repo || ""].join(" ").toLowerCase().includes(f);
     const all = everything(match);
     const out = [];
     if (!f) {
@@ -1241,7 +1243,7 @@
   // package's or the folder's
   function shownName(e) {
     const pkg = name(e.spec);
-    return displayAliases[ghRepo(e.spec)] || (listings || []).find((x) => samePackage(x.package, pkg))?.name || e.ownName || (isGit(e.spec) && e.package) || label(e.spec);
+    return displayName(displayAliases[ghRepo(e.spec)] || (listings || []).find((x) => samePackage(x.package, pkg))?.name || e.ownName || (isGit(e.spec) && e.package) || label(e.spec), e.spec || pkg);
   }
 
   function installedRow(e) {
@@ -1318,7 +1320,7 @@
     // of them serves it; the row says which, and the other gets a way to
     // take it over, rather than the provider just going missing
     const clashes = e.off || e.error ? [] : e.clashes || [];
-    const nameOfSpec = (spec) => { const o = (mine?.plugins || []).find((x) => x.spec === spec); return o ? shownName(o) : label(spec); };
+    const nameOfSpec = (spec) => { const o = (mine?.plugins || []).find((x) => x.spec === spec); return o ? shownName(o) : displayName(label(spec)); };
     const ask = asking?.pkg === pkg && !busy.size && (asking.op === "move" ? cands.length : moved.length) ? asking.op : "";
     if (ask === "move") {
       sub.textContent = t("{names} can run on it again, with the same accounts.", { names: cands.map((c) => c.name).join(t(", ")) });
@@ -1795,7 +1797,7 @@
     hd.append(logo(l.icon || l.npm?.icon, true, kindOf(l)));
     const who = el("div", "pm-who");
     const nm = el("div", "pm-name");
-    nm.append(el("b", "", l.name));
+    nm.append(el("b", "", displayName(l.name)));
     const by = el("div", "pm-by"); // the words in a span of their own, or a flex row cuts them without the ellipsis
     by.append(el("span", "", l.community ? t("jianmu community") + " · " + l.package : [l.npm?.publisher, l.package].filter(Boolean).join(" · ")));
     who.append(nm, by);
@@ -1804,7 +1806,7 @@
     // loses the pointer's hover
     let said = "";
     const redrawAct = () => {
-      const b = actionFor(l.package, l.name, l.npm ? l : null);
+      const b = actionFor(l.package, displayName(l.name), l.npm ? l : null);
       const now = b.className + b.textContent + b.disabled;
       if (now !== said) { said = now; actBox.replaceChildren(b); }
     };
