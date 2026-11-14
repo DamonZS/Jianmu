@@ -3310,12 +3310,12 @@ On a network that lets github.com through and not toporeduce.cn (a company
 allow list), the app and `jianmu update` need no setting: when the feed
 fails, the newest release is read from `DamonZS/Jianmu` itself
 (`api.github.com/repos/DamonZS/Jianmu/releases/latest`, or the
-release page's redirect when the API is rate-limited), with its
-`SHA256SUMS` and `SHA256SUMS.sig` from github.com. They go through the same
-check as the feed's: the ed25519 signature against the key built into the
-binary, the version in the signed message, each file's hash from the signed
-list. A release read this way must be signed whatever its version. The
-Stable channel and a `JIANMU_UPDATE_FEED` of your own don't fall back.
+release page's redirect when the API is rate-limited). `SHA256SUMS` supplies
+each file's SHA-256. When a release has `SHA256SUMS.sig`, its signature and
+version are checked too; a signature that exists but is invalid is refused.
+Unsigned releases before v0.1.3862 keep the SHA-256 check, while releases from
+that version on must be signed. The Stable channel and a `JIANMU_UPDATE_FEED`
+of your own don't fall back.
 
 Release files are downloaded from toporeduce.cn's copy on Cloudflare R2
 (`toporeduce.cn/files/<tag>/<file>`). Every five minutes the site copies the

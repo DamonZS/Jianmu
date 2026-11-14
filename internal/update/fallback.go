@@ -2,6 +2,8 @@ package update
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,24 +17,24 @@ import (
 )
 
 // A network that lets github.com through and nothing else (a company's
-// allow list: ssharpcc on X) can't reach usejianmu.ai's feed. When the
+// allow list: ssharpcc on X) can't reach toporeduce.cn's feed. When the
 // default feed fails, the newest release is read from GitHub itself:
-// DamonZS/Jianmu-releases' API, or, when the API is rate-limited, the
+// DamonZS/Jianmu's API, or, when the API is rate-limited, the
 // release page's redirect and the SHA256SUMS beside the files. Nothing
-// is configured. The result goes through Release.verify like the feed's,
-// and here a release must be signed whatever its version: the feed is the
-// only thing that may carry an unsigned old release, and this isn't the
-// feed. The files themselves are on github.com (Asset.GitHub), which
-// download already takes, with its API route.
+// is configured. The result goes through Release.verify like the feed's.
+// Older unsigned releases retain their SHA-256 check; releases from
+// firstSigned on still require a valid signature. The files themselves are
+// on github.com (Asset.GitHub), which download already takes, with its API
+// route.
 //
 // The Stable channel is the site's choice (a release a week), which
 // GitHub can't give: on Stable a failed feed stays a failed feed.
 
 // releaseRepo is where releases are published.
-const releaseRepo = "DamonZS/Jianmu-releases"
+const releaseRepo = "DamonZS/Jianmu"
 
 // feedWait is how long the feed has to answer when GitHub stands behind
-// it: a network that drops usejianmu.ai's packets would otherwise hold
+// it: a network that drops toporeduce.cn's packets would otherwise hold
 // the check for the client's ten minutes. A var for tests.
 var feedWait = 20 * time.Second
 
@@ -59,33 +61,51 @@ func githubLatest(ctx context.Context, lang string) (*Release, error) {
 	if err != nil {
 		return nil, err
 	}
+	version := strings.TrimPrefix(tag, "v")
 	sig, err := githubFile(ctx, base+"SHA256SUMS.sig", files["SHA256SUMS.sig"].api)
-	if err != nil {
+	var signed *Signed
+	if err == nil {
+		signed = &Signed{Sums: sums, Sig: strings.TrimSpace(sig)}
+	} else if signedRequired(version) || !errors.Is(err, errGitHubFileMissing) {
 		return nil, fmt.Errorf("%s has no signature: %w", tag, err)
 	}
+	checksums := map[string]string{}
+	for _, line := range strings.Split(sums, "\n") {
+		f := strings.Fields(line)
+		if len(f) == 0 {
+			continue
+		}
+		if len(f) != 2 {
+			return nil, fmt.Errorf("%s has a malformed SHA256SUMS line", tag)
+		}
+		b, err := hex.DecodeString(f[0])
+		name := strings.TrimPrefix(f[1], "*")
+		if err != nil || len(b) != sha256.Size || name == "" || strings.ContainsAny(name, `/\\`) {
+			return nil, fmt.Errorf("%s has an invalid SHA256SUMS entry", tag)
+		}
+		if _, exists := checksums[name]; exists {
+			return nil, fmt.Errorf("%s repeats %s in SHA256SUMS", tag, name)
+		}
+		checksums[name] = strings.ToLower(f[0])
+	}
 	rel := &Release{
-		Version: strings.TrimPrefix(tag, "v"),
+		Version: version,
 		Notes:   InLang(notes, lang),
 		URL:     page,
 		Assets:  map[string]Asset{},
-		Signed:  &Signed{Sums: sums, Sig: strings.TrimSpace(sig)},
+		Signed:  signed,
 	}
 	if parse(rel.Version) == nil {
 		return nil, fmt.Errorf("GitHub's release tag %q is no version", tag)
 	}
-	// the names come from the signed list; verify() drops any other and
-	// gives each file its hash
-	for _, line := range strings.Split(sums, "\n") {
-		f := strings.Fields(line)
-		if len(f) != 2 {
-			continue
-		}
-		name := strings.TrimPrefix(f[1], "*")
-		if name == "" || strings.ContainsAny(name, `/\`) || name == "SHA256SUMS" || name == "SHA256SUMS.sig" {
+	// the names and hashes come from SHA256SUMS; signed releases are also
+	// checked by verify(), which drops files not named by the signed list.
+	for name, hash := range checksums {
+		if name == "SHA256SUMS" || name == "SHA256SUMS.sig" {
 			continue
 		}
 		u := base + url.PathEscape(name)
-		rel.Assets[name] = Asset{URL: u, GitHub: u, API: files[name].api, Size: files[name].size}
+		rel.Assets[name] = Asset{URL: u, GitHub: u, SHA256: hash, API: files[name].api, Size: files[name].size}
 	}
 	if err := rel.verify(); err != nil {
 		return nil, err
@@ -164,20 +184,23 @@ func githubTag(ctx context.Context) (tag, notes, page string, files map[string]g
 	return tag, "", fmt.Sprintf("%s/%s/releases/tag/%s", githubWeb, releaseRepo, tag), files, nil
 }
 
-// githubFile reads a small release file from its github.com address (the
-// mirror the user gave in front of it), else through the API route when
-// that is known. Its bytes are trusted for nothing until the signature
-// over them is checked.
+var errGitHubFileMissing = errors.New("GitHub release file not found")
+
+// githubFile reads a release manifest or signature through the download
+// address, then the asset API when known. Only all-404 failures mean missing.
+
 func githubFile(ctx context.Context, raw, api string) (string, error) {
 	var errs []error
 	tries := []struct {
 		u   string
 		api bool
 	}{{mirrored(mirrorOf(ctx), raw), false}, {api, true}}
+	tried, notFound := 0, 0
 	for _, try := range tries {
 		if try.u == "" {
 			continue
 		}
+		tried++
 		req, err := http.NewRequestWithContext(ctx, "GET", try.u, nil)
 		if err != nil {
 			return "", err
@@ -193,6 +216,9 @@ func githubFile(ctx context.Context, raw, api string) (string, error) {
 		b, err := io.ReadAll(io.LimitReader(res.Body, maxSmall+1))
 		res.Body.Close()
 		switch {
+		case res.StatusCode == http.StatusNotFound:
+			notFound++
+			errs = append(errs, fmt.Errorf("%s: %s", hostOf(try.u), res.Status))
 		case res.StatusCode != 200:
 			errs = append(errs, fmt.Errorf("%s: %s", hostOf(try.u), res.Status))
 		case err != nil:
@@ -202,6 +228,9 @@ func githubFile(ctx context.Context, raw, api string) (string, error) {
 		default:
 			return string(b), nil
 		}
+	}
+	if tried > 0 && notFound == tried {
+		return "", errors.Join(errGitHubFileMissing, errors.Join(errs...))
 	}
 	return "", errors.Join(errs...)
 }

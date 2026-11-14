@@ -6,8 +6,9 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,14 +22,16 @@ import (
 // that refuses every connection, the way a company allow list that lets
 // only github.com through does (ssharpcc on X).
 type fallbackWorld struct {
-	srv       *httptest.Server
-	body      []byte
-	asset     string
-	limited   bool // the API answers 403, as when anonymous asks run out
-	sums, sig string
-	feedHits  atomic.Int32
-	apiHits   atomic.Int32
-	dlHits    atomic.Int32
+	srv           *httptest.Server
+	body          []byte
+	asset         string
+	limited       bool // the API answers 403, as when anonymous asks run out
+	unsigned      bool // current Jianmu releases publish checksums without a signature
+	apiSigLimited bool // the API denies the signature asset even if metadata lists it
+	sums, sig     string
+	feedHits      atomic.Int32
+	apiHits       atomic.Int32
+	dlHits        atomic.Int32
 }
 
 func newFallbackWorld(t *testing.T, version string) *fallbackWorld {
@@ -43,22 +46,41 @@ func newFallbackWorld(t *testing.T, version string) *fallbackWorld {
 	w.sig = base64.StdEncoding.EncodeToString(ed25519.Sign(priv, []byte("jianmu release "+version+"\n"+w.sums)))
 
 	tag := "v" + version
-	dl := "/" + releaseRepo + "/releases/download/" + tag + "/"
+	const publishedRepo = "DamonZS/Jianmu"
+	dl := "/" + publishedRepo + "/releases/download/" + tag + "/"
 	w.srv = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/repos/" + releaseRepo + "/releases/latest":
+		case "/repos/" + publishedRepo + "/releases/latest":
 			w.apiHits.Add(1)
 			if w.limited {
 				http.Error(rw, "rate limit exceeded", 403)
 				return
 			}
-			fmt.Fprintf(rw, `{"tag_name":%q,"body":"notes here","html_url":"https://github.com/%s/releases/tag/%s","assets":[{"name":%q,"size":%d,"url":%q}]}`,
-				tag, releaseRepo, tag, w.asset, len(w.body), w.srv.URL+"/repos/"+releaseRepo+"/releases/assets/1")
-		case "/" + releaseRepo + "/releases/latest":
-			http.Redirect(rw, r, "/"+releaseRepo+"/releases/tag/"+tag, http.StatusFound)
+			fmt.Fprintf(rw, `{"tag_name":%q,"body":"notes here","html_url":"https://github.com/%s/releases/tag/%s","assets":[{"name":%q,"size":%d,"url":%q},{"name":"SHA256SUMS.sig","size":%d,"url":%q}]}`,
+				tag, publishedRepo, tag, w.asset, len(w.body), w.srv.URL+"/repos/"+publishedRepo+"/releases/assets/1", len(w.sig), w.srv.URL+"/repos/"+publishedRepo+"/releases/assets/2")
+		case "/" + publishedRepo + "/releases/latest":
+			http.Redirect(rw, r, "/"+publishedRepo+"/releases/tag/"+tag, http.StatusFound)
 		case dl + "SHA256SUMS":
 			rw.Write([]byte(w.sums))
+		case "/repos/" + publishedRepo + "/releases/assets/2":
+			if w.unsigned {
+				http.NotFound(rw, r)
+				return
+			}
+			if r.Header.Get("Accept") == "application/octet-stream" {
+				if w.apiSigLimited {
+					http.Error(rw, "rate limit exceeded", http.StatusForbidden)
+					return
+				}
+				rw.Write([]byte(w.sig + "\n"))
+				return
+			}
+			http.NotFound(rw, r)
 		case dl + "SHA256SUMS.sig":
+			if w.unsigned || w.apiSigLimited {
+				http.NotFound(rw, r)
+				return
+			}
 			rw.Write([]byte(w.sig + "\n"))
 		case dl + w.asset:
 			w.dlHits.Add(1)
@@ -71,13 +93,17 @@ func newFallbackWorld(t *testing.T, version string) *fallbackWorld {
 
 	oldWeb, oldAPI, oldFeed := githubWeb, githubAPI, siteFeed
 	githubWeb, githubAPI = w.srv.URL, w.srv.URL
-	// the site's feed: a port nobody listens on
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	siteFeed = "http://" + l.Addr().String() + "/api/latest"
-	l.Close()
+	// The feed closes the connection without a response, as in the reported EOF.
+	feed := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		w.feedHits.Add(1)
+		conn, _, err := rw.(http.Hijacker).Hijack()
+		if err != nil {
+			return
+		}
+		conn.Close()
+	}))
+	t.Cleanup(feed.Close)
+	siteFeed = feed.URL + "/api/latest"
 	t.Cleanup(func() { githubWeb, githubAPI, siteFeed = oldWeb, oldAPI, oldFeed })
 	t.Setenv("JIANMU_UPDATE_FEED", "")
 	stableFor(t, "")
@@ -119,6 +145,126 @@ func TestUpdateWorksFromGitHubWhenTheFeedIsUnreachable(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Jianmu's existing releases have SHA256SUMS but no signature. A failed
+// feed and an API limit still leave the Windows download available by hash.
+func TestFeedVerificationFailureDoesNotFallBack(t *testing.T) {
+	w := newFallbackWorld(t, "0.1.12")
+	good, err := Latest(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	bad := *good
+	bad.Assets = make(map[string]Asset, len(good.Assets))
+	for name, asset := range good.Assets {
+		asset.SHA256 = strings.Repeat("00", sha256.Size)
+		bad.Assets[name] = asset
+	}
+	feed := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		json.NewEncoder(rw).Encode(&bad)
+	}))
+	defer feed.Close()
+	oldFeed := siteFeed
+	siteFeed = feed.URL
+	defer func() { siteFeed = oldFeed }()
+	if _, err := Latest(context.Background()); err == nil || !errors.Is(err, errFeedVerification) {
+		t.Fatalf("a bad feed checksum fell back to GitHub: %v", err)
+	}
+	if w.apiHits.Load() != 1 {
+		t.Fatalf("GitHub was queried after a corrupt feed; API hits %d", w.apiHits.Load())
+	}
+}
+
+func TestJianmuReleaseUpdatesWithoutTheFeed(t *testing.T) {
+	for _, limited := range []bool{false, true} {
+		t.Run(fmt.Sprintf("api limited %v", limited), func(t *testing.T) {
+			wasGUI := GUI
+			GUI = true
+			t.Cleanup(func() { GUI = wasGUI })
+			w := newFallbackWorld(t, "0.1.12")
+			w.limited, w.unsigned = limited, true
+			rel, err := LatestIn(context.Background(), "zh")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if rel.Version != "0.1.12" || rel.Signed != nil {
+				t.Fatalf("release %+v", rel)
+			}
+			asset, ok := rel.Assets[w.asset]
+			if !ok || !strings.Contains(asset.URL, "/DamonZS/Jianmu/releases/download/v0.1.12/") {
+				t.Fatalf("Windows update asset: %+v", rel.Assets)
+			}
+			exe := filepath.Join(t.TempDir(), "jianmu-windows-x64.exe")
+			staged, err := stageBinaryFor(context.Background(), asset, exe)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if b, _ := os.ReadFile(staged); string(b) != string(w.body) {
+				t.Fatalf("staged %q", b)
+			}
+		})
+	}
+}
+
+func TestGitHubFallbackStillRequiresSignatureAndVerifiedHash(t *testing.T) {
+	t.Run("signature required after cutoff", func(t *testing.T) {
+		w := newFallbackWorld(t, firstSigned)
+		w.unsigned = true
+		if _, err := Latest(context.Background()); err == nil || !strings.Contains(err.Error(), "has no signature") {
+			t.Fatalf("missing signature: %v", err)
+		}
+	})
+	t.Run("raw missing plus API forbidden is not missing", func(t *testing.T) {
+		w := newFallbackWorld(t, "0.1.12")
+		w.apiSigLimited = true
+		api := w.srv.URL + "/repos/DamonZS/Jianmu/releases/assets/2"
+		if _, err := githubFile(context.Background(), w.srv.URL+"/raw-signature", api); err == nil || errors.Is(err, errGitHubFileMissing) {
+			t.Fatalf("raw 404 plus API 403 was treated as a missing file: %v", err)
+		}
+	})
+	t.Run("all signature URLs missing is recognized", func(t *testing.T) {
+		w := newFallbackWorld(t, "0.1.12")
+		if _, err := githubFile(context.Background(), w.srv.URL+"/raw-signature", ""); err == nil || !errors.Is(err, errGitHubFileMissing) {
+			t.Fatalf("raw 404 with no API URL was not recognized as missing: %v", err)
+		}
+	})
+	t.Run("release page loc works without asset API metadata", func(t *testing.T) {
+		wasGUI := GUI
+		GUI = true
+		t.Cleanup(func() { GUI = wasGUI })
+		w := newFallbackWorld(t, "0.1.12")
+		w.limited, w.unsigned = true, true
+		rel, err := Latest(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, ok := rel.Assets[w.asset]; !ok {
+			t.Fatalf("assets from SHA256SUMS: %+v", rel.Assets)
+		}
+	})
+	t.Run("bad signature is not treated as missing", func(t *testing.T) {
+		w := newFallbackWorld(t, "0.1.12")
+		w.sig = "not base64"
+		if _, err := Latest(context.Background()); err == nil || !strings.Contains(err.Error(), "signature") {
+			t.Fatalf("bad signature: %v", err)
+		}
+	})
+	t.Run("bad unsigned file hash is not staged", func(t *testing.T) {
+		wasGUI := GUI
+		GUI = true
+		t.Cleanup(func() { GUI = wasGUI })
+		w := newFallbackWorld(t, "0.1.12")
+		w.unsigned = true
+		w.sums = strings.Repeat("00", 32) + "  " + w.asset + "\n"
+		rel, err := Latest(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := stageBinaryFor(context.Background(), rel.Assets[w.asset], filepath.Join(t.TempDir(), w.asset)); err == nil {
+			t.Fatal("staged a file whose bytes do not match SHA256SUMS")
+		}
+	})
 }
 
 // A release GitHub gives with a signature that isn't the key's is refused,
@@ -163,13 +309,12 @@ func TestGitHubFallbackBindsTheVersion(t *testing.T) {
 	}
 }
 
-// The feed's old unsigned allowance doesn't carry over: a release GitHub
-// gives with no signature is refused even for an old version.
-func TestGitHubFallbackNeedsASignatureForOldVersionsToo(t *testing.T) {
+// An existing but empty signature is invalid even before the signing cutoff.
+func TestGitHubFallbackRefusesEmptySignatureForOldVersions(t *testing.T) {
 	w := newFallbackWorld(t, "0.1.100")
 	w.sig = ""
 	if _, err := Latest(context.Background()); err == nil {
-		t.Fatal("accepted an unsigned release from GitHub")
+		t.Fatal("accepted an empty signature from GitHub")
 	}
 }
 

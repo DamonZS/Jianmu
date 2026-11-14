@@ -153,7 +153,7 @@ func latestAt(ctx context.Context, feed, lang string) (*Release, error) {
 	if err == nil {
 		return rel, nil
 	}
-	if ctx.Err() != nil {
+	if ctx.Err() != nil || errors.Is(err, errFeedVerification) {
 		return nil, err
 	}
 	rel, gerr := githubLatest(ctx, lang)
@@ -162,6 +162,8 @@ func latestAt(ctx context.Context, feed, lang string) (*Release, error) {
 	}
 	return rel, nil
 }
+
+var errFeedVerification = errors.New("update feed verification failed")
 
 func latestFrom(ctx context.Context, feed, lang string) (*Release, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", feed, nil)
@@ -184,7 +186,7 @@ func latestFrom(ctx context.Context, feed, lang string) (*Release, error) {
 		return nil, fmt.Errorf("update feed: no version")
 	}
 	if err := r.verify(); err != nil {
-		return nil, fmt.Errorf("update feed: %w", err)
+		return nil, fmt.Errorf("update feed: %w", errors.Join(errFeedVerification, err))
 	}
 	r.Notes = InLang(r.Notes, lang)
 	r.githubAddresses()
