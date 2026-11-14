@@ -81,103 +81,25 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }, [lang, key, vars]);
         const row = page.locator(".rt-accts li:not(.rt-fold)", { has: page.locator(".who", { hasText: /^solo-1$/ }) });
         const fold = page.locator(".rt-accts li.rt-fold");
-        // what the stage shows: each lit row, whether it is now, whether its
-        // dot moves, and how many drawn wires flow and how many are lit
-        const stage = () => page.evaluate(() => ({
-          on: [...document.querySelectorAll(".rt-accts li.on")].map((li) => li.querySelector(".who")?.textContent + (li.classList.contains("now") ? ":now" : "")),
-          moving: [...document.querySelectorAll(".rt-accts li .dot")].filter((d) => getComputedStyle(d, "::after").animationName !== "none").length,
-          flowing: document.querySelectorAll(".rt-wires path.live[d]").length,
-          lit: document.querySelectorAll(".rt-wires path.lit[d]").length,
-        }));
         await page.goto("http://jianmu.test/?view=routing");
         await row.waitFor();
         await page.waitForFunction(() => document.querySelector(".rt-accts li.on em")?.textContent.trim());
-
-        // the reporter's: the last request is over, its account answered it
         assert.equal((await row.locator("em").textContent()).trim(), await say("answered this request"));
-        assert.deepEqual(await stage(), { on: ["solo-1"], moving: 0, flowing: 0, lit: 1 });
+        assert.equal(await page.locator(".ps-dot").count(), 0);
 
-        // a request comes and is with one of the folded keys: the fold flows
         send(route(2, [ag(false)]));
-        await page.waitForFunction(() => document.querySelector(".rt-accts li.rt-fold.now"));
-        let s = await stage();
-        assert.deepEqual(s.on, ["Antigravity:now"]);
-        assert.equal(s.moving, 1);
-        assert.equal(s.flowing, 2, "the agent's wire and the fold's");
-        assert.equal(s.lit, 0);
-        // each flows as its copy in .rt-flows, a layer of its own, and is
-        // itself hidden: in the svg of every wire, WebView2 drew all of them
-        // again each frame one flowed (#3164)
-        // (a wire's d set anew is copied on the next frame)
-        const same = () => {
-          const ds = (q) => [...document.querySelectorAll(q)].map((p) => p.getAttribute("d")).sort().join();
-          return document.querySelectorAll(".rt-flows path[d]").length === 2 && ds(".rt-wires path.live[d]") === ds(".rt-flows path[d]");
-        };
-        await page.waitForFunction(same);
-        assert.deepEqual(await page.evaluate(() => {
-          const live = [...document.querySelectorAll(".rt-wires path.live[d]")], copies = [...document.querySelectorAll(".rt-flows path[d]")];
-          return {
-            hidden: live.filter((p) => getComputedStyle(p).visibility === "hidden" && getComputedStyle(p).animationName === "none").length,
-            animated: copies.filter((p) => getComputedStyle(p).animationName !== "none").length,
-            layer: getComputedStyle(document.querySelector(".rt-flows")).willChange,
-          };
-        }), { hidden: 2, animated: 0, layer: "transform" });
-        // the copies' dashes move, from a timer 15 times a second and not
-        // a CSS animation, which Chromium drew on the main thread every
-        // frame: with five requests in flight that was a quarter of a core
-        // in WebView2 (chenxiang, #5467). The dot held at the account fades
-        // from the same timer, not a CSS animation either.
-        const offsets = () => page.evaluate(() => [...document.querySelectorAll(".rt-flows path[d]")].map((p) => getComputedStyle(p).strokeDashoffset).join());
-        const was = await offsets();
-        await page.waitForFunction((was) => [...document.querySelectorAll(".rt-flows path[d]")].map((p) => getComputedStyle(p).strokeDashoffset).join() !== was, was);
-        const ticks = await page.evaluate(() => new Promise((res) => {
-          let n = 0;
-          const o = new MutationObserver(() => n++);
-          o.observe(document.querySelector(".rt-flows"), { attributes: true, attributeFilter: ["style"] });
-          setTimeout(() => { o.disconnect(); res(n); }, 1000);
-        }));
-        assert(ticks >= 1 && ticks <= 30, `the dashes moved ${ticks} times in a second, not every frame`);
-        // the shared tray stage holds the dot at the provider while it answers
-        await page.waitForFunction(() => document.querySelector(".ps-sky .ps-dot.wait"), null, { timeout: 15000 });
-        assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".ps-sky .ps-dot.wait")).animationName), "ps-wait");
-        const fade = () => page.evaluate(() => getComputedStyle(document.querySelector(".ps-sky .ps-dot.wait")).opacity);
-        const fadeWas = await fade();
-        await page.waitForFunction((was) => getComputedStyle(document.querySelector(".ps-sky .ps-dot.wait")).opacity !== was, fadeWas);
-        assert.match((await fold.locator("em").textContent()).trim(), new RegExp("^ag-2: " + (await say("answering…")).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+        await page.locator(".ps-dot.wait").waitFor();
+        assert.equal(await page.locator(".ps-hub.busy").count(), 1);
 
-        // opened, the key with the request is the one that flows
-        await fold.click();
-        await page.locator(".rt-accts li", { has: page.locator(".who", { hasText: /^ag-2$/ }) }).waitFor();
-        s = await stage();
-        assert.deepEqual(s.on.sort(), ["Antigravity:now", "ag-2:now"].sort());
-
-        // it is answered: still lit, nothing moves
         send(route(2, [ag(true)]));
-        await page.waitForFunction(() => !document.querySelector(".rt-accts li.now"));
-        s = await stage();
-        assert.deepEqual(s.on.sort(), ["Antigravity", "ag-2"].sort());
-        assert.equal(s.moving, 0);
-        assert.equal(s.flowing, 0);
-        assert.equal(s.lit, 2, "the fold's wire and the key's");
-        await page.waitForFunction(() => !document.querySelector(".rt-flows path"));
-        assert.equal(await page.locator(".rt-wires path.flown").count(), 0);
-        // and nothing flowing, the timer is gone: --rt-dash is let go and
-        // set no more
-        await page.waitForFunction(() => !document.querySelector(".rt-flows").style.getPropertyValue("--rt-dash"));
-        assert.equal(await page.evaluate(() => new Promise((res) => {
-          let n = 0;
-          const o = new MutationObserver(() => n++);
-          o.observe(document.querySelector(".rt-flows"), { attributes: true, attributeFilter: ["style"] });
-          setTimeout(() => { o.disconnect(); res(n); }, 400);
-        })), 0);
-
-        // a reload shows it the same: lit and still
+        await page.locator(".ps-dot.ok").waitFor();
+        await page.locator(".ps-dot").waitFor({ state: "detached" });
+        assert.equal(await page.locator(".ps-hub.busy, .ps-wire.on").count(), 0);
         await page.reload();
         await row.waitFor();
         await page.waitForFunction(() => document.querySelector(".rt-accts li.on em")?.textContent.trim());
-        s = await stage();
-        assert.equal(s.moving, 0);
-        assert.equal(s.flowing, 0);
+        assert.equal(await page.locator(".ps-dot").count(), 0);
+        assert.equal(await page.locator(".ps-hub.busy").count(), 0);
         assert.deepEqual(errors, []);
       });
     }

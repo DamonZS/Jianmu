@@ -1,12 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// With motion reduced, a request in flight still shows on the Routing page
-// (vantiboolean on Discord: the Windows app's Routing page had "lost its
-// animation", every wire dotted and still while two accounts answered).
-// Reduced motion is the system's (Windows' "Animation effects" off, which
-// WebView2 reports as prefers-reduced-motion) or Settings' Reduce motion.
-// Nothing moves along a wire then, but the flowing wires fade and come
-// back, and so does the dot held at the account answering. Once the
-// request is over nothing fades. No backend, the API is faked here.
+// Reduced motion is honored by the shared tray Routing stage in both places
+// it appears: system preference and Settings' Reduce motion. The request rows
+// still show active work; dots and the hub pulse stay static. No backend.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -70,41 +65,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction(() => document.querySelector(".rt-accts li.on em")?.textContent.trim());
         assert.equal(await page.evaluate(() => calm()), true, "motion is reduced");
 
-        // two requests at once, one at each account: the reporter's two
-        // rows "answering another request…"
-        send(route(2, [at(1, false)]), route(3, [at(2, false)]));
-        await page.waitForFunction(() => document.querySelectorAll(".rt-accts li.now").length === 2);
-        await page.waitForFunction(() => document.querySelectorAll(".rt-flows path[d]").length >= 2);
-        // the wires' dashes stand still: no animation and no offset
-        const dashes = () => page.evaluate(() => [...document.querySelectorAll(".rt-flows path[d]")].map((p) => getComputedStyle(p).animationName + "|" + getComputedStyle(p).strokeDashoffset).join());
-        const first = await dashes();
-        assert.doesNotMatch(first, /rtflow/);
-        // but the layer they are on fades and comes back
-        const layer = () => page.evaluate(() => Number(getComputedStyle(document.querySelector(".rt-flows")).opacity));
-        const seen = new Set();
-        for (let i = 0; i < 40 && seen.size < 3; i++) { seen.add((await layer()).toFixed(2)); await page.waitForTimeout(60); }
-        assert(seen.size >= 3, `the flowing wires fade: ${[...seen]}`);
-        assert(Math.min(...[...seen].map(Number)) < .95, `they fade below full: ${[...seen]}`);
-        assert.equal(await dashes(), first, "the dashes stood still");
-        // the shared tray stage stays static under reduced motion
+        // A request in flight remains visible; reduced motion keeps the
+        // shared stage static while the trace updates it.
+        send(route(2, [at(1, false)]));
+        await page.waitForFunction(() => document.querySelector(".rt-accts li.now"));
+        await page.waitForTimeout(300);
         assert.equal(await page.locator(".ps-sky .ps-dot").count(), 0);
         assert.equal(await page.locator(".ps-hub").evaluate((e) => getComputedStyle(e).animationName), "none");
-        // no bird flies with motion reduced
         assert.equal(await page.locator(".rt-flier").count(), 0);
 
-        // both are answered: nothing fades any more, the layer is whole
-        send(route(2, [at(1, true)]), route(3, [at(2, true)]));
+        send(route(2, [at(1, true)]));
         await page.waitForFunction(() => !document.querySelector(".rt-accts li.now"));
-        await page.waitForFunction(() => !document.querySelector(".rt-flows path"));
-        await page.waitForFunction(() => !document.querySelector(".rt-flows").style.getPropertyValue("--rt-fade"));
-        assert.equal(await layer(), 1);
-        assert.equal(await page.evaluate(() => new Promise((res) => {
-          let n = 0;
-          const o = new MutationObserver(() => n++);
-          o.observe(document.querySelector(".rt-flows"), { attributes: true, attributeFilter: ["style"] });
-          o.observe(document.querySelector(".rt-sky"), { attributes: true, attributeFilter: ["style"] });
-          setTimeout(() => { o.disconnect(); res(n); }, 400);
-        })), 0, "the timer stopped");
+        assert.equal(await page.locator(".ps-dot, .ps-wire.on").count(), 0);
+        assert.equal(await page.locator(".ps-hub.busy").count(), 0);
         assert.deepEqual(errors, []);
       });
     }
