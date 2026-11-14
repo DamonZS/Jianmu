@@ -19,7 +19,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, "../assets");
+const assets = process.env.JIANMU_PLUGIN_ASSETS || path.resolve(__dirname, "../assets");
 
 const REPOS = [
   { spec: "opencode-claude-auth", repo: "griffinmartin/opencode-claude-auth", url: "https://github.com/griffinmartin/opencode-claude-auth", owner: "griffinmartin", ownerAvatar: "https://avatars.githubusercontent.com/u/1090329?v=4", description: "OpenCode plugin that uses your existing Claude Code credentials — no separate login needed. ", stars: 1301, license: "MIT", pushed: "2026-09-22T23:47:15Z", package: "opencode-claude-auth", version: "2.2.1", icon: "file:claude-auth.svg" },
@@ -33,7 +33,7 @@ const LISTINGS = [
 ];
 const README = { "opencode-claude-auth": "# opencode-claude-auth\n\nUses your existing Claude Code credentials.", "github:keli-wen/agy-staff": "# agy-staff\n\nHire agy as a staffer." };
 
-function server(lang, asked) {
+function server(lang, asked, repos = REPOS) {
   // installed before: the quota plugin, by its repository's page URL
   const installed = [{ spec: "https://github.com/slkiser/opencode-quota", package: "@slkiser/opencode-quota", providers: [], version: "5.0.2", moved: [] }];
   const state = () => ({ bun: true, bunVersion: "1.4.2", plugins: installed, picker: false, movable: [] });
@@ -50,7 +50,7 @@ function server(lang, asked) {
     if (url.pathname === "/api/plugins") return json(state());
     if (url.pathname === "/api/plugins/listings") return json({ listings: LISTINGS.map((l) => ({ ...l, npm: undefined })) });
     if (url.pathname === "/api/plugins/npm") return json({ npm: { "@rama_nigg/open-cursor": LISTINGS[0].npm } });
-    if (url.pathname === "/api/plugins/github") { asked.push(["github"]); return json({ repos: REPOS, topic: "jianmu-plugin" }); }
+    if (url.pathname === "/api/plugins/github") { asked.push(["github"]); return json({ repos, topic: "jianmu-plugin" }); }
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname === "/api/plugins/updates") return json({ waiting: [], updated: [] });
     if (url.pathname === "/api/plugins/page") {
@@ -60,7 +60,7 @@ function server(lang, asked) {
     if (url.pathname === "/api/plugins/add") {
       const b = body();
       asked.push(["add", b]);
-      const r = REPOS.find((x) => x.spec === b.spec);
+      const r = repos.find((x) => x.spec === b.spec);
       installed.push({ spec: b.spec, package: r.package, providers: [], version: r.version, moved: [] });
       return json(state());
     }
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
-          page.on("pageerror", (e) => errors.push(e.message));
+          page.on("pageerror", (e) => errors.push(e.stack));
           await page.route("**/*", server(lang, asked));
           await page.addInitScript(() => { try { localStorage.setItem("jianmu.pluginTab", "discover"); } catch {} });
 
@@ -232,6 +232,57 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.deepEqual(errors, []);
         });
       }
+    }
+  });
+}
+
+// Repository aliases are presentation only: installing still uses the author's spec.
+const ALIASED_REPOS = [
+  ["932633145/magpie-agent-cursor-bridge", "jianmu-agent-cursor-bridge"],
+  ["nodlles/magpie-agent-cursor-bridge", "jianmu-agent-cursor-bridge"],
+  ["Jhonny1024/claude-science-local-for-magpie-windows", "claude-science-local-for-jianmu-windows"],
+];
+for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
+  test(`${engine}: Jianmu aliases retain original repositories and installation identities`, async (t) => {
+    const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium" }));
+    t.after(() => browser.close());
+    for (const lang of ["en", "zh"]) for (const [repo, alias] of ALIASED_REPOS) {
+      await t.test(lang + " " + repo, async () => {
+        const context = await browser.newContext({ viewport: { width: 980, height: 860 } });
+        t.after(() => context.close());
+        const page = await context.newPage(), asked = [], errors = [];
+        page.on("pageerror", (e) => errors.push(e.stack));
+        const repos = ALIASED_REPOS.map(([repo]) => ({ repo, spec: "github:" + repo, url: "https://github.com/" + repo,
+          owner: repo.split("/")[0], name: repo.split("/")[1], package: repo.split("/")[1], kind: "agent",
+          version: "0.1.0", description: "Original publisher description", stars: 1, pushed: "2026-11-14T00:00:00Z" }));
+        await page.route("**/*", server(lang, asked, repos));
+        await page.addInitScript(() => localStorage.setItem("jianmu.pluginTab", "discover"));
+        await page.goto("http://jianmu.test/?view=plugins");
+        const view = page.locator("#view-plugins"), spec = "github:" + repo;
+        await view.locator(".pm-find input").fill("jianmu-agent-cursor-bridge");
+        await page.waitForFunction(() => document.querySelectorAll(".pm-card").length === 2);
+        await view.locator(".pm-find input").fill(repo);
+        const card = view.locator(`.pm-card[data-pkg="${spec}"]`);
+        await card.waitFor();
+        assert.equal(await card.locator(".pm-name b").innerText(), alias);
+        assert.match(await card.locator(".pm-by").innerText(), new RegExp(repo.split("/")[0]));
+        assert.equal(await card.locator(".pm-chip.warn").count(), 1, "alias must not imply review");
+        await card.locator(".pm-sum").click();
+        const detail = page.locator("#modal .pm-detail");
+        assert.equal(await detail.locator(".pm-name b").innerText(), alias);
+        assert.ok((await detail.locator(".pm-facts").innerText()).includes(repo));
+        assert.equal(await detail.locator('.pm-links a', { hasText: "GitHub" }).getAttribute("href"), "https://github.com/" + repo);
+        assert.equal(await detail.locator(".pm-note.warn").count(), 1);
+        await detail.locator(".pm-act").click();
+        await detail.locator(".pm-act.done").waitFor();
+        assert.deepEqual(asked.filter(([kind]) => kind === "add").pop(), ["add", { spec }]);
+        await detail.locator(".bar button.text").last().click();
+        await page.waitForFunction(() => document.querySelector("#modal").hidden);
+        await view.locator(".pm-find input").fill("");
+        await view.locator('.lib-tabs .opt[data-sub="installed"]').click();
+        assert.ok((await view.locator(".pm-row .name").allInnerTexts()).some((text) => text.startsWith(alias)));
+        assert.deepEqual(errors, []);
+      });
     }
   });
 }

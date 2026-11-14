@@ -428,22 +428,25 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
 		License any             `json:"license"`
-		Jianmu  struct {
-			Middleware string `json:"middleware"`
-			Agent      string `json:"agent"`
-			Hooks      string `json:"hooks"`
-			Icon       string `json:"icon"`
-			Name       string `json:"name"`
-			// a map of language to sentence, anything else read as none
-			Summary json.RawMessage `json:"summary"`
-			Page    struct {
-				File string `json:"file"`
-			} `json:"page"`
-		} `json:"jianmu"`
+	}
+	var meta struct {
+		Middleware string `json:"middleware"`
+		Agent      string `json:"agent"`
+		Hooks      string `json:"hooks"`
+		Icon       string `json:"icon"`
+		Name       string `json:"name"`
+		// a map of language to sentence, anything else read as none
+		Summary json.RawMessage `json:"summary"`
+		Page    struct {
+			File string `json:"file"`
+		} `json:"page"`
 	}
 	if json.Unmarshal(pb, &pj) != nil || !pkgName.MatchString(pj.Name) {
 		return t, false, true, nil
 	}
+	// a plugin written under the old name keeps its fields in the magpie
+	// block, which jianmu reads the same way
+	_ = json.Unmarshal(metadataBlock(pb), &meta)
 	t.Package, t.Version = pj.Name, pj.Version
 	// the licence it names, a string as npm takes it, for when GitHub
 	// couldn't tell one from its LICENSE file
@@ -455,26 +458,26 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 	}
 	// a picture, as host.js's iconOf takes one: jianmu checks and
 	// keeps it before the page shows it (the GUI's /api/plugins/github)
-	t.Icon = ownIcon(pj.Jianmu.Icon)
+	t.Icon = ownIcon(meta.Icon)
 	// and what it says of itself, shown on its card as its own words
 	// rather than the community's (#3608)
-	t.Name, t.Summary = ownName(pj.Jianmu.Name), ownSummary(pj.Jianmu.Summary)
+	t.Name, t.Summary = ownName(meta.Name), ownSummary(meta.Summary)
 	// runs is whether Bun loads a module of its own (main, exports)
 	runs := pj.Main != "" || len(pj.Exports) > 0
 	switch {
-	case !runs && strings.TrimSpace(pj.Jianmu.Middleware) != "":
+	case !runs && strings.TrimSpace(meta.Middleware) != "":
 		t.Kind = "middleware"
 	// a package that adds an agent is an agent plugin, its Bun module
 	// (main) only what keeps the agent working, not a provider
 	// (plugins#737)
-	case strings.TrimSpace(pj.Jianmu.Agent) != "":
+	case strings.TrimSpace(meta.Agent) != "":
 		t.Kind = "agent"
-	case !runs && strings.TrimSpace(pj.Jianmu.Page.File) != "":
+	case !runs && strings.TrimSpace(meta.Page.File) != "":
 		t.Kind = "page"
 	// gateway hooks alone (jianmu.hooks) need no entry of their
 	// own, as the host loads them: the hooks file is the one to
 	// find (#3821)
-	case !runs && strings.TrimSpace(pj.Jianmu.Hooks) != "":
+	case !runs && strings.TrimSpace(meta.Hooks) != "":
 		t.Kind = "hooks"
 	}
 	// published to npm from this repository: npm's copy is the one
@@ -495,10 +498,10 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 			t.Spec, t.Version = pj.Name, l.Version
 			// the copy installed says what it is: its words when it
 			// says any, else the repository's
-			if n := ownName(l.Jianmu.Name); n != "" {
+			if n := ownName(l.words().Name); n != "" {
 				t.Name = n
 			}
-			if s := ownSummary(l.Jianmu.Summary); s != nil {
+			if s := ownSummary(l.words().Summary); s != nil {
 				t.Summary = s
 			}
 			npmNames = l.Main != "" || len(l.Exports) > 0
@@ -522,13 +525,13 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 		if !runs {
 			switch t.Kind {
 			case "middleware":
-				entry = pj.Jianmu.Middleware
+				entry = meta.Middleware
 			case "agent":
-				entry = pj.Jianmu.Agent
+				entry = meta.Agent
 			case "page":
-				entry = pj.Jianmu.Page.File
+				entry = meta.Page.File
 			case "hooks":
-				entry = pj.Jianmu.Hooks
+				entry = meta.Hooks
 			}
 		}
 		if path.Ext(entry) != "" {

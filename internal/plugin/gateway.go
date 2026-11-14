@@ -34,16 +34,14 @@ func Gateway(target string) string {
 		}
 		return ""
 	}
-	var pkg struct {
-		Jianmu struct {
-			Hooks string `json:"hooks"`
-		} `json:"jianmu"`
+	var meta struct {
+		Hooks string `json:"hooks"`
 	}
 	b, err := os.ReadFile(filepath.Join(target, "package.json"))
-	if err != nil || json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Jianmu.Hooks) == "" {
+	if err != nil || json.Unmarshal(metadataBlock(b), &meta) != nil || strings.TrimSpace(meta.Hooks) == "" {
 		return ""
 	}
-	return filepath.Join(target, filepath.FromSlash(strings.TrimSpace(pkg.Jianmu.Hooks)))
+	return filepath.Join(target, filepath.FromSlash(strings.TrimSpace(meta.Hooks)))
 }
 
 // GatewayOnly distinguishes request hooks from packages that also serve a

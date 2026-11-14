@@ -2495,6 +2495,13 @@ function keyAsked(m) {
   return m.type === "api" && Array.isArray(m.prompts) && m.prompts.length > 0 && typeof m.authorize === "function"
 }
 
+// ownMeta is a package.json's jianmu block, else the magpie block a plugin
+// written before the rename keeps: the fields are the same.
+function ownMeta(dir) {
+  const pj = readJSON(path.join(dir, "package.json"))
+  return pj?.jianmu ?? pj?.magpie
+}
+
 // iconOf is the picture a plugin gives its provider, jianmu's own field
 // (OpenCode's providers have none): the auth hook's icon, else
 // package.json's jianmu.icon. An https URL or a data:image URI; jianmu
@@ -2508,7 +2515,7 @@ function iconOf(a) {
   const own = ok(a.auth.icon)
   if (own || !a.target) return own
   const dir = fs.statSync(a.target, { throwIfNoEntry: false })?.isDirectory() ? a.target : path.dirname(a.target)
-  return ok(readJSON(path.join(dir, "package.json"))?.jianmu?.icon)
+  return ok(ownMeta(dir)?.icon)
 }
 
 // concurrencyOf is how many requests the plugin says each of its accounts
@@ -2534,7 +2541,7 @@ function declared(a, key) {
   const own = ok(a.auth[key])
   if (own || !a.target) return own
   const dir = fs.statSync(a.target, { throwIfNoEntry: false })?.isDirectory() ? a.target : path.dirname(a.target)
-  return ok(readJSON(path.join(dir, "package.json"))?.jianmu?.[key])
+  return ok(ownMeta(dir)?.[key])
 }
 
 // rateOf reads a model's credit rate as a plugin gives it: a number (0.5)

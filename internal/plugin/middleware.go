@@ -33,17 +33,17 @@ func Middleware(target string) (file string, only bool) {
 	var pkg struct {
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
-		Jianmu  struct {
-			Middleware string `json:"middleware"`
-			Gateway    string `json:"gateway"`
-		} `json:"jianmu"`
 	}
-	if json.Unmarshal(b, &pkg) != nil {
+	var meta struct {
+		Middleware string `json:"middleware"`
+		Gateway    string `json:"gateway"`
+	}
+	if json.Unmarshal(b, &pkg) != nil || json.Unmarshal(metadataBlock(b), &meta) != nil {
 		return "", false
 	}
-	name := strings.TrimSpace(pkg.Jianmu.Middleware)
+	name := strings.TrimSpace(meta.Middleware)
 	if name == "" {
-		name = strings.TrimSpace(pkg.Jianmu.Gateway)
+		name = strings.TrimSpace(meta.Gateway)
 	}
 	if name == "" {
 		return "", false
@@ -63,13 +63,11 @@ func OptionsExample(target string) map[string]any {
 	if err != nil {
 		return nil
 	}
-	var pkg struct {
-		Jianmu struct {
-			Options map[string]any `json:"options"`
-		} `json:"jianmu"`
+	var meta struct {
+		Options map[string]any `json:"options"`
 	}
-	if json.Unmarshal(b, &pkg) != nil {
+	if json.Unmarshal(metadataBlock(b), &meta) != nil {
 		return nil
 	}
-	return pkg.Jianmu.Options
+	return meta.Options
 }

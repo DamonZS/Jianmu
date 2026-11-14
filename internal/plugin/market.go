@@ -42,7 +42,7 @@ var builtinParsed = sync.OnceValue(func() []Listing {
 
 // MarketURL is where the list is kept; JIANMU_PLUGIN_MARKET moves it, and
 // "off" keeps to the built-in copy.
-const MarketURL = "https://raw.githubusercontent.com/DamonZS/jianmu-commonity/main/plugins/registry.json"
+const MarketURL = "https://raw.githubusercontent.com/TopoReduce/plugins/main/plugins/registry.json"
 
 // Listing is a plugin the market suggests. One not Community is an
 // author's own package the list names, published from their repository
@@ -421,6 +421,15 @@ func infoWithin(ctx context.Context, names []string, age time.Duration) map[stri
 	return res
 }
 
+// hostWords is a package.json's own words about itself: jianmu's icon,
+// name and summary, in its jianmu block or the magpie block a plugin
+// written before the rename keeps.
+type hostWords struct {
+	Icon    string          `json:"icon"`
+	Name    string          `json:"name"`
+	Summary json.RawMessage `json:"summary"`
+}
+
 type npmLatest struct {
 	Version     string `json:"version"`
 	Description string `json:"description"`
@@ -434,11 +443,16 @@ type npmLatest struct {
 	NPMUser struct {
 		Name string `json:"name"`
 	} `json:"_npmUser"`
-	Jianmu struct {
-		Icon    string          `json:"icon"`
-		Name    string          `json:"name"`
-		Summary json.RawMessage `json:"summary"`
-	} `json:"jianmu"`
+	Jianmu hostWords `json:"jianmu"`
+	Magpie hostWords `json:"magpie"`
+}
+
+// words is the copy's jianmu block, else its legacy magpie block.
+func (l npmLatest) words() hostWords {
+	if l.Jianmu.Icon == "" && l.Jianmu.Name == "" && len(l.Jianmu.Summary) == 0 {
+		return l.Magpie
+	}
+	return l.Jianmu
 }
 
 func person(v any) string {
@@ -544,7 +558,7 @@ func npmOf(l npmLatest) NPM {
 	info.License, _ = l.License.(string)
 	info.Repository = repoURL(l.Repository)
 	info.Publisher = person(l.Author)
-	info.Icon = ownIcon(l.Jianmu.Icon)
+	info.Icon = ownIcon(l.words().Icon)
 	if info.Publisher == "" {
 		info.Publisher = l.NPMUser.Name
 	}
@@ -819,10 +833,7 @@ func installedOwn(spec string) (own struct {
 	if err != nil {
 		return own
 	}
-	var p struct {
-		Jianmu json.RawMessage `json:"jianmu"`
-	}
-	if json.Unmarshal(b, &p) != nil || json.Unmarshal(p.Jianmu, &own) != nil {
+	if json.Unmarshal(metadataBlock(b), &own) != nil {
 		own.Icon, own.Name = "", ""
 	}
 	return own

@@ -166,18 +166,18 @@ func Window(target string) (w *WindowSpec, only bool) {
 	var pkg struct {
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
-		Jianmu  struct {
-			Page        *part    `json:"page"`
-			Panels      []part   `json:"panels"`
-			Actions     []part   `json:"actions"`
-			Permissions []string `json:"permissions"`
-		} `json:"jianmu"`
 	}
-	if json.Unmarshal(b, &pkg) != nil {
+	var meta struct {
+		Page        *part    `json:"page"`
+		Panels      []part   `json:"panels"`
+		Actions     []part   `json:"actions"`
+		Permissions []string `json:"permissions"`
+	}
+	if json.Unmarshal(b, &pkg) != nil || json.Unmarshal(metadataBlock(b), &meta) != nil {
 		return nil, false
 	}
 	w = &WindowSpec{}
-	if pg := pkg.Jianmu.Page; pg != nil {
+	if pg := meta.Page; pg != nil {
 		if file, ok := htmlInside(target, pg.File); ok {
 			p := &PageSpec{Title: strings.TrimSpace(pg.Title), Titles: titles(pg.Titles), File: file, Dir: filepath.Dir(file), KeepAlive: string(pg.KeepAlive) == "true"}
 			// the icon is served with the page, so it sits in the page's folder
@@ -198,7 +198,7 @@ func Window(target string) (w *WindowSpec, only bool) {
 			w.Page = p
 		}
 	}
-	for _, pn := range pkg.Jianmu.Panels {
+	for _, pn := range meta.Panels {
 		if len(w.Panels) == maxPanels {
 			break
 		}
@@ -211,7 +211,7 @@ func Window(target string) (w *WindowSpec, only bool) {
 	}
 	// an action opens the plugin's page, so a plugin with none has no
 	// action; an id given twice is the first's
-	for _, a := range pkg.Jianmu.Actions {
+	for _, a := range meta.Actions {
 		if w.Page == nil || len(w.Actions) == maxActions {
 			break
 		}
@@ -224,7 +224,7 @@ func Window(target string) (w *WindowSpec, only bool) {
 	if w.Page == nil && len(w.Panels) == 0 {
 		return nil, false
 	}
-	for _, r := range pkg.Jianmu.Permissions {
+	for _, r := range meta.Permissions {
 		if slices.Contains(PageReads, r) && !slices.Contains(w.Reads, r) {
 			w.Reads = append(w.Reads, r)
 		}

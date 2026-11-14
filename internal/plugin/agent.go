@@ -30,14 +30,14 @@ func Agent(target string) (file string, only bool) {
 	var pkg struct {
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
-		Jianmu  struct {
-			Agent string `json:"agent"`
-		} `json:"jianmu"`
 	}
-	if json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Jianmu.Agent) == "" {
+	var meta struct {
+		Agent string `json:"agent"`
+	}
+	if json.Unmarshal(b, &pkg) != nil || json.Unmarshal(metadataBlock(b), &meta) != nil || strings.TrimSpace(meta.Agent) == "" {
 		return "", false
 	}
-	file = filepath.Join(target, filepath.FromSlash(strings.TrimSpace(pkg.Jianmu.Agent)))
+	file = filepath.Join(target, filepath.FromSlash(strings.TrimSpace(meta.Agent)))
 	return file, pkg.Main == "" && len(pkg.Exports) == 0
 }
 

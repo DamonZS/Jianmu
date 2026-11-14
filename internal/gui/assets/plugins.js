@@ -70,9 +70,11 @@
   // names it (github:owner/repo, its page's or a git URL), never by its
   // package's name, which another repository can give too (#3685)
   const ghRepo = (spec) => { const m = /^(?:github:|(?:git\+)?(?:https?|ssh|git):\/\/(?:[^@/\s]+@)?(?:www\.|ssh\.)?github\.com(?::\d+(?=\/))?[/:])([^/#\s]+\/[^/#\s]+?)(?:\.git)?(?:[/#].*)?$/i.exec(spec) || (isGit(spec) && /^([^:/#]+\/[^:/#]+)(?:#.*)?$/.exec(spec)); return m ? m[1].toLowerCase() : ""; };
+  const packageIdentity = (pkg) => typeof pkg === "string" ? pkg.replace(/^@magpie-community\//, "@jianmu/") : "";
+  const samePackage = (a, b) => !!packageIdentity(a) && packageIdentity(a) === packageIdentity(b);
   const entryOf = (pkg) => {
-    const g = (tagged || []).find((x) => x.package === pkg)?.github;
-    return mine?.plugins?.find((e) => name(e.spec) === pkg || (g && ghRepo(e.spec) === g.repo.toLowerCase()));
+    const g = (tagged || []).find((x) => samePackage(x.package, pkg))?.github;
+    return mine?.plugins?.find((e) => samePackage(name(e.spec), pkg) || (g && ghRepo(e.spec) === g.repo.toLowerCase()));
   };
   // npm has the versions of a package: not a folder's, nor a git one's
   const onNPM = (spec) => !isPath(spec) && !isGit(spec);
@@ -159,8 +161,14 @@
   // listing: its owner as the publisher, its version, and installed by its
   // spec (its npm name when published there from the repository, else
   // github:owner/repo); its name and summary its package.json's own (#3608)
+  // Display aliases never change the repository or spec that Install uses.
+  const displayAliases = {
+    "932633145/magpie-agent-cursor-bridge": "jianmu-agent-cursor-bridge",
+    "nodlles/magpie-agent-cursor-bridge": "jianmu-agent-cursor-bridge",
+    "jhonny1024/claude-science-local-for-magpie-windows": "claude-science-local-for-jianmu-windows",
+  };
   const ghListing = (r) => ({
-    package: r.spec, name: r.name || r.repo.split("/")[1], kind: r.kind, github: r, icon: r.icon || undefined,
+    package: r.spec, name: displayAliases[r.repo.toLowerCase()] || r.name || r.repo.split("/")[1], kind: r.kind, github: r, icon: r.icon || undefined,
     summary: r.summary || r.description ? { ...(r.description && { en: r.description }), ...r.summary } : undefined,
     own: !!(r.name || r.summary),
     npm: { version: r.version || "", publisher: r.owner, repository: r.url, license: r.license, weekly: 0 },
@@ -452,7 +460,7 @@
     const npm = e.latest && e.version && newer(e.latest, e.version);
     if (!npm && !gitBehind(e)) return false;
     const pkg = name(e.spec);
-    const l = (listings || []).find((x) => x.package === pkg);
+    const l = (listings || []).find((x) => samePackage(x.package, pkg));
     b.classList.add("pm-act", "pm-up");
     b.type = "button";
     b.textContent = busy.get(pkg) === "upgrade" || busy.get(e.spec) === "upgrade" ? t("Updating…") : t("Update");
@@ -460,7 +468,7 @@
     if (npm) {
       b.title = t("Update to {v}", { v: "v" + e.latest });
       // the community's would come by itself: Update brings it now
-      if (pkg.startsWith("@magpie-community/") && !/@(?!latest$)[^@/]+$/.test(e.spec.slice(pkg.length))) b.title += "\n" + t("jianmu updates it by itself within the hour; Update does it now");
+      if ((pkg.startsWith("@jianmu/") || pkg.startsWith("@magpie-community/")) && !/@(?!latest$)[^@/]+$/.test(e.spec.slice(pkg.length))) b.title += "\n" + t("jianmu updates it by itself within the hour; Update does it now");
     } else b.title = t("Fetches it from {repo} again", { repo: e.spec }) + "\n" + t("{have} installed, {repo} is at {head}", { have: e.commit, repo: e.spec, head: e.head });
     b.onclick = (ev) => {
       ev.stopPropagation();
@@ -670,8 +678,13 @@
   // every plugin the market can show: the list's, and the repositories
   // tagged on GitHub it doesn't list already
   function everything(match) {
-    const listed = new Set((listings || []).map((l) => l.package));
-    const gh = (tagged || []).filter((l) => !(l.github.package && listed.has(l.github.package)));
+    const listed = new Set((listings || []).map((l) => packageIdentity(l.package)));
+    const listedRepos = new Set((listings || []).map((l) => {
+      const repo = String(l.npm?.repository || "").replace(/^git\+/, "").replace(/\.git\/?$/, "");
+      const m = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/#]+\/[^/#]+)/i.exec(repo);
+      return m ? m[1].toLowerCase() : "";
+    }).filter(Boolean));
+    const gh = (tagged || []).filter((l) => !listed.has(packageIdentity(l.github.package)) && !listedRepos.has(l.github.repo.toLowerCase()));
     return [...(listings || []), ...gh].filter(match);
   }
 
@@ -682,7 +695,7 @@
     if (l.community) {
       const v = el("span", "pm-verified");
       v.append(glyph(SHIELD, 11, 1.5), el("span", "", t("jianmu community")));
-      v.title = t("Written for jianmu by its community, in github.com/magpie-community/plugins");
+      v.title = t("Listed in the Jianmu community catalog: {repo}", { repo: "github.com/TopoReduce/plugins" });
       by.append(v);
       return by;
     }
@@ -1024,7 +1037,7 @@
       return;
     }
     const f = query.trim().toLowerCase();
-    const match = (l) => !f || [l.name, l.package, summary(l), (l.providers || []).join(" "), l.npm?.publisher || "", l.github?.owner || ""].join(" ").toLowerCase().includes(f);
+    const match = (l) => !f || [l.name, l.package, summary(l), (l.providers || []).join(" "), l.npm?.publisher || "", l.github?.owner || "", l.github?.repo || ""].join(" ").toLowerCase().includes(f);
     const all = everything(match);
     const out = [];
     if (!f) {
@@ -1053,7 +1066,7 @@
     // npm's card goes where a card above is its package (a listing, or a
     // tagged repository npm has), not where a repository's package.json
     // only names it (#3685)
-    const known = new Set([...listings.map((l) => l.package), ...(tagged || []).map((l) => l.package)]);
+    const known = new Set([...listings.map((l) => packageIdentity(l.package)), ...(tagged || []).map((l) => packageIdentity(l.package))]);
     const ls = all;
     const box = el("section", "pm-sec");
     const h = el("div", "pm-sechead");
@@ -1063,7 +1076,7 @@
     else if (hits.loading) box.append(skeleton(2));
     else if (hits.error) box.append(el("p", "pm-note bad", hits.error));
     else {
-      const list = hits.list.filter((x) => !known.has(x.package));
+      const list = hits.list.filter((x) => !known.has(packageIdentity(x.package)));
       if (!list.length) box.append(el("p", "pm-note", ls.length ? t("Nothing else on npm") : t("No plugin called “{q}”", { q: query.trim() })));
       const g = el("div", "pm-grid");
       for (const x of list) g.append(card({ package: x.package, name: x.package, npm: x }));
@@ -1228,12 +1241,12 @@
   // package's or the folder's
   function shownName(e) {
     const pkg = name(e.spec);
-    return (listings || []).find((x) => x.package === pkg)?.name || e.ownName || (isGit(e.spec) && e.package) || label(e.spec);
+    return displayAliases[ghRepo(e.spec)] || (listings || []).find((x) => samePackage(x.package, pkg))?.name || e.ownName || (isGit(e.spec) && e.package) || label(e.spec);
   }
 
   function installedRow(e) {
     const pkg = name(e.spec);
-    const l = (listings || []).find((x) => x.package === pkg);
+    const l = (listings || []).find((x) => samePackage(x.package, pkg));
     const r = el("div", "row pm-row" + (e.off ? " off" : ""));
     const who = el("div", "who");
     const nm = el("div", "name");
@@ -1807,6 +1820,7 @@
     fact(t("Downloads"), l.npm?.weekly ? t("{n}/week", { n: count(l.npm.weekly) }) : "");
     if (l.github) fact(t("Stars"), count(l.github.stars));
     fact(t("License"), l.npm?.license);
+    if (l.github && displayAliases[l.github.repo.toLowerCase()]) fact("GitHub", l.github.repo);
     const upd = el("span", "v", "…");
     fact(t("Updated"), upd);
     if (l.providers?.length) fact(t("Signs in to"), l.providers.join(t(", ")));

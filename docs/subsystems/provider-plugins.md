@@ -15,6 +15,19 @@ Some built-in subscriptions are deprecated and have community plugins that provi
 
 The `movers` map assembled in `internal/provider/migrate*.go` is the authoritative subscription-to-plugin mapping. Each mover's `min` is the minimum plugin version required by jianmu. The list of moved subscriptions in [AGENTS.md](../../AGENTS.md#built-in-subscriptions-that-a-plugin-serves) is a contributor lookup; confirm the mapping in source when changing it.
 
+## Community catalog and display names
+
+The curated catalog is maintained in [TopoReduce/plugins](https://github.com/TopoReduce/plugins), at `plugins/registry.json`. [`MarketURL`](../../internal/plugin/market.go) reads that file; [`market.json`](../../internal/plugin/market.json) is the embedded fallback. The catalog's `community: true` means inclusion in this maintained list, not an independent security certification. Maintainers review proposed entries through the community repository's pull requests; there is no in-app approval queue. Automatically discovered GitHub repositories remain marked **Unreviewed**.
+
+[`plugins.js`](../../internal/gui/assets/plugins.js) gives selected GitHub discoveries Jianmu display aliases in discovery, details and installed rows. Searches still match the original repository, and details retain its repository name and source link. Aliases do not change authors, package names, provider ids, install specs or review status. `plugin-github.test.cjs` checks the displayed names and the original spec sent by Install.
+
+A package's host metadata is its `jianmu` block, or the `magpie` block a plugin written before the
+rename keeps (`metadataBlock` in [`manifest.go`](../../internal/plugin/manifest.go)); where a package says both,
+`jianmu`'s is read. The same fallback covers npm's copy and a repository GitHub discovers, and the host
+(`ownMeta` in [`host.js`](../../internal/plugin/host.js)) reads the icon and the concurrency fields the same way.
+
+New community packages use the `@jianmu/` npm namespace. Moving the curated catalog does not by itself republish packages or relocate the distribution files served by [`dist.go`](../../internal/plugin/dist.go); existing install specs remain unchanged until their replacement packages are published and compatibility is verified.
+
 ## Ownership and runtime paths
 
 `provider.Moved(id)` identifies a subscription whose migration state in `migrations.json` is `plugin`. In `/api/providers`, its row exposes `move.state == "plugin"`; the GUI also receives its id in `onPlugins`.
