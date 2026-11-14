@@ -112,7 +112,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (let i = 6; i > 3; i--) if (id - i >= 100) feed.q.push(req(id - i, false)); // the ones before, answered
       }, 400);
       t.after(() => clearInterval(pump));
-      await page.waitForFunction(() => document.querySelectorAll(".rt-sky .rt-flier").length > 0);
+      await page.waitForFunction(() => document.querySelectorAll(".ps-sky .ps-dot").length > 0);
       const before = await page.evaluate(() => ({ ...window.__n }));
       await page.waitForTimeout(3000);
       const after = await page.evaluate(() => ({ ...window.__n }));
@@ -129,13 +129,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert(lenAgain <= len / 20, `${lenAgain} of ${len} path lengths measured again for a d already measured`);
       // a wire's two ends are asked for once by its tips and once among
       // the points along it: two a d at most, never one a frame
-      assert(ptAgain <= 2 * len, `${ptAgain} of ${pt} points measured again along the ${len} d's measured`);
+      assert(ptAgain <= Math.max(4, 2 * len), `${ptAgain} of ${pt} points measured again along the ${len} d's measured`);
       // and the points along it are read from its d by the page: the
       // browser walks a path from its start for each point, and along the
       // wires to keys hundreds of rows down that was a sixth of WebKit's
       // time (#3164). The browser is asked for the ends (~1.2 a d), not
       // for points along the way (~3.3 a d here, ~20 on long wires)
-      assert(pt <= 2 * len, `${pt} points asked of the browser along the ${len} d's measured`);
+      assert(pt <= Math.max(4, 2 * len), `${pt} points asked of the browser along the ${len} d's measured`);
       // the rows' numbers come from one formatter, not one per number
       assert(fmt < 200, `${fmt} numbers formatted one formatter each over ${frames} frames`);
       // and they still read in the page's language

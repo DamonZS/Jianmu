@@ -6,17 +6,30 @@
 .rt-what { font-size: 13px; color: var(--muted); }
 .rt-what b { color: var(--fg); font-weight: 600; }
 .rt-mode { margin: 0; font-size: 12.5px; color: var(--fg-2); line-height: 1.45; }
-/* the agent and Jianmu columns stay compact; provider rows use the rest */
-.rt-stage { position: relative; display: grid; grid-template-columns: minmax(124px, 15%) minmax(124px, 15%) minmax(0, 1fr); column-gap: 12px; align-items: stretch; padding: 22px 2px 12px; }
-.rt-stage > .rt-srcs { align-content: center; justify-items: end; }
-.rt-stage > .rt-hub { align-self: center; width: min(100%, 148px); height: min(100%, 148px); min-width: 0; min-height: 0; box-sizing: border-box; padding: 10px; border-radius: 50%; justify-content: center; border-color: var(--line); background: var(--card); box-shadow: 0 0 0 5px var(--card-2), 0 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent); animation: rtring 2.4s ease-in-out infinite; }
-.rt-stage > .rt-accts { grid-column: 3; width: 100%; }
+/* the agents' and jianmu's columns at least 124px, and as wide as their
+   words up to 15% of the stage: at 124px a full-screen window cut an agent
+   to "Claude Desk…" while its keys' rows ran on across the rest (refeccd
+   on Discord) */
+/* The stage is one tree, read bottom to top: the model's accounts at the
+   foot, jianmu's trunk above them, and an agent on each branch over it.
+   One column: the trunk is held to its middle, the branches above it, and
+   the account rows run under (a grid area of their own keeps their
+   widths; layout, client.js, draws the trunk and the branches). */
+.rt-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; row-gap: 0; padding: 22px 2px 12px; }
+.rt-stage.shared { display: block; padding: 0; }
+.rt-stage.shared > .rt-wires, .rt-stage.shared > .rt-flows, .rt-stage.shared > .rt-srcs, .rt-stage.shared > .rt-hub, .rt-stage.shared > .rt-sky { display: none; }
+.rt-stage.shared > .rt-accts { width: 100%; }
+.rt-shared-meta { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 0 0 8px; font-size: 11px; color: var(--muted); }
+.rt-shared-meta b { color: var(--fg); font-weight: 600; }
+.rt-shared-meta small { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rt-shared-meta i { flex: none; font-style: normal; font-size: 10.5px; font-weight: 560; padding: 1px 8px; border-radius: 999px; background: var(--fg); color: var(--card); }
+.rt-stage > .rt-srcs { order: 1; width: 100%; }
+.rt-stage > .rt-hub { order: 2; }
+.rt-stage > .rt-accts { order: 3; width: 100%; }
+.rt-stage > :is(.rt-srcs, .rt-hub) { min-width: 124px; }
 .rt-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .rt-wires path { fill: none; stroke: var(--line); stroke-width: 1.5; transition: opacity .3s; }
-@keyframes rtring { 50% { box-shadow: 0 0 0 5px var(--card-2), 0 0 0 11px color-mix(in srgb, var(--accent) 16%, transparent); } }
-/* live: the energy on a branch, the same dots .rt-flows runs — standing
-   still on the limb until one is in flight (#2386) */
-.rt-wires path.live { stroke: var(--agent, var(--muted)); stroke-dasharray: 3 5; filter: drop-shadow(0 0 4px var(--agent, var(--muted))); }
+.rt-wires path.live { stroke: var(--agent, var(--muted)); stroke-dasharray: 3 5; animation: rtflow .7s linear infinite; }
 /* lit: the way the request shown went, over; only a request in flight flows (#2386) */
 .rt-wires path.lit { stroke: var(--agent, var(--muted)); }
 .rt-wires path.rest { stroke-dasharray: 2 6; opacity: .45; }
@@ -27,42 +40,31 @@
 /* its dashes move by --rt-dash, which a timer sets 15 times a second
    (slowTick): an animated offset was drawn again every frame. With motion
    reduced they stand still and the layer fades by --rt-fade instead */
-.rt-flows path { fill: none; stroke: var(--agent, var(--muted)); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 3 5; stroke-dashoffset: var(--rt-dash, 0); filter: drop-shadow(0 0 4px var(--agent, var(--muted))); }
-/* the same wire the other way: the same dots, the same speed, the
+.rt-flows path { fill: none; stroke: var(--agent, var(--muted)); stroke-width: 1.5; stroke-dasharray: 3 5; stroke-dashoffset: var(--rt-dash, 0); }
+/* the same wire the other way: the same dashes, the same speed, the
    offset moving the opposite way, so the energy reads as equal both ways */
 .rt-flows path.rev { stroke-dashoffset: calc(-1 * var(--rt-dash, 0)); }
-/* the jianmus: one carries each request out, another brings its answer
-   back — the dot at the tip of its beak. They fly over the cards (the
-   owner, 11-09: under them, 869c4d112, a jianmu vanished crossing
-   jianmu's box), but off their words: each flight starts and ends a dot
-   clear of the card at either end of its wire (pose), so a dot held at
-   its seat or waiting at jianmu sits beside it, not on its address
-   (penershu on X), and the way through jianmu keeps to its edge (via). */
+@keyframes rtflow { to { stroke-dashoffset: -8; } }
+/* a request's dot flies over the cards (the owner, 11-09: under them,
+   869c4d112, a flight vanished crossing jianmu's box), but off their
+   words: each flight starts and ends a dot clear of the card at either
+   end of its wire (pose), so a dot held at its seat or waiting at jianmu
+   sits beside it, not on its address (penershu on X), and the way through
+   jianmu keeps to its edge (via). */
 .rt-sky { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-/* each agent's requests and answers fly in its colour: a request filled
-   with it, an answer ringed with it, a failure ringed red */
-.rt-sky .pkt { fill: var(--agent, var(--fg)); filter: drop-shadow(0 0 3px var(--agent, var(--muted))); }
-.rt-sky .pkt.back { fill: var(--card); stroke: var(--agent, var(--fg)); stroke-width: 2.25; }
-.rt-sky .pkt.back.err { fill: var(--agent, var(--card)); stroke: var(--red); }
+/* a request flies in its agent's colour; its answer comes back green, and
+   a failure red, as the tray panel's dot does */
+.rt-sky .pkt { fill: var(--agent, var(--fg)); filter: drop-shadow(0 0 3px var(--agent, var(--muted))); transition: fill .2s; }
+.rt-sky .pkt.back { fill: var(--green); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--green) 60%, transparent)); stroke: none; }
+.rt-sky .pkt.back.err { fill: var(--red); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--red) 60%, transparent)); }
 .rt-sky path.via { fill: none; stroke: none; }
 /* a dot held at an account fades by --rt-held, from the same timer: an
    animated opacity under its shadow was drawn again every frame */
 .rt-sky .pkt.held { opacity: var(--rt-held, 1); }
-.rt-flier { color: var(--fg); }
-.rt-flier .body, .rt-flier .tail, .rt-flier .wing path:first-child, .rt-flier .wing.far { fill: currentColor; }
-.rt-flier .wing.far { opacity: .45; }
-.rt-flier .belly { fill: var(--card); }
-.rt-flier .wing .bar { fill: none; stroke: var(--card); stroke-width: 1.3; stroke-linecap: round; }
-/* the wings beat from the shoulder: down hard, up easy */
-.rt-flier .wing { transform-box: fill-box; transform-origin: 50% 100%; animation: rtflap .42s cubic-bezier(.45, 0, .3, 1) infinite; }
-.rt-flier .wing.far { animation-delay: -.03s; }
-@keyframes rtflap { 0%, 100% { transform: scaleY(1); } 55% { transform: scaleY(-.62) skewX(-8deg); } }
-.rt-flier .rt-lift { animation: rtcome .3s ease-out; transition: transform .45s cubic-bezier(.3, 0, .2, 1), opacity .45s; }
-.rt-flier.away .rt-lift { transform: translate(14px, -16px) scale(.8); opacity: 0; }
-@keyframes rtcome { from { transform: translate(-6px, -10px) scale(.85); opacity: 0; } }
 .rt-srcs { position: relative; z-index: 1; min-width: 0; display: grid; gap: 10px; justify-items: center; }
-/* agents stack in the left lane so each can join Jianmu directly */
-.rt-srcs { grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; grid-auto-columns: auto; align-items: center; }
+/* an agent's branch: the trunks fan out under the agents, evenly, so two
+   agents stand as level as eight do */
+.rt-srcs { grid-auto-flow: column; grid-auto-columns: minmax(96px, 160px); align-items: start; }
 .rt-srcs.many .rt-node { padding: 8px 8px 7px; }
 .rt-src b::before { content: ""; display: inline-block; width: 7px; height: 7px; margin: 0 6px 1px 0; border-radius: 50%; background: var(--agent); vertical-align: middle; }
 .rt-srcs.many .rt-node .rt-ic .ic, .rt-srcs.many .rt-node .rt-ic .ic img, .rt-srcs.many .rt-node .rt-ic .ic svg { width: 20px; height: 20px; }
@@ -71,10 +73,9 @@
 .rt-node .rt-ic .ic img, .rt-node .rt-ic .ic svg { width: 26px; height: 26px; }
 .rt-node b { font-size: 13px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rt-node small { font-size: 11px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rt-hub { border-color: var(--line); box-shadow: 0 0 0 5px var(--card-2), 0 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent); }
-@media (prefers-reduced-motion: reduce) { .rt-hub, .rt-stage > .rt-hub { animation: none; } }
+.rt-hub { border-color: var(--fg); box-shadow: 0 0 0 4px var(--card-2); }
 .rt-hub i { font-style: normal; font-size: 10.5px; font-weight: 560; margin-top: 5px; padding: 1px 8px; border-radius: 999px; background: var(--fg); color: var(--card); }
-.rt-hub.tick, .rt-src.tick { animation: rttick .4s ease-out; }
+.rt-src.tick { animation: rttick .4s ease-out; }
 @keyframes rttick { 40% { transform: scale(1.04); } }
 /* one column as wide as the list: a row out of sight is as wide as WebKit
    last drew it (content-visibility), and in a column as wide as its rows
@@ -270,10 +271,12 @@
 .rt-accts:where(.max460) li.rt-fold { grid-template-columns: 10px minmax(0, 1fr) auto; }
 .rt-accts:where(.max460) li.rt-fold em { grid-row: 2; text-align: left; }
 .rt-accts:where(.max460) li.rt-fold .chev { grid-column: 3; grid-row: 1; }
-/* the panel keeps the agent and Jianmu beside each other, with provider rows below */
-:where(.rt.max560) .rt-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 12px; row-gap: 12px; padding: 16px 0; }
-:where(.rt.max560) .rt-stage > .rt-hub { width: min(100%, 148px); height: min(100%, 148px); }
-:where(.rt.max560) .rt-stage > .rt-accts { grid-column: 1 / -1; padding-left: 0; }
+/* narrow (the tray panel): the same tree, its trunk and branches closer
+   together and its agents on as many columns as fit */
+:where(.rt.max560) .rt-stage { grid-template-columns: minmax(0, 1fr); row-gap: 0; padding: 16px 0; }
+:where(.rt.max560) .rt-stage > :is(.rt-srcs, .rt-hub) { min-width: 0; }
+:where(.rt.max560) .rt-srcs { grid-auto-columns: minmax(72px, 1fr); }
+:where(.rt.max560) .rt-accts { padding-left: 0; }
 .rt-accts:where(.max560) li { grid-template-columns: 10px minmax(0, 1fr); }
 .rt-accts:where(.max560) em { grid-column: 2; white-space: normal; }
 .rt-accts:where(.max560) .bar { grid-column: 2; }
@@ -828,7 +831,6 @@ body.window .rt-gedit > .bar { --vfoot: 8px; }
 /* a group bound to gateway keys (Group.Keys): a long key name ellipsizes */
 .rt-gedit > .rt-gkeys[hidden] { display: none; }
 .rt-gkey { min-width: 0; }
-.rt-gredact-b { min-width: 0; }
 .rt-gadd {
   justify-self: start; display: inline-flex; align-items: center; gap: 6px;
   height: 28px; padding: 0 11px 0 9px; border-radius: 8px;
@@ -1059,7 +1061,7 @@ body.window .rt-gedit > .bar { --vfoot: 8px; }
 .ps-dst.wait > i { background: var(--muted); }
 .ps-hub { position: relative; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: var(--fg); background: var(--card); box-shadow: inset 0 0 0 1px var(--line), 0 1px 3px rgba(0, 0, 0, .08); }
 .ps-hub svg { width: 24px; height: 24px; }
-.ps-hub.busy { animation: ps-ring 1.8s ease-out infinite; }
+.rt-hub.busy, .ps-hub.busy { animation: ps-ring 1.8s ease-out infinite; }
 @keyframes ps-ring { 0% { box-shadow: inset 0 0 0 1px var(--line), 0 0 0 0 color-mix(in srgb, var(--fg) 16%, transparent); } 70%, 100% { box-shadow: inset 0 0 0 1px var(--line), 0 0 0 7px transparent; } }
 .ps-dot { fill: var(--agent, var(--accent)); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--agent, var(--accent)) 60%, transparent)); transition: fill .2s, opacity .3s; }
 .ps-dot.ok { fill: var(--green); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--green) 60%, transparent)); }
@@ -1106,7 +1108,7 @@ body.window .rt-gedit > .bar { --vfoot: 8px; }
 .pr-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; }
 .pr-line .pr-to { flex: 1 1 auto; }
 .pr-req .meta { flex: none; max-width: 100%; margin-left: auto; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
-@media (prefers-reduced-motion: reduce) { .pr-req.wait .pr-to > i, .ps-hub.busy, .ps-dot.wait { animation: none; } .ps-dst.wait > i::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .pr-req.wait .pr-to > i, .rt-hub.busy, .ps-hub.busy, .ps-dot.wait { animation: none; } .ps-dst.wait > i::after { animation: none; } }
 @supports not (grid-template-columns: subgrid) {
   @media (max-width: 700px) {
     .rt-reqs { --rt-tpl: auto minmax(0, 1fr); }

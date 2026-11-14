@@ -185,6 +185,19 @@ filter only when that request is excluded. Usage's purpose picker remains a
 single choice sent to the ledger API. See `purpose-filter.test.cjs` and
 `routing-purpose-state.test.cjs`.
 
+### Routing animation
+
+The window's Routing page and the tray panel render the same compact
+`pr-stage` from `pDraw`, `pLayout` and `pPlay` in
+[`plugins/routing/client.js`](../../internal/gui/assets/plugins/routing/client.js).
+Agent → Jianmu → provider uses the tray's dots, wire timings and hub pulse;
+there is no separate window flight animation. The window feeds its selected
+history, purpose filter and replay into that stage. Playback cancellation
+keeps an old replay from holding a dot or clearing a newer playback's state.
+Reduced motion leaves the stage static. Request details and Accounts and keys
+remain below the stage. See `routing-shared-stage.test.cjs` and
+`panel-routing.test.cjs`.
+
 ### Routing mode chip
 
 The stage's chip and the Accounts and keys heading in

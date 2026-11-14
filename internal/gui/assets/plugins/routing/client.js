@@ -1,8 +1,9 @@
 // Routing, live: the gateway's own trace of each request, played as it
-// happens. A jianmu carries each request from its agent through jianmu to
-// the account routing put first; another brings the answer back — or,
-// from one that can't answer, the failure back to jianmu, and the first
-// takes the request on to the next. Every agent sending at once plays at
+// happens. A dot goes from the request's agent through jianmu to the
+// account routing put first; its answer comes back as a green dot — or,
+// from one that can't answer, a red one back to jianmu, and the request
+// goes on to the next try. The same dot the tray panel's stage moves.
+// Every agent sending at once plays at
 // once, each from its own place on the left. Every row, number and sentence comes from what the gateway
 // recorded while deciding (see internal/gateway/trace.go) — the order it
 // weighed the accounts in, what it weighed them by, what each answered,
@@ -1726,15 +1727,7 @@ function routingPage(part) {
   let tallies = null; // today's counts per account or key, from the history read (#3351); live only
   const src = () => rp ? rp.routes : routes; // the routes the stage plays from
   const LINGER = 12e3;      // how long an agent's last request stays on the stage
-  let gen = 0, trips = [], waiters = [];
-  // a dot let go at an account waits there while it answers: it stays at
-  // the end of the wire to it as the stage is laid out again, the window
-  // resized or the view coming back narrow then wide (#1859: posed once,
-  // it stayed where the account had been)
-  const holds = new Map(); // packet → the row it waits at
-  function holdAll() {
-    for (const [dot, row] of holds) pose({ dot, legs: wiresTo(row).map((p) => ({ p })) }, 1);
-  }
+  let gen = 0;
   let capQ = [], capAt = -1e9, capLo = false, flipUntil = 0;
   // the frame loop's own state; see frame below
   let seen = false, lastFrame = 0, ticking = 0;
@@ -1742,7 +1735,7 @@ function routingPage(part) {
   // its turn, rows sliding to their new places. Only then does the loop
   // ask for frames; an idle stage asks for none (#2827: a frame every
   // vsync, nothing drawn, cost a renderer without a GPU a core and more)
-  const busy = () => trips.length > 0 || capQ.length > 0 || performance.now() < flipUntil;
+  const busy = () => capQ.length > 0 || performance.now() < flipUntil;
   // kick wakes the loop for new motion. Waking from idle is not a gap in
   // the frames — the page was in sight and still — so the gap resume()
   // looks for counts from now
@@ -1751,16 +1744,6 @@ function routingPage(part) {
     if (seen) lastFrame = performance.now();
     ticking = requestAnimationFrame(frame);
   }
-
-  // fly carries a dot along paths one after another, as one flight — and
-  // the jianmu holding it in its beak, if there is one
-  const fly = (dot, bird, legs, ms) => new Promise((res) => {
-    if (!shown()) { res(); return; } // no hidden frame is needed to finish it
-    const tr = { dot, bird, legs, t0: performance.now(), ms: still() ? 0 : ms, res, g: gen };
-    pose(tr, 0);
-    trips.push(tr);
-    kick();
-  }).finally(() => { for (const l of legs) if (l.j) l.p.remove(); });
 
   // measured is a path's length, and the tips of it flights met, for the d
   // it had: measured again only when its d changes. Every frame poses
@@ -1852,120 +1835,6 @@ function routingPage(part) {
     return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
   }
 
-  // tip is where a flight meets a wire's end or start, and which way it
-  // heads there: along the wire, or back along it
-  const tip = (p, atEnd, back) => () => {
-    const m = measure(p);
-    if (!m) return null; // not laid out: nowhere to meet it yet
-    const key = (atEnd ? 2 : 0) + (back ? 1 : 0);
-    if (m.tips[key]) return m.tips[key];
-    if (m.ends === undefined) m.ends = wireEnds(m.d);
-    let a, tx, ty;
-    if (m.ends) {
-      const e = m.ends[atEnd ? 1 : 0];
-      a = e; tx = e.tx; ty = e.ty;
-    } else {
-      const L = lengthOf(p, m);
-      if (!L) return null;
-      a = p.getPointAtLength(atEnd ? L : 0);
-      const b = p.getPointAtLength(atEnd ? Math.max(0, L - 2) : Math.min(L, 2));
-      tx = atEnd ? a.x - b.x : b.x - a.x; ty = atEnd ? a.y - b.y : b.y - a.y;
-    }
-    if (back) { tx = -tx; ty = -ty; }
-    const n = Math.hypot(tx, ty) || 1;
-    return m.tips[key] = { x: a.x, y: a.y, tx: tx / n, ty: ty / n };
-  };
-  // wireEnds are a d's start and end, each with the way it heads there (along
-  // the path at its end, into it at its start), read off its first and
-  // last pieces: the line or control point next to each end that isn't
-  // the end itself. Only for jianmu's own absolute M, L, Q and C, and
-  // null for any other d, or one with no way at all, which the browser
-  // measures instead.
-  function wireEnds(d) {
-    const n = d.match(/[A-Za-z]|-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi) || [], k = { M: 2, L: 2, Q: 4, C: 6 };
-    const pts = []; // [x, y], each point the d names in turn
-    let c = "";
-    for (let i = 0; i < n.length;) {
-      if (/[A-Za-z]/.test(n[i])) { c = n[i++]; continue; }
-      if (!k[c] || (c === "M" && pts.length)) return null;
-      const a = n.slice(i, i += k[c]).map(Number);
-      if (a.length < k[c] || a.some(isNaN)) return null;
-      for (let j = 0; j < a.length; j += 2) pts.push([a[j], a[j + 1]]);
-      if (c === "M") c = "L";
-    }
-    if (pts.length < 2) return null;
-    const way = (from, step) => {
-      const [x, y] = pts[from];
-      for (let j = from + step; j >= 0 && j < pts.length; j += step) {
-        const tx = (pts[j][0] - x) * step, ty = (pts[j][1] - y) * step, h = Math.hypot(tx, ty);
-        if (h > 1e-9) return { x, y, tx: tx / h, ty: ty / h };
-      }
-      return null;
-    };
-    // at its start, from the start to what comes next; at its end, from
-    // what came before to the end
-    const s = way(0, 1), e = way(pts.length - 1, -1);
-    return s && e ? [s, e] : null;
-  }
-  // via is the way through jianmu from one wire to the next: an arc along
-  // its edge, carrying on the way the flight came in and leaving the way
-  // the next wire goes — or, out the side it came in, a loop round inside.
-  // It follows the wires as they move.
-  function via(from, to) {
-    const p = document.createElementNS(NS, "path");
-    p.setAttribute("class", "via");
-    sky.appendChild(p);
-    // j runs each frame a flight is on it: the arc is laid again only when
-    // a wire's end moved, not made anew sixty times a second (#1481)
-    let ax = NaN, ay = NaN, atx = NaN, aty = NaN, bx = NaN, by = NaN, btx = NaN, bty = NaN;
-    const j = () => {
-      const a = from(), b = to();
-      if (!a || !b) { p.removeAttribute("d"); ax = NaN; return; }
-      if (a.x === ax && a.y === ay && a.tx === atx && a.ty === aty && b.x === bx && b.y === by && b.tx === btx && b.ty === bty) return;
-      ax = a.x; ay = a.y; atx = a.tx; aty = a.ty; bx = b.x; by = b.y; btx = b.tx; bty = b.ty;
-      const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
-      let c1, c2;
-      if (dist < 4) {
-        const h = hub.getBoundingClientRect(), k = Math.min(h.width, h.height) * .42, m = k * .6;
-        const nx = a.ty, ny = -a.tx;
-        c1 = [a.x + a.tx * k - nx * m, a.y + a.ty * k - ny * m];
-        c2 = [b.x - b.tx * k + nx * m, b.y - b.ty * k + ny * m];
-      } else {
-        // the sky is over the cards (the owner, 11-09): a jianmu crossing
-        // jianmu's box keeps to its edge, off its name and address. Side
-        // to side it goes along the top edge; round a corner, by it.
-        // the box layout read with the wires, not read again: a read here
-        // laid the stage out again mid-flight
-        const h = hubBox || { l: 0, t: 0, r: 0, b: 0 }, L = h.l, T = h.t, R = h.r, B = h.b, wide = R > L;
-        const side = (p) => { const e = [Math.abs(p.x - L), Math.abs(p.y - T), Math.abs(p.x - R), Math.abs(p.y - B)]; return e.indexOf(Math.min(...e)); }; // left, top, right, bottom
-        const sa = side(a), sb = side(b);
-        if (wide && sa % 2 === 0 && sb % 2 === 0 && sa !== sb) {
-          // up the side it came in, over the top a little above the edge
-          // ((a.y + 3cy + 3cy + b.y) / 8 = T - 8) and down the side it
-          // leaves by: the jianmu trails its dot, and anywhere lower its
-          // tail swept the name
-          const cy = (8 * (T - 8) - a.y - b.y) / 6;
-          c1 = [a.x, cy];
-          c2 = [b.x, cy];
-        } else if (wide && sa % 2 !== sb % 2) {
-          const x = sa % 2 === 0 ? a.x : b.x, y = sa % 2 === 1 ? a.y : b.y;
-          c1 = [x, y];
-          c2 = [x, y];
-        } else {
-          const k = dist * .38, l = Math.min(16, dist * .12), nx = dy / dist, ny = -dx / dist;
-          c1 = [a.x + a.tx * k + nx * l, a.y + a.ty * k + ny * l];
-          c2 = [b.x - b.tx * k + nx * l, b.y - b.ty * k + ny * l];
-        }
-      }
-      // set only when it moved: a new d is measured again (measure)
-      const d = `M${a.x} ${a.y} C${c1[0]} ${c1[1]} ${c2[0]} ${c2[1]} ${b.x} ${b.y}`;
-      if (p.getAttribute("d") !== d) p.setAttribute("d", d);
-    };
-    j();
-    return { p, j };
-  }
-  const until = (f) => f() ? Promise.resolve() : new Promise((res) => waiters.push({ f, res }));
-  const wake = () => { const w = waiters; waiters = []; for (const x of w) if (x.f()) x.res(); else waiters.push(x); };
   function say(s, lo) {
     if (!s) return;
     if (!shown()) { capQ = []; show({ s, lo }); return; }
@@ -2026,7 +1895,7 @@ function routingPage(part) {
   // having lost its animation (vantiboolean).
   const SLOW_EVERY = 1000 / 15;
   let slowTimer = 0;
-  const slowNeeded = () => (flowing.size > 0 || holds.size > 0) && shown();
+  const slowNeeded = () => flowing.size > 0 && shown();
   function slowTick() {
     if (!slowNeeded()) {
       // stopped where it was, a dot held on would stay faded and still
@@ -2041,7 +1910,6 @@ function routingPage(part) {
       flows.style.setProperty(calm_ ? "--rt-fade" : "--rt-dash", calm_ ? fade : (-(now_ % 700) / 700 * 8).toFixed(2) + "px");
       flows.style.removeProperty(calm_ ? "--rt-dash" : "--rt-fade");
     }
-    if (holds.size) sky.style.setProperty("--rt-held", fade);
   }
   function slowMove() {
     if (slowTimer || !slowNeeded()) return;
@@ -2292,7 +2160,6 @@ function routingPage(part) {
     // the view moved by more than a scroll told of (a row held in place,
     // the stage grown under it): the list made again around where it is
     if (win) placeSoon();
-    holdAll();
   }
 
   // rankOf is an account's or key's place in its provider's own list, the
@@ -2514,21 +2381,6 @@ function routingPage(part) {
     const rs = staged();
     if (rs.length) steady(() => rebuild(rs, false));
     render();
-  }
-  // wiresTo is the way from jianmu to a row: through the headings of the
-  // groups it is in, then its own wire
-  function wiresTo(row) {
-    const out = [];
-    if (row.sub) { // a group in the group folded: the way down to its heading
-      const via = row.key.split(">");
-      for (let d = 1; d <= via.length; d++) { const s = subs.get(via.slice(0, d).join(">")); if (s) out.push(s.wire); }
-      return out;
-    }
-    const via = row.path || [];
-    for (let d = 1; d <= via.length; d++) { const s = subs.get(via.slice(0, d).join(">")); if (s) out.push(s.wire); }
-    const f = row.fold && folds.get(row.fold);
-    if (f?.open) out.push(f.wire);
-    return [...out, row.wire];
   }
   // shownRow is where a seat is on the stage: its own row, the fold it is
   // folded into, or the heading of the group in the group folded over it —
@@ -2955,7 +2807,6 @@ function routingPage(part) {
     for (const r of rs) for (const tr of r.tries) if (!tr.done) { trying.set(tryseat(r, tr), r); busy.add(srcOf(r)); }
     askUnnamed(rs);
     const onWire = new Map(); // a seat → the agent whose jianmu is at it
-    for (const f of flying.values()) { onWire.set(f.id, f.agent); busy.add(f.agent); }
     // what each request found, read once a pass: hundreds of a route's
     // keys each read their route's whole list again (#3164)
     const found = new Map();
@@ -5159,7 +5010,9 @@ function routingPage(part) {
   function drawAll() {
     drawing = 0;
     if (!shown()) return;
+    hub.classList.toggle("busy", playing.size > 0);
     render(); renderLog(); renderHist();
+    pDraw(); pWake();
   }
   const newest = () => (day ? past : [...routes.values()]).filter(matchesPurpose).reduce((a, b) => (!a || b.id > a.id ? b : a), null);
   // told: the request the live card tells of. Following the newest, with
@@ -5177,54 +5030,10 @@ function routingPage(part) {
 
   // ---------- playing a request ----------
 
-  const flying = new Map(); // packet → { id: the row it is at, agent }
-
-  // A jianmu, drawn to fly: facing right, the dot it carries at the tip
-  // of its beak where the flight puts it; its wings beat from the shoulder.
-  const FLIER = '<g class="rt-lift"><g transform="scale(1.2) translate(-6.5 3.2)">'
-    + '<path class="wing far" d="M-14.5 -3.4C-16.5 -9.5 -14.2 -15 -8.6 -18.6C-9.4 -12.6 -9.6 -7.4 -9.2 -3.2Z"/>'
-    + '<path class="tail" d="M-31.5 3.1L-18.6 -1.8L-17.4 1.2L-30.8 4.6Z"/>'
-    + '<ellipse class="body" cx="-12.2" cy="-1.4" rx="7.6" ry="3.9"/>'
-    + '<ellipse class="belly" cx="-12.8" cy="0.4" rx="4.3" ry="1.6"/>'
-    + '<circle class="body" cx="-4.9" cy="-3.7" r="3.1"/>'
-    + '<path class="body" d="M-2.3 -4.8L1.4 -3.3L-2.3 -2.2Z"/>'
-    + '<g class="wing near"><path d="M-15.6 -3.2C-17.8 -10.2 -15.2 -16.4 -8.4 -20.4C-9.3 -13.6 -9.4 -7.8 -8.8 -2.8Z"/>'
-    + '<path class="bar" d="M-14.6 -5.6C-15.4 -10.4 -13.8 -14.4 -10.4 -17.2"/></g>'
-    + "</g></g>";
-
-  function bird(kind) {
-    if (still() || !shown()) return null;
-    const g = document.createElementNS(NS, "g");
-    g.setAttribute("class", "rt-flier " + kind);
-    g.innerHTML = FLIER;
-    sky.appendChild(g);
-    return g;
-  }
-  // off it goes, up and away, once it has let go of the dot
-  function away(b) {
-    if (!b) return;
-    b.classList.add("away");
-    setTimeout(() => b.remove(), 450);
-  }
-  function packet() {
-    const dot = document.createElementNS(NS, "circle");
-    dot.setAttribute("r", 4.5);
-    dot.setAttribute("class", "pkt");
-    dot.setAttribute("visibility", "hidden"); // until a flight puts it somewhere
-    sky.appendChild(dot);
-    return dot;
-  }
-
-  // play: one jianmu carries the request from the agent through jianmu to
-  // who routing put first, and lets it go there while it answers; another
-  // picks up the answer and brings it back — a failure only as far as
-  // jianmu, where the first takes the request on to the next.
+  // The window and tray use the same stage, including replay's trace.
   async function play(id, synced) {
-    const routes = src(); // a replay's, if it is one
-    let r = routes.get(id);
-    const g = gen;
+    const r = src().get(id), g = gen;
     playing.set(id, g);
-    // live, it flies, and the card stays on the request it tells of
     cur = rp ? r : told() || r;
     if (!synced) sync();
     if (cur.id === r.id) {
@@ -5233,128 +5042,24 @@ function routingPage(part) {
       if (aside) say(aside, true);
     }
     renderAll();
-    const A = agents.get(srcOf(r));
-    // an agent past the stage's four (staged) isn't drawn: its request is
-    // listed, not flown
-    if (!A) {
-      if (playing.get(id) === g) playing.delete(id);
-      return;
-    }
-    const dot = packet();
-    dot.style.setProperty("--agent", hueOf(srcOf(r)));
-    // from: where in jianmu the dot is, once it is — the way it came in
-    let carrier = bird("req"), from = null, back = null;
-    // rt: the route as the gateway has it now — or, dropped from what it
-    // keeps, as it was last, over
-    const rt = () => routes.get(id) || { ...r, done: true, tries: r.tries.map((x) => ({ ...x, done: true })) };
     try {
-      tick(A.node);
-      if (!r.tries.length) { // routing hasn't picked yet: to jianmu, to wait there
-        await fly(dot, carrier, [{ p: A.wire }], 620);
-        from = tip(A.wire, true);
-        tick(hub);
-      }
-      for (let i = 0; g === gen; ) {
-        r = rt();
-        if (!routes.has(id)) break;
-        if (i >= r.tries.length) {
-          if (r.done) break;
-          await until(() => g !== gen || rt().tries.length > i || rt().done);
-          continue;
-        }
-        const row = shownRow(tryseat(r, r.tries[i])); // a folded key's fold
-        if (!row) { i++; continue; }
-        flying.set(dot, { id: tryseat(r, r.tries[i]), agent: srcOf(r) });
-        if (!carrier) carrier = bird("req");
-        if (from) tick(hub);
-        const ws = wiresTo(row);
-        const out = [via(from || tip(A.wire, true), tip(ws[0], false)), ...ws.map((p) => ({ p }))];
-        await fly(dot, carrier, from ? out : [{ p: A.wire }, ...out], from ? 900 : 1400);
-        if (g !== gen) break;
-        // let go at the account: it waits there while it answers
-        away(carrier);
-        carrier = null;
-        dot.classList.add("held");
-        holds.set(dot, row);
-        holdAll();
-        slowMove();
-        await until(() => g !== gen || rt().tries[i].done);
-        holds.delete(dot);
-        if (g !== gen) break;
-        r = rt();
-        if (!routes.has(id)) break;
-        const tr = r.tries[i];
-        dot.classList.remove("held");
-        if (tryOk(tr)) {
-          // the reply's tokens are counted once the route is done
-          await until(() => g !== gen || rt().done);
-          if (g !== gen) break;
-          r = rt();
-          say(tryWhy(r, i), true);
-          renderAll();
-          dot.classList.add("back");
-          dot.setAttribute("r", 4);
-          back = bird("res");
-          await fly(dot, back, home(row, A), 1400);
-          flying.delete(dot);
-          away(back);
-          tick(A.node);
-          break;
-        }
-        // the tag stands over the row's top edge, so the row is drawn whole
-        // (lift, routing.css) while it shows and as it fades: the shake's
-        // .hit ends at .45s, and with it the tag's top was cut for the rest
-        // of its 1.8s (yuancjun on Discord). A failure again on the row
-        // starts the 1.8s over
-        rerun(row.li, "hit", "rthit"); row.li.classList.add("tagged", "lift");
-        row.tg.textContent = `${tr.status} · ${failWord(tr.fail, tr.rest)}`;
-        clearTimeout(tagFor.get(row.li));
-        tagFor.set(row.li, setTimeout(() => {
-          row.li.classList.remove("tagged");
-          tagFor.set(row.li, setTimeout(() => row.li.classList.remove("lift"), 300));
-        }, 1800));
-        say(tryWhy(r, i));
-        renderAll();
-        dot.classList.add("back", "err");
-        back = bird("res");
-        if (!tr.rest && !tr.credits && (!tr.again || tr.gone)) { // that was the answer: the agent gets the error, or has gone
-          await fly(dot, back, home(row, A), 1350);
-          flying.delete(dot);
-          away(back);
-          tick(A.node);
-          break;
-        }
-        // back to jianmu, which hands the request on to the next
-        await fly(dot, back, [...ws].reverse().map((p) => ({ p, rev: true })), 620);
-        flying.delete(dot);
-        away(back);
-        dot.classList.remove("back", "err");
-        from = tip(ws[0], false, true);
-        i++;
-      }
-    } finally { // however it ended, nothing of it stays behind
-      away(carrier);
-      away(back);
-      flying.delete(dot);
-      holds.delete(dot);
-      dot.remove();
+      await pPlay(id);
+    } finally {
       if (playing.get(id) === g) playing.delete(id);
       renderAll();
     }
-  }
-
-  // home: from an account back through jianmu to the agent
-  const home = (row, A) => {
-    const ws = wiresTo(row);
-    return [...[...ws].reverse().map((p) => ({ p, rev: true })), via(tip(ws[0], false, true), tip(A.wire, true, true)), { p: A.wire, rev: true }];
   };
 
   // stopPlays ends whatever is flying: each play sees its gen gone and
   // clears up after itself
   function stopPlays() {
-    gen++; flying.clear(); holds.clear(); playing.clear();
-    for (const p of sky.querySelectorAll(".pkt, .rt-flier")) p.remove();
-    wake();
+    gen++; playing.clear();
+    hub.classList.remove("busy");
+    pPlays.clear(); pHeld.clear();
+    for (const p of pSky.querySelectorAll(".ps-dot")) p.remove();
+    pWake();
+    for (const p of sky.querySelectorAll(".pkt")) p.remove();
+    pWake();
   }
 
   // ---------- replay ----------
@@ -5433,7 +5138,7 @@ function routingPage(part) {
       moved = true;
       if (!was) play(g.r.id);
     }
-    wake();
+    pWake();
     // as the gateway's own trace would: a try begun or ended shows at once
     if (moved) { if (cur && p.routes.has(cur.id)) cur = p.routes.get(cur.id); renderAll(); }
     replayBar(p, fast);
@@ -5508,41 +5213,6 @@ function routingPage(part) {
 
   // ---------- the loop ----------
 
-  // pose puts a flight's dot e of the way along, and its jianmu with it,
-  // heading the way it flies — turned about to fly left, tilted no more
-  // than a bird banks
-  function pose(tr, e) {
-    for (const l of tr.legs) if (l.j) l.j();
-    const lens = tr.legs.map((l) => pathLength(l.p));
-    const total = lens.reduce((a, b) => a + b, 0);
-    const point = (d) => {
-      d = Math.max(0, Math.min(total, d));
-      let i = 0;
-      // a leg not laid out has nowhere to be on: passed over
-      while (i < lens.length - 1 && (d > lens[i] || !lens[i])) { d -= lens[i]; i++; }
-      const l = tr.legs[i];
-      return pointAt(l.p, l.rev ? lens[i] - d : d);
-    };
-    if (!total) return;
-    // every wire ends at a card, and the sky is under the cards: a flight
-    // starts and ends a dot clear of them, so a dot held at its seat or
-    // waiting at jianmu is seen whole
-    const edge = Math.min(6, total / 4), d = edge + e * (total - 2 * edge), pt = point(d);
-    setAttr(tr.dot, "cx", String(pt.x));
-    setAttr(tr.dot, "cy", String(pt.y));
-    tr.dot.removeAttribute("visibility");
-    const b = tr.bird;
-    if (!b) return;
-    const p0 = point(d - 3), p1 = point(d + 3);
-    let vx = p1.x - p0.x, vy = p1.y - p0.y;
-    if (Math.abs(vx) + Math.abs(vy) < .01) { vx = b._vx ?? (tr.legs[0].rev ? -1 : 1); vy = 0; }
-    b._vx = vx;
-    const aim = Math.max(-24, Math.min(24, Math.atan2(vy, Math.abs(vx)) * 180 / Math.PI));
-    b._a = b._a === undefined || b._flip !== (vx < 0) ? aim : b._a + (aim - b._a) * .12;
-    b._flip = vx < 0;
-    b.setAttribute("transform", `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)}) scale(${b._flip ? -1 : 1} 1) rotate(${b._a.toFixed(1)})`);
-  }
-
   // resume: the page back in sight — another tab left, the window shown
   // again, or frames not drawn for a while (a hidden or covered window
   // draws none, and may not say it is hidden). What was flying then is
@@ -5573,15 +5243,6 @@ function routingPage(part) {
     seen = vis;
     lastFrame = ts;
     if (vis) {
-      const now_ = trips; trips = [];
-      for (const tr of now_) {
-        if (tr.g !== gen) { tr.res(); continue; }
-        const k = tr.ms ? Math.min(1, Math.max(0, (ts - tr.t0) / tr.ms)) : 1;
-        try {
-          pose(tr, (1 - Math.cos(Math.PI * k)) / 2); // eased in and out, as a bird glides to land
-        } catch { tr.res(); continue; } // one that can't be flown ends, and the rest fly on
-        if (k >= 1) tr.res(); else trips.push(tr);
-      }
       if (ts < flipUntil) layout();
       if (capQ.length && ts - capAt > (capLo && !capQ[0].lo ? 500 : 1700)) show(capQ.shift());
     } else pause();
@@ -5593,9 +5254,7 @@ function routingPage(part) {
     seen = false;
     endReplay(true);
     leftPick();
-    for (const tr of trips) tr.res();
-    trips = [];
-    wake();
+    pWake();
     if (capQ.length) { show(capQ[capQ.length - 1]); capQ = []; }
   }
   // Visibility events can arrive after the browser has suspended frames, so
@@ -5651,7 +5310,7 @@ function routingPage(part) {
   function offline(msg) {
     off.textContent = msg;
     off.hidden = !msg;
-    for (const e of [top, stage, foot, log]) e.hidden = !!msg;
+    for (const e of [top, pStage, foot, log]) e.hidden = !!msg;
     more.hidden = !!msg;
   }
 
@@ -5805,9 +5464,9 @@ function routingPage(part) {
           if (go.length) sync(); // the stage once for them all (#308)
           for (const id of go) play(id, true);
           // back in sight, those still under way fly, not all that came
-          for (const id of (back ? fresh.filter((id) => !routes.get(id).done) : fresh).slice(-4)) pPlay(id);
+          if (pBox) for (const id of (back ? fresh.filter((id) => !routes.get(id).done) : fresh).slice(-4)) pPlay(id);
           if (back && seen && shown()) for (const u of underWay()) if (!playing.has(u.id)) play(u.id);
-          wake();
+          pWake();
           renderAll();
         }
       } catch {
@@ -8961,7 +8620,7 @@ function routingPage(part) {
   if (pBox) pBox.hidden = false;
   const P_ROWS = 6;
   let today = null, todayAt = 0;
-  const pShown = () => pBox && document.body.dataset.ptab === "routing";
+  const pShown = () => pBox ? document.body.dataset.ptab === "routing" : shown();
   let pStale = false; // a draw skipped while the panel was hidden
   if (pBox) document.addEventListener("visibilitychange", () => { if (pStale && !document.hidden) renderPanel(); });
   async function loadToday() {
@@ -8998,9 +8657,17 @@ function routingPage(part) {
   pHub.innerHTML = '<svg viewBox="0 0 44 44" aria-hidden="true"><use href="#bird"/></svg>';
   pStage.append(pWires, pFrom, pHub, pTo, pSky);
   pStage.setAttribute("aria-hidden", "true");
+  if (!pBox) {
+    stage.classList.add("shared");
+    const info = el("div", "rt-shared-meta");
+    info.append(el("b", "", "jianmu"), hubSub, chip);
+    stage.before(pStage);
+    pStage.after(info);
+  }
   let pAg = [], pDst = [];          // the keys on the stage, in their places
   const pNodes = new Map();         // "a:<agent>" / "d:<provider>" → { node, wire }
-  const pPlays = new Set();         // the requests flying
+  const pPlays = new Map();         // request → playback generation
+  const pHeld = new Map();          // waiting dot → provider node
   let pTrips = [], pWait = [], pRaf = 0;
   // pSeat is where a try went: its place, the provider, and the account
   // or key there
@@ -9018,9 +8685,10 @@ function routingPage(part) {
     return out.filter(Boolean).slice(0, P_SIDE);
   }
   function pDraw() {
-    if (!pBox || !pStage.isConnected) return;
+    if (!pStage.isConnected) return;
     if (document.hidden) { pStale = true; return; }
-    const recent = [...routes.values()].sort((a, b) => b.id - a.id);
+    const recent = (pBox ? [...routes.values()] : pinned ? [pinned] : day ? past : [...src().values()])
+      .filter((r) => pBox || matchesPurpose(r)).sort((a, b) => b.id - a.id);
     const flying = recent.filter((r) => pPlays.has(r.id));
     const ags = [], dst = new Map(); // seat key → { name, sub, how }
     const byOf = new Map(); // a caller (srcOf) → its latest request
@@ -9096,6 +8764,11 @@ function routingPage(part) {
       const mx = (x1 + x2) / 2;
       n.wire.setAttribute("d", `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`);
     }
+    for (const [dot, n] of pHeld) {
+      const pt = pointAt(n.wire, pathLength(n.wire));
+      dot.setAttribute("cx", pt.x);
+      dot.setAttribute("cy", pt.y);
+    }
   }
   new ResizeObserver(pLayout).observe(pStage);
   // pFly carries a dot along a wire (back: from its end), lighting the wire
@@ -9136,10 +8809,11 @@ function routingPage(part) {
   }
   const pRest = (ms) => new Promise((res) => setTimeout(res, pShown() && !still() ? ms : 0));
   async function pPlay(id) {
-    if (!pBox || !pShown() || document.hidden || still() || pPlays.has(id) || pPlays.size >= 4) return;
-    let r = routes.get(id);
+    if (!pShown() || document.hidden || still() || pPlays.get(id) === gen || pPlays.size >= 4) return;
+    const source = pBox ? routes : src(), g = gen;
+    let r = source.get(id);
     if (!r) return;
-    pPlays.add(id);
+    pPlays.set(id, g);
     pDraw();
     const dot = document.createElementNS(NS, "circle");
     dot.setAttribute("r", 3.5);
@@ -9151,7 +8825,7 @@ function routingPage(part) {
     // rt: the route as the gateway has it now — or, dropped from the 60
     // kept while it flew, over: its dot goes, as nothing more will be heard
     // of it. Waiting on it held the dot and its place for three minutes
-    const rt = () => routes.get(id) || { ...r, done: true, gone: true };
+    const rt = () => g === gen && pShown() && source.get(id) || { ...r, done: true, gone: true };
     try {
       await pFly(dot, home(), false, 420);
       for (let i = 0; ; i++) {
@@ -9166,8 +8840,10 @@ function routingPage(part) {
         // it waits at the account while that answers
         if (n) n.lit++;
         dot.classList.add("wait");
+        if (n) pHeld.set(dot, n);
         await pUntil(() => { r = rt(); return r.tries[i]?.done || r.done; });
         dot.classList.remove("wait");
+        pHeld.delete(dot);
         if (n && !--n.lit) n.wire.classList.remove("on");
         if (r.gone) break;
         const t2 = r.tries[i];
@@ -9187,9 +8863,10 @@ function routingPage(part) {
         break;
       }
     } finally {
+      pHeld.delete(dot);
       dot.classList.add("gone");
       setTimeout(() => dot.remove(), 300);
-      pPlays.delete(id);
+      if (pPlays.get(id) === g) pPlays.delete(id);
       pDraw();
     }
   }

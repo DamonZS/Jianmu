@@ -46,11 +46,13 @@ function serve(lang) {
 // where the held dot is, and where the wire to the answering seat ends, in
 // the page's own pixels
 const where = () => {
-  const dot = document.querySelector(".rt-sky .pkt.held");
-  const seat = [...document.querySelectorAll(".rt-accts li")].find((li) => li.classList.contains("on"));
+  const dot = document.querySelector(".ps-sky .ps-dot.wait");
+  const seat = document.querySelector(".ps-dst.wait");
   if (!dot || !seat) return null;
   const d = dot.getBoundingClientRect(), s = seat.getBoundingClientRect();
-  return { dot: { x: d.left + d.width / 2, y: d.top + d.height / 2 }, seat: { l: s.left, t: s.top, b: s.bottom } };
+  const stage = document.querySelector(".pr-stage").getBoundingClientRect();
+  const wire = document.querySelector(".ps-wire.ps-out")?.getAttribute("d");
+  return { dot: { x: d.left + d.width / 2, y: d.top + d.height / 2, cx: dot.getAttribute("cx"), cy: dot.getAttribute("cy") }, seat: { l: s.left, t: s.top, b: s.bottom }, stage: { l: stage.left, w: stage.width }, wire };
 };
 
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"];
@@ -59,7 +61,7 @@ const widths = [1100, 560];
 for (const engine of engines) for (const lang of langs) for (const width of widths) {
   test(`${engine} ${lang} ${width}px: Routing picked mid-request holds the request's dot at the seat that answers it`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
-    const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
+    const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "no-preference" });
     const page = await context.newPage();
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
@@ -77,7 +79,7 @@ for (const engine of engines) for (const lang of langs) for (const width of widt
     await page.goto("http://jianmu.test/?view=agents");
     await page.waitForTimeout(800);
     await openPage(page, "routing");
-    await page.waitForFunction(() => document.querySelector(".rt-sky .pkt.held"), null, { timeout: 6000 });
+    await page.waitForFunction(() => document.querySelector(".ps-sky .ps-dot.wait"), null, { timeout: 6000 });
     await page.waitForTimeout(400);
     const atSeat = async (when) => {
       const w = await page.evaluate(where);

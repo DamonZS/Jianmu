@@ -137,12 +137,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           setTimeout(() => { o.disconnect(); res(n); }, 1000);
         }));
         assert(ticks >= 1 && ticks <= 30, `the dashes moved ${ticks} times in a second, not every frame`);
-        // the dot let go at the account fades and comes back, by the timer
-        await page.waitForFunction(() => document.querySelector(".rt-sky .pkt.held"), null, { timeout: 15000 });
-        assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".rt-sky .pkt.held")).animationName), "none");
-        const fade = () => page.evaluate(() => getComputedStyle(document.querySelector(".rt-sky .pkt.held")).opacity);
+        // the shared tray stage holds the dot at the provider while it answers
+        await page.waitForFunction(() => document.querySelector(".ps-sky .ps-dot.wait"), null, { timeout: 15000 });
+        assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".ps-sky .ps-dot.wait")).animationName), "ps-wait");
+        const fade = () => page.evaluate(() => getComputedStyle(document.querySelector(".ps-sky .ps-dot.wait")).opacity);
         const fadeWas = await fade();
-        await page.waitForFunction((was) => getComputedStyle(document.querySelector(".rt-sky .pkt.held")).opacity !== was, fadeWas);
+        await page.waitForFunction((was) => getComputedStyle(document.querySelector(".ps-sky .ps-dot.wait")).opacity !== was, fadeWas);
         assert.match((await fold.locator("em").textContent()).trim(), new RegExp("^ag-2: " + (await say("answering…")).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
         // opened, the key with the request is the one that flows

@@ -86,11 +86,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(seen.size >= 3, `the flowing wires fade: ${[...seen]}`);
         assert(Math.min(...[...seen].map(Number)) < .95, `they fade below full: ${[...seen]}`);
         assert.equal(await dashes(), first, "the dashes stood still");
-        // the dot held at each account fades too
-        await page.waitForFunction(() => document.querySelector(".rt-sky .pkt.held"), null, { timeout: 15000 });
-        const held = () => page.evaluate(() => getComputedStyle(document.querySelector(".rt-sky .pkt.held")).opacity);
-        const heldWas = await held();
-        await page.waitForFunction((was) => getComputedStyle(document.querySelector(".rt-sky .pkt.held")).opacity !== was, heldWas);
+        // the shared tray stage stays static under reduced motion
+        assert.equal(await page.locator(".ps-sky .ps-dot").count(), 0);
+        assert.equal(await page.locator(".ps-hub").evaluate((e) => getComputedStyle(e).animationName), "none");
         // no bird flies with motion reduced
         assert.equal(await page.locator(".rt-flier").count(), 0);
 

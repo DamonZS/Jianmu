@@ -200,6 +200,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const picked = await win.locator('.rt-req[aria-pressed="true"]').evaluateAll((rs) => rs.map((r) => r.querySelector(".to").textContent));
       assert.equal(picked.length, 1);
       assert.match(picked[0], /429/);
+      await win.waitForFunction(() => document.querySelector(".rt-log-head")?.textContent.trim());
       assert.match(await win.locator(".rt-log-head").textContent(), want[lang].story);
 
       // a request as it comes: a dot flies from its agent, waits at the
