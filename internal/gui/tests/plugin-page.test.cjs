@@ -23,7 +23,7 @@ const assets = path.resolve(__dirname, "../assets");
 const example = path.resolve(__dirname, "../testdata/page-plugin/page");
 const bridge = path.resolve(__dirname, "../pagebridge.js");
 
-const GLANCE = "a".repeat(32), PROBE = "b".repeat(32), OPEN = "c".repeat(32), BROKEN = "d".repeat(32);
+const GLANCE = "a".repeat(32), PROBE = "b".repeat(32), OPEN = "c".repeat(32), BROKEN = "d".repeat(32), MAGPIE = "e".repeat(32);
 const entry = (tok, name, title, reads, file = "index.html") => ({
   spec: "/x/" + name, name, key: "plugin-" + name, title, reads,
   url: `/_jianmu/plugin/${tok}/${file}`, icon: name === "glance" ? `/_jianmu/plugin/${tok}/icon.svg` : "",
@@ -79,6 +79,8 @@ const PROBE_JS = `(async () => {
   parent.postMessage({ probe: out }, "*");
 })();`;
 const BROKEN_HTML = `<!doctype html><meta charset="utf-8"><script src="_jianmu/bridge.js"></script><script src="app.js"></script><p id="ok">drawn</p>`;
+const MAGPIE_HTML = `<!doctype html><meta charset="utf-8"><script src="_jianmu/bridge.js"></script><script src="legacy.js"></script><p id="ready">ready</p>`;
+const MAGPIE_JS = `(async () => { await magpie.ready; const before = await magpie.options.get(); const after = await magpie.options.set({ ...before, legacyProbe: true }); parent.postMessage({ legacy: { lang: magpie.theme.lang, before, after } }, "*"); })();`;
 
 function server(lang, seen, plugins) {
   return async (route) => {
@@ -129,6 +131,8 @@ function server(lang, seen, plugins) {
       else if ((tok === PROBE || tok === OPEN) && rel === "probe.js") body = PROBE_JS;
       else if (tok === BROKEN && rel === "index.html") body = BROKEN_HTML;
       else if (tok === BROKEN && rel === "app.js") body = seen.broken ? "throw new Error('fixture: the page broke')" : "1";
+      else if (tok === MAGPIE && rel === "index.html") body = MAGPIE_HTML;
+      else if (tok === MAGPIE && rel === "legacy.js") body = MAGPIE_JS;
       if (body == null) return route.fulfill({ status: 404, body: "" });
       return route.fulfill({ status: 200, headers: { ...headers, "Content-Type": type }, body });
     }
@@ -328,6 +332,29 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, [], where);
       await page.context().close();
     }
+  });
+
+  test(`${engine}: a legacy magpie plugin page uses the same options bridge`, async (t) => {
+    const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
+    t.after(() => browser.close());
+    const page = await (await browser.newContext({ viewport: { width: 980, height: 820 } })).newPage();
+    page.setDefaultTimeout(8000);
+    const errors = [], seen = { api: [], reads: [], options: [] };
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.addInitScript(() => { window.navMine = () => []; });
+    seen.pages = () => [entry(MAGPIE, "comfyui-link", "ComfyUI", [])];
+    await page.route("**/*", server("zh", seen, plugins));
+    await page.goto("http://jianmu.test/");
+    await page.waitForFunction(() => document.querySelector('#nav button[data-plugin-page]'));
+    const result = page.evaluate(() => new Promise((resolve) => addEventListener("message", (e) => { if (e.data?.legacy) resolve(e.data.legacy); })));
+    await page.evaluate(() => show("plugin-comfyui-link"));
+    const frame = await frameReady(page, MAGPIE);
+    await frame.locator("#ready").waitFor();
+    assert.deepEqual(await result, { lang: "zh", before: {}, after: { legacyProbe: true } });
+    assert.deepEqual(seen.options.map((o) => [o.spec, o.options]), [["/x/comfyui-link", { legacyProbe: true }]]);
+    assert.equal(await page.locator("#view-plugin-comfyui-link .slot-error").count(), 0);
+    assert.deepEqual(errors, []);
+    await page.context().close();
   });
 
   test(`${engine}: Plugins says what a page may read before it is on`, async (t) => {

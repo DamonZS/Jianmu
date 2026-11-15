@@ -252,4 +252,6 @@
 `;
   (document.head || document.documentElement).prepend(base);
   window.jianmu = api;
+  // Installed community pages may still use the original global; keep the same bridge API.
+  window.magpie = api;
 })();
