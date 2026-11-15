@@ -102,10 +102,14 @@ jobs:
         env:
           VERSION: ${{ needs.trigger-release.outputs.version }}
         run: |
+          set -eu
           v=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._+-')
           make app VERSION="$v"
           mkdir -p dist
-          hdiutil create -volname Jianmu -srcfolder jianmu.app -ov -format UDZO "dist/jianmu-macos-${{ matrix.arch }}.dmg"
+          du -sh jianmu.app
+          df -h . "$RUNNER_TEMP"
+          size=$(du -sk jianmu.app | awk '{ printf "%.0fk\n", $1 * 2 + 65536 }')
+          hdiutil create -size "$size" -fs HFS+ -volname Jianmu -srcfolder jianmu.app -ov -format UDZO "dist/jianmu-macos-${{ matrix.arch }}.dmg"
       - uses: actions/upload-artifact@v4
         with:
           name: dist-macos-${{ matrix.arch }}
