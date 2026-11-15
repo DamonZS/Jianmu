@@ -7079,6 +7079,11 @@ function shinePartners(k, grid) {
 }
 
 // The add sheet: presets, and a custom provider beside its search (jackutan on X).
+// These remain preset metadata for existing providers; only their add rows are hidden.
+const hiddenAddRelayPresets = new Set([
+  "vercel", "gmicloud", "opencode-go", "clinepass", "opencode-zen", "kilo", "commandcode", "together",
+  "fireworks", "fireworks-nexus", "siliconflow", "nvidia", "modelscope", "aihubmix", "pipellm", "302ai", "cherryin", "yylx",
+]);
 let presetQuery = "", addReturnPick = null;
 function renderAdd() {
   const sheet = $("#addSheet");
@@ -7134,6 +7139,8 @@ function renderAdd() {
   const drawTiles = () => {
     tiles.replaceChildren();
     const f = presetQuery.trim().toLowerCase();
+    const addPresets = providers.presets.filter((p) => !hiddenAddRelayPresets.has(p.id))
+      .map((p) => p.id === "toporeduce" ? { ...p, kind: "partner" } : p);
     // the note is found in the words it is shown in, too (远程 for Remote jianmu)
     const hit = (pr) => !f || pr.name.toLowerCase().includes(f) || pr.id.includes(f) || hostOf(pr.chat || pr.responses || pr.anthropic).includes(f) || (pr.note || "").toLowerCase().includes(f) || (pr.note ? t(pr.note).toLowerCase().includes(f) : false);
     // a section: its name, what it is in a word, and its rows, three to a line
@@ -7155,7 +7162,9 @@ function renderAdd() {
     // partners pay to be listed first, under a heading that says so; who
     // they are comes from usejianmu.ai (internal/provider/partners.go), and
     // each may name the languages it is shown in
-    const partners = providers.presets.filter((p) => p.kind === "partner" && partnerShown(p) && (hit(p) || partnerNote(p).toLowerCase().includes(f)));
+    // partners and built-in toporeduce appear first under their own heading;
+    // the remote partners come from usejianmu.ai and may name their languages
+    const partners = addPresets.filter((p) => p.kind === "partner" && partnerShown(p) && (hit(p) || partnerNote(p).toLowerCase().includes(f)));
     if (partners.length) {
       any = true;
       const grid = section("Partners", "jianmu's sponsors");
@@ -7218,7 +7227,7 @@ function renderAdd() {
     // this machine's (Avalon on Discord didn't find it among the relays)
     for (const [kind, title, hint] of [["vendor", "Vendors", "the makers' own APIs"], ["relay", "Relays", "one key, many vendors"], ["local", "On this machine", ""], ["remote", "Another computer's jianmu", "shared on its network"]]) {
       // a vendor's China endpoint is a preset of its own: one row with the global one
-      const rows = providers.presets.filter((p) => p.kind === kind && !globalOf(p))
+      const rows = addPresets.filter((p) => p.kind === kind && !globalOf(p))
         .map((p) => [p, chinaOf(p)]).filter(([p, cn]) => hit(p) || (cn && hit(cn)));
       if (!rows.length) continue;
       any = true;

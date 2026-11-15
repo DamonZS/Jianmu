@@ -4,11 +4,14 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart } = require("./reader.cjs");
 
-// Settings › About had Discord and GitHub but no link to toporeduce.cn (the
-// owner). Its Website row names the site and opens it, in every language and
-// at the tray panel's width.
+// Settings › About names and opens toporeduce.cn, removes the Discord invite,
+// and keeps the GitHub entry, in every language and at the tray panel's width.
 const words = {
-  en: "Website", zh: "官网", "zh-TW": "官網", ja: "公式サイト", de: "Website",
+  en: { website: "Website", community: "Community", github: "questions, ideas and feedback, on GitHub" },
+  zh: { website: "官网", community: "社区", github: "提问、想法和反馈，可在 GitHub 上交流" },
+  "zh-TW": { website: "官網", community: "社群", github: "提問、想法和反饋，可在 GitHub 上交流" },
+  ja: { website: "公式サイト", community: "コミュニティ", github: "質問、アイデア、フィードバックは GitHub で" },
+  de: { website: "Website", community: "Community", github: "Fragen, Ideen und Feedback auf GitHub" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -26,12 +29,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.goto("http://jianmu.test/");
         await page.locator("#prefs").click();
         await openPart(page, "about");
-        const row = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang] }) });
+        const row = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang].website }) });
         await row.waitFor();
         assert.equal(await row.locator("code").textContent(), "toporeduce.cn");
         const opened = page.waitForRequest((r) => r.url().includes("/api/open"));
         await row.locator("button.text").click();
         assert.equal(JSON.parse((await opened).postData()).url, "https://toporeduce.cn");
+        const community = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang].community }) });
+        assert.equal(await community.locator("button.discord").count(), 0);
+        assert.equal(await community.locator("button.github").count(), 1);
+        assert.equal(await community.locator(".sub").textContent(), words[lang].github);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "About wider than the window");
         assert.deepEqual(errors, []);
       });
