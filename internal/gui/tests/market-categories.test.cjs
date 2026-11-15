@@ -47,7 +47,7 @@ const skillItems = [
   ...Array.from({ length: 58 }, (_, i) => ({ id: `acme/skills/helper-${i}`, name: `helper-${i}`, source: "acme/skills", skillId: `helper-${i}`, installs: 0, icon: "" })),
 ];
 const catalogs = { mcp: mcpItems, skills: skillItems };
-const categoryExample = { browse: "playwright", development: "code-review-0", data: "postgres", knowledge: "memory", productivity: "calendar", media: "imagegen", security: "sentry", other: "mcp-utility" };
+const categoryExample = { browse: "playwright", development: "git-tool-0", data: "postgres", knowledge: "memory", productivity: "calendar", media: "imagegen", security: "sentry", other: "mcp-utility" };
 const skillCategoryExample = { browse: "acme/skills/playwright", development: "acme/skills/code-review-0", data: "acme/skills/xlsx", knowledge: "acme/skills/research", productivity: "acme/skills/docx", media: "acme/skills/ai-video-generation", security: "acme/skills/security-audit", other: "acme/skills/mystery-skill" };
 
 function matches(item, query) {

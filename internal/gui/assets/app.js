@@ -20027,6 +20027,9 @@ function renderSettings() {
     (v) => setGatewayPaused(v === "paused")));
   // quitask.js's question
   $("#quitAskSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.quitNoAsk ? "off" : "on", (v) => savePrefs({ ...keep, quitNoAsk: v === "off" })));
+  $("#restoreQuitRow").hidden = web;
+  $("#restoreQuitSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.restoreOnQuit ? "on" : "off",
+    (v) => savePrefs({ ...keep, restoreOnQuit: v === "on" })));
   // WSL's distros, looked in on Windows unless turned off (#1264)
   $("#wslAgentsRow").hidden = !s.wsl;
   $("#wslAgentsSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.noWSLAgents ? "off" : "on",
@@ -20766,6 +20769,7 @@ function renderProxy(s, keep) {
   });
   renderProxyCheck(s, row);
   renderPluginProxy(s, keep);
+  renderUpdateProxy(s, keep);
 }
 const proxyState = { custom: false };
 // plugin downloads' proxy (JonahFu on X); plugins' vendor requests follow the one above
@@ -20779,6 +20783,18 @@ function renderPluginProxy(s, keep) {
     key: "pluginProxy", box: $("#pluginProxySegs"), cur, state: pluginProxyState,
     modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], cur === "saved"),
     again: () => renderPluginProxy(s, keep),
+  });
+}
+const updateProxyState = { custom: false };
+function renderUpdateProxy(s, keep) {
+  const v = (s.updateProxy || "").trim();
+  const cur = !v ? "auto" : v === "direct" ? "off" : v.startsWith("@") ? "saved" : "custom";
+  $("#updateProxySub").textContent = cur === "auto" ? t("Updates go through the proxy above")
+    : cur === "off" ? t("Updates go direct") : t("Updates go through {proxy}", { proxy: v.startsWith("@") ? savedProxyName(v) : proxyDisplay(v) });
+  proxyRow(s, keep, {
+    key: "updateProxy", box: $("#updateProxySegs"), cur, state: updateProxyState,
+    modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], cur === "saved"),
+    again: () => renderUpdateProxy(s, keep),
   });
 }
 // proxyRow: o.key's modes, and Custom's address and login; o.state.custom is Custom not saved yet.
@@ -22745,6 +22761,7 @@ function dockChoice(s) {
 // prefsKeep is what the settings page sends of s, all of it each time.
 function prefsKeep(s) {
   return { theme: s.theme, colorblind: !!s.colorblind, reduceMotion: !!s.reduceMotion, noBird: !!s.noBird, lang: s.lang, tray: s.tray, dock: !!s.dock, dockWindow: !!s.dockWindow, dockNever: !!s.dockNever, lightweight: s.lightweight, keepAwake: !!s.keepAwake, keepAwakeDisplay: !!s.keepAwakeDisplay, noWSLAgents: !!s.noWSLAgents, quitNoAsk: !!s.quitNoAsk, proxy: s.proxy || "", pluginProxy: s.pluginProxy || "",
+    restoreOnQuit: !!s.restoreOnQuit, updateProxy: s.updateProxy || "",
     sessionTerminal: s.sessionTerminal || "",
     uiFont: s.uiFont || null, codeFont: s.codeFont || null,
     otel: s.otel || {},
