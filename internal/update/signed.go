@@ -11,7 +11,7 @@ import (
 )
 
 // A release's files are trusted by one signature, not by the feed's word.
-// The feed (usejianmu.ai/api/latest) is only a courier: whoever can change
+// The feed (toporeduce.cn/api/latest) is only a courier: whoever can change
 // its answer, the site, a proxy, a mirror, could swap a file and the hash
 // beside it. Release CI signs "jianmu release <version>\n" followed by the
 // release's SHA256SUMS with a private key that lives only as the

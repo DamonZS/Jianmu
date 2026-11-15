@@ -7159,9 +7159,6 @@ function renderAdd() {
     const named = (x) => !f || x.name.toLowerCase().includes(f) || x.agent.includes(f) || "subscription".includes(f);
     const subs = SUBS.filter((x) => !(replacedSub(x.agent) || unusedSub(x.agent)) || signing?.agent === x.agent).map((x) => subOf(x.agent)).filter(named);
     const inPlugins = f && SUBS.some((x) => unusedSub(x.agent) && signing?.agent !== x.agent && named(subOf(x.agent)));
-    // partners pay to be listed first, under a heading that says so; who
-    // they are comes from usejianmu.ai (internal/provider/partners.go), and
-    // each may name the languages it is shown in
     // partners and built-in toporeduce appear first under their own heading;
     // the remote partners come from usejianmu.ai and may name their languages
     const partners = addPresets.filter((p) => p.kind === "partner" && partnerShown(p) && (hit(p) || partnerNote(p).toLowerCase().includes(f)));
@@ -19635,7 +19632,6 @@ async function writingPrefs(p) {
 const prefsSettled = (since) => !prefsBusy && since === prefsWrites;
 
 const GITHUB_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>';
-const DISCORD_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>';
 
 // PROV_PREFS: a subscription's warm-up, check-in and resets, lists kept
 // in #provPrefRows, shown in its provider's editor (the owner, 11-07)
@@ -19936,7 +19932,7 @@ function renderCLI(r) {
 }
 
 // Settings' Download source (#893): a GitHub mirror before github.com, as
-// `jianmu update mirror` writes; the feed and SHA-256 stay usejianmu.ai's
+// `jianmu update mirror` writes; the feed and SHA-256 stay toporeduce.cn's
 let mirrorEditing = false, mirrorDraft = "", mirrorErr = "";
 function setUpdateMirror(mirror) {
   return writingPrefs(api("settings/update-mirror", { mirror }))
@@ -19950,10 +19946,10 @@ function renderUpdateMirror(r, s) {
   const sub = el("div", "sub");
   who.append(sub);
   const m = s.updateMirror || "";
-  sub.textContent = mirrorErr || (m ? t("Updates are downloaded from usejianmu.ai, and through this mirror when that fails, each checked against usejianmu.ai's checksum")
-    : t("Updates are downloaded from usejianmu.ai, and from GitHub when that fails; a mirror can stand in for GitHub where it is slow"));
+  sub.textContent = mirrorErr || (m ? t("Updates are downloaded from toporeduce.cn, and through this mirror when that fails, each checked against toporeduce.cn's checksum")
+    : t("Updates are downloaded from toporeduce.cn, and from GitHub when that fails; a mirror can stand in for GitHub where it is slow"));
   sub.classList.toggle("err", !!mirrorErr);
-  sub.title = t("The update and its checksum always come from usejianmu.ai; a file from the mirror that doesn't match it is not installed.");
+  sub.title = t("The update and its checksum always come from toporeduce.cn; a file from the mirror that doesn't match it is not installed.");
   if (!mirrorEditing) {
     if (m) {
       const official = el("button", "text", t("Remove mirror"));
@@ -19964,7 +19960,7 @@ function renderUpdateMirror(r, s) {
     } else {
       const add = el("button", "text", t("Use a mirror…"));
       add.onclick = () => { mirrorEditing = true; mirrorDraft = ""; renderUpdateMirror(r, s); };
-      val.append(el("code", "", "usejianmu.ai"), add);
+      val.append(el("code", "", "toporeduce.cn"), add);
     }
     return;
   }
@@ -20195,23 +20191,17 @@ function renderSettings() {
     row(who, t("JIANMU_PUBLIC_URL: where other computers reach the gateway, with a gateway key"), s.publicURL, copyBtn(s.publicURL, who)).id = "publicURLRow";
   }
   const site = el("button", "text", t("Open"));
-  site.onclick = () => api("open", { url: "https://usejianmu.ai" }).catch(() => {});
-  row(t("Website"), t("downloads, docs and what's new"), "usejianmu.ai", site);
+  site.onclick = () => api("open", { url: "https://toporeduce.cn" }).catch(() => {});
+  row(t("Website"), t("downloads, docs and what's new"), "toporeduce.cn", site);
   const lic = el("button", "text", t("View"));
   lic.onclick = showNotices;
   row(t("Open-source licenses"), t("the notices of the code and data jianmu is built with"), "", lic);
-  const join = el("button", "discord");
-  join.innerHTML = DISCORD_SVG;
-  join.append(el("span", "", t("Join Discord")));
-  join.title = "discord.gg/vGSnD3ZKQF";
-  join.onclick = () => api("open", { url: "https://discord.gg/vGSnD3ZKQF" }).catch(() => {});
-  // issues and the code are on GitHub, for those who'd rather not use Discord
   const repo = el("button", "github");
   repo.innerHTML = GITHUB_SVG;
   repo.append(el("span", "", "GitHub"));
   repo.title = "github.com/DamonZS/Jianmu";
   repo.onclick = () => api("open", { url: "https://github.com/DamonZS/Jianmu" }).catch(() => {});
-  row(t("Community"), t("questions, ideas and feedback, on Discord or GitHub"), "", join, repo);
+  row(t("Community"), t("questions, ideas and feedback, on GitHub"), "", repo);
   // jianmu uninstall, from the app (Jevik_AI on X deleted jianmu's folders
   // by hand and Codex kept pointing at a gateway that was gone). Never in a
   // browser: jianmu web would be taken off the computer serving the page.

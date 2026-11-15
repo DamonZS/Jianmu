@@ -1,5 +1,5 @@
 // Package update keeps jianmu current. Builds are published as GitHub
-// releases of DamonZS/Jianmu; usejianmu.ai/api/latest describes the
+// releases of DamonZS/Jianmu; toporeduce.cn/api/latest describes the
 // newest one: its version, notes, and every file with its SHA-256.
 //
 // The macOS app replaces its own bundle: the new zip is downloaded, checked
