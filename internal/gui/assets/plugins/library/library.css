@@ -541,6 +541,12 @@ input.lib-setname:focus { border-color: var(--accent); box-shadow: 0 0 0 3px col
 .mk-find input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: none; font-size: 13px; color: var(--fg); }
 .mk-find input::placeholder { color: var(--faint); }
 .mk-find input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.mk-categories { display: flex; flex-wrap: wrap; gap: 5px 6px; margin: 0 0 12px; }
+.mk-category { min-height: 25px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); color: var(--muted); font-size: 11.5px; line-height: 1.25; }
+.mk-category:hover { border-color: color-mix(in srgb, var(--fg) 22%, var(--line)); color: var(--fg-2); }
+.mk-category.on { border-color: var(--fg); background: var(--fg); color: var(--card); }
+.mk-category:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mk-category-reset { margin: 10px auto 0; }
 .mk-spin { flex: none; width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--line); border-top-color: var(--fg-2); opacity: 0; transition: opacity .15s; }
 .mk.loading .mk-spin { opacity: 1; animation: mk-spin .7s linear infinite; }
 @keyframes mk-spin { to { transform: rotate(360deg); } }
