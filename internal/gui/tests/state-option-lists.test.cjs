@@ -85,6 +85,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, fresh));
         await page.goto("http://jianmu.test/?view=agents");
+        // api must restore shared options before any startup renderer reads length.
+        assert.equal(await page.evaluate(async () => (await api("state?last=1")).agents[0].fields[0].options.length), catalog.length);
         // drawn from the kept state, before the fresh one comes
         await page.locator('.row.agent[data-id="crush"]').waitFor();
         const read = () => page.evaluate(() => state.agents.map((a) => [a.id, a.fields.map((f) => [f.key, (f.options || []).map((o) => o.value + (o.fastFor ? " " + o.fastFor : ""))])]));
