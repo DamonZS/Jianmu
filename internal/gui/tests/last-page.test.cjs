@@ -97,6 +97,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await open(page, BASE, "plugins", `${where}: Plugins kept`);
       await page.locator('#nav button[data-view="agents"]').click();
       await open(page, BASE, "agents", `${where}: Agents kept`);
+      // Agents hidden in Sidebar pages falls back to Providers on startup.
+      await page.evaluate(() => localStorage.setItem("jianmu.navHidden", JSON.stringify(["agents"])));
+      await open(page, BASE, "providers", `${where}: Agents hidden`);
+      assert.equal(await page.locator('#nav button[data-view="agents"]').isHidden(), true, `${where}: hidden Agents tab`);
       assert.deepEqual(errors, [], where);
       await context.close();
 

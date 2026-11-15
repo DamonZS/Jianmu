@@ -23286,17 +23286,20 @@ function setGatewayMode(on) {
   else if (!sideNav()) slide($("#nav"), "nav");
   navSubs();
 }
+// navMine reads the pages the user hid on this computer (navpages.js)
+const navMine = () => { try { return JSON.parse(localStorage.getItem("jianmu.navHidden") || "[]"); } catch { return []; } };
 // offView: v, or the page a plugin switched off sends it to (yyddbds)
 function offView(v) {
-  if (!featureHides($(`#nav button[data-view="${v}"]`))) return v;
-  if (v === "groups" && !featureHides($('#nav button[data-view="routing"]'))) return "routing";
-  return gatewayMode ? "providers" : "agents";
+  const gone = (x) => featureHides($(`#nav button[data-view="${x}"]`)) || navMine().includes(x);
+  if (!gone(v)) return v;
+  if (v === "groups" && !gone("routing")) return "routing";
+  return gatewayMode || gone("agents") ? "providers" : "agents";
 }
-// navHides leaves out the tabs of the pages gateway mode or a built-in
-// plugin switched off leaves out
+// navHides leaves out the tabs of the pages gateway mode, the reader or a
+// built-in plugin switched off leaves out
 function navHides() {
   if (mode !== "window") return;
-  for (const b of $("#nav").querySelectorAll("button[data-view]")) b.hidden = (gatewayMode && GATEWAY_HIDES.includes(b.dataset.view)) || featureHides(b);
+  for (const b of $("#nav").querySelectorAll("button[data-view]")) b.hidden = (gatewayMode && GATEWAY_HIDES.includes(b.dataset.view)) || featureHides(b) || navMine().includes(b.dataset.view);
 }
 // applyFeatures takes the built-in plugins' state from a read of the
 // settings, or a switch on Plugins › Built-in:

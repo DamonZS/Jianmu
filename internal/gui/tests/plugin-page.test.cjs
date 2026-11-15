@@ -341,7 +341,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(8000);
     const errors = [], seen = { api: [], reads: [], options: [] };
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.addInitScript(() => { window.navMine = () => []; });
     seen.pages = () => [entry(MAGPIE, "comfyui-link", "ComfyUI", [])];
     await page.route("**/*", server("zh", seen, plugins));
     await page.goto("http://jianmu.test/");
