@@ -28,11 +28,28 @@ const partners = [
   partner("zhonly", "China Only", { langs: ["zh"], notes: { en: "Mainland relay", zh: "国内中转" } }),
   partner("taken", "Taken", { added: true }),
 ];
+const hiddenRelays = [
+  ["vercel", "Vercel AI Gateway"], ["gmicloud", "GMI Cloud"], ["opencode-go", "OpenCode Go"], ["clinepass", "ClinePass"],
+  ["opencode-zen", "OpenCode Zen"], ["kilo", "Kilo Gateway"], ["commandcode", "Command Code"], ["together", "Together AI"],
+  ["fireworks", "Fireworks"], ["fireworks-nexus", "Nexus"], ["siliconflow", "SiliconFlow"], ["nvidia", "NVIDIA NIM"],
+  ["modelscope", "ModelScope"], ["aihubmix", "AiHubMix"], ["pipellm", "PipeLLM"], ["302ai", "302.AI"],
+  ["cherryin", "CherryIN"], ["yylx", "鱼鱼连线"],
+];
 const presets = [
   { id: "openai", name: "OpenAI", icon: "openai", kind: "vendor", chat: "https://api.openai.example.com/v1" },
+  { id: "toporeduce", name: "拓扑API", icon: "generic", kind: "relay", chat: "https://api.toporeduce.cn/v1", anthropic: "https://api.toporeduce.cn", sponsored: true },
   { id: "openrouter", name: "OpenRouter", icon: "openai", kind: "relay", chat: "https://openrouter.example.com/v1", sponsored: true },
+  ...hiddenRelays.map(([id, name]) => ({
+    id, name, icon: "generic", kind: "relay", chat: `https://api.${id}.example.com/v1`,
+    ...(id === "gmicloud" ? { website: "https://www.gmicloud.ai" } : {}),
+  })),
+  { id: "vercel-jev", name: "Jev · Vercel AI Gateway", icon: "vercel", kind: "relay", decide: "https://ai-gateway.example.com/typesafe" },
+  { id: "cloudflare-jev", name: "Cloudflare Workers AI · Jev, Clef", icon: "cloudflare", kind: "relay", decide: "https://api.cloudflare.example.com" },
 ];
-const providers = [{ id: "taken", name: "Taken", icon: "generic", preset: "taken", models: [], agents: [], key: { set: true, masked: "sk-…ab12" } }];
+const providers = [
+  { id: "taken", name: "Taken", icon: "generic", preset: "taken", models: [], agents: [], key: { set: true, masked: "sk-…ab12" } },
+  { id: "gmicloud", name: "Saved GMI Cloud", icon: "generic", preset: "gmicloud", chat: "https://api.gmi-serving.com/v1", models: [], agents: [], key: { set: true, masked: "sk-…cd34" } },
+];
 
 function server(lang, list, counted) {
   return async (route) => {
@@ -55,10 +72,10 @@ function server(lang, list, counted) {
 }
 
 const L = {
-  en: { head: ["Partners", "jianmu's sponsors"], subs: "Subscriptions", rows: ["Acme AI", "Taken"], note: "Fast relay", region: "pick the region of your Acme AI account" },
-  zh: { head: ["合作伙伴", "赞助 jianmu 的服务"], subs: "订阅", rows: ["Acme AI", "China Only", "Taken"], note: "快速中转", region: "按你的 Acme AI 账号所在区域选择" },
-  ja: { head: ["パートナー", "jianmu のスポンサー"], subs: null, rows: ["Acme AI", "Taken"], note: "高速な中継", region: "Acme AI アカウントのリージョンを選んでください" },
-  de: { head: ["Partner", "Sponsoren von jianmu"], subs: null, rows: ["Acme AI", "Taken"], note: "Fast relay", region: "die Region deines Acme AI-Kontos wählen" },
+  en: { head: ["Partners", "jianmu's sponsors"], subs: "Subscriptions", relays: "Relays", rows: ["Acme AI", "Taken", "拓扑API"], note: "Fast relay", region: "pick the region of your Acme AI account" },
+  zh: { head: ["合作伙伴", "赞助 jianmu 的服务"], subs: "订阅", relays: "中转", rows: ["Acme AI", "China Only", "Taken", "拓扑API"], note: "快速中转", region: "按你的 Acme AI 账号所在区域选择" },
+  ja: { head: ["パートナー", "jianmu のスポンサー"], subs: null, relays: "中継サービス", rows: ["Acme AI", "Taken", "拓扑API"], note: "高速な中継", region: "Acme AI アカウントのリージョンを選んでください" },
+  de: { head: ["Partner", "Sponsoren von jianmu"], subs: null, relays: "Relays", rows: ["Acme AI", "Taken", "拓扑API"], note: "Fast relay", region: "die Region deines Acme AI-Kontos wählen" },
 };
 
 async function openSheet(page) {
@@ -88,6 +105,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const kinds = await sheet.locator(".kind").evaluateAll((ks) => ks.map((k) => [k.querySelector("b").textContent, k.querySelector("span")?.textContent || ""]));
         assert.deepEqual(kinds[0], w.head);
         if (w.subs) assert.equal(kinds[1][0], w.subs);
+
+        // 拓扑API is a partner before subscriptions; removed relay entries
+        // stay available as saved presets but are absent from the add sheet.
+        const relayHeading = sheet.locator(".kind").filter({ has: page.getByText(w.relays, { exact: true }) });
+        const relayRows = await relayHeading.locator("xpath=following-sibling::div[1]").locator(".n").allTextContents();
+        for (const [, name] of hiddenRelays) assert(!relayRows.includes(name), name);
+        for (const name of ["OpenRouter", "Jev · Vercel AI Gateway", "Cloudflare Workers AI · Jev, Clef"]) assert(relayRows.includes(name), name);
+        const partnerGrid = sheet.locator(".kind").first().locator("xpath=following-sibling::div[1]");
+        assert.deepEqual(await partnerGrid.locator(".n").allTextContents(), w.rows);
+        const topo = partnerGrid.locator('.tile[data-pick="拓扑API"]');
+        assert.equal(await topo.count(), 1);
+        assert.equal(await topo.locator(".badge").count(), 0);
 
         // its rows: listed in the page's language only, one quiet line each
         // with no badge, the tagline in the title
@@ -131,6 +160,24 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.context().close();
       });
     }
+    await t.test("a hidden relay still opens its saved preset editor", async () => {
+      const page = await (await browser.newContext({ viewport: { width: 900, height: 800 } })).newPage();
+      await page.route("**/*", server("en", partners));
+      await page.goto("http://jianmu.test/?view=providers");
+      await page.locator('#providers .row[data-id="gmicloud"]').click();
+      const editor = page.locator("#modal .editor");
+      await editor.waitFor();
+      assert.equal(await editor.locator(".ehead b").textContent(), "Saved GMI Cloud");
+      assert.equal(await editor.locator(".ehead .link.site").textContent(), "www.gmicloud.ai ↗");
+      await page.keyboard.press("Escape");
+      await editor.waitFor({ state: "detached" });
+      await page.locator("#addProvider").click();
+      await page.locator("#addSheet .tile").first().waitFor();
+      const names = await page.locator("#addSheet .tile .n").allTextContents();
+      assert(!names.includes("GMI Cloud"));
+      await page.context().close();
+    });
+
     // how often each partner is shown, opened and its key page opened is
     // counted (provider.CountPartner): shown once per opening of the sheet,
     // not again as it is redrawn or searched
@@ -146,7 +193,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await input.fill("");
       await sheet.locator(".tile", { hasText: "Taken" }).waitFor();
       await page.waitForTimeout(100);
-      assert.deepEqual(counted, [{ what: "shown", ids: ["acme", "taken"] }]);
+      assert.deepEqual(counted, [{ what: "shown", ids: ["acme", "taken", "toporeduce"] }]);
 
       await sheet.locator(".tile", { hasText: "Acme AI" }).click();
       await page.locator("#modal .editor").getByRole("button", { name: "Get a key ↗" }).click();
@@ -271,13 +318,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, []);
       await page.context().close();
     });
-    await t.test("no partners, no heading", async () => {
+    await t.test("built-in 拓扑API stays in Partners without a feed", async () => {
       const page = await (await browser.newContext({ viewport: { width: 900, height: 800 } })).newPage();
       await page.route("**/*", server("en", []));
       const sheet = await openSheet(page);
       const heads = await sheet.locator(".kind b").allTextContents();
-      assert(!heads.includes("Partners"), heads.join(","));
-      assert.equal(heads[0], "Subscriptions");
+      assert.equal(heads[0], "Partners");
+      assert.equal(heads[1], "Subscriptions");
+      assert.equal(await sheet.locator('.tile[data-pick="拓扑API"]').count(), 1);
       await page.context().close();
     });
   });

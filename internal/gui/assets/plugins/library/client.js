@@ -7769,11 +7769,39 @@ jianmu.plugin("library", (ctx) => {
 
   // What the market offers: popular and featured ones until the reader
   // searches. Kept across renders; asked for the first time a tab shows it.
-  const market = {
-    mcp: { q: "", items: null, error: "", loading: false, seq: 0, timer: 0, custom: null, shown: 0 },
-    skills: { q: "", items: null, error: "", loading: false, seq: 0, timer: 0, shown: 0 },
-    pi: { q: "", items: null, error: "", loading: false, seq: 0, timer: 0, shown: 0 },
+  const marketCategories = ["all", "browse", "development", "data", "knowledge", "productivity", "media", "security", "other"];
+  const marketCategoryNames = {
+    all: "All categories", browse: "Browse & search", development: "Development & testing", data: "Data & databases",
+    knowledge: "Knowledge & memory", productivity: "Office & automation", media: "Media & design", security: "Security & operations", other: "Other resources"
   };
+  const exactMarketCategories = {
+    mcp: { playwright: "browse", github: "development", postgres: "data", memory: "knowledge", context7: "knowledge", calendar: "productivity", figma: "media", imagegen: "media", sentry: "security" },
+    skills: { playwright: "browse", "find-skills": "browse", react: "development", "code-review": "development", xlsx: "data", research: "knowledge", docx: "productivity", "ai-video-generation": "media", "ppt-master": "media", "security-audit": "security" },
+  };
+  const marketCategoryRules = [
+    ["browse", /\b(browser|browsing|playwright|puppeteer|chrome|firefox|web search|search engine|web page|fetch|scrape|crawl)\b|浏览器|网页|搜索引擎/iu],
+    ["development", /\b(github|git|code|coding|developer|development|test|testing|terminal|repository|repo|ide|programming|software|debug)\b|编程|代码|开发|测试|调试/iu],
+    ["data", /\b(database|postgres(?:ql)?|mysql|sqlite|redis|mongodb|mongo|sql|data warehouse|databricks|snowflake|spreadsheet|xlsx|csv|excel|data)\b|数据库|数据|表格/iu],
+    ["knowledge", /\b(memory|knowledge|wiki|documentation|docs|context|rag|embedding|vector store|research|notes?)\b|记忆|知识|文档|研究|笔记/iu],
+    ["productivity", /\b(calendar|email|mail|slack|notion|linear|jira|asana|trello|task management|project management|todo|office|automation|workflow)\b|日历|邮件|任务|办公|自动化/iu],
+    ["media", /\b(image|video|audio|music|design|figma|photoshop|illustration|creative|media|animation)\b|图片|图像|视频|音频|设计|媒体/iu],
+    ["security", /\b(security|vulnerability|pentest|cloud|kubernetes|docker|deploy|deployment|monitoring|observability|sentry|logs?|incident|infrastructure|devops|aws|azure|gcp|terraform)\b|安全|漏洞|云|监控|运维|部署/iu],
+  ];
+  function marketCategoryOf(kind, item) {
+    const exact = exactMarketCategories[kind] || {};
+    const ids = [item.id, item.name, item.skillId].filter(Boolean).map((id) => id.toLowerCase().split("/").at(-1));
+    for (const id of ids) if (exact[id]) return exact[id];
+    const text = [item.name, item.title, item.description].filter(Boolean).join(" ");
+    return marketCategoryRules.find(([, rule]) => rule.test(text))?.[0] || "other";
+  }
+  const market = {
+    mcp: { q: "", category: "all", items: null, error: "", loading: false, seq: 0, timer: 0, custom: null, shown: 0 },
+    skills: { q: "", category: "all", items: null, error: "", loading: false, seq: 0, timer: 0, custom: null, shown: 0 },
+    pi: { q: "", items: null, error: "", loading: false, seq: 0, timer: 0, custom: null, shown: 0 },
+  };
+  function marketItems(kind, state = market[kind]) {
+    return (state.items || []).filter((item) => kind === "pi" || state.category === "all" || item.marketCategory === state.category);
+  }
   // how many cards a list shows at first, and each Show more adds
   const MARKET_PAGE = 60;
   const asked = new Set(); // skills whose description has been asked for
@@ -7786,7 +7814,7 @@ jianmu.plugin("library", (ctx) => {
     try {
       const r = await api("library/market/" + ({ mcp: "servers", skills: "skills", pi: "pi" })[kind] + "?q=" + encodeURIComponent(m.q.trim()));
       if (seq !== m.seq) return;
-      m.items = r.items || [];
+      m.items = kind === "pi" ? r.items || [] : (r.items || []).map((item) => ({ ...item, marketCategory: marketCategoryOf(kind, item) }));
       m.shown = MARKET_PAGE;
       m.error = r.error || "";
       // the source that didn't answer when the rest did (#1589)
@@ -7858,6 +7886,25 @@ jianmu.plugin("library", (ctx) => {
     };
     find.append(glyph(GLYPH.search, "lib-mini"), inp, el("span", "mk-spin"));
     box.append(find);
+    if (kind !== "pi") {
+      const filters = el("div", "mk-categories");
+      filters.setAttribute("role", "group");
+      filters.setAttribute("aria-label", t("Filter by category"));
+      for (const category of marketCategories) {
+        const filter = el("button", "mk-category", t(marketCategoryNames[category]));
+        filter.type = "button";
+        filter.dataset.marketCategory = category;
+        filter.setAttribute("aria-pressed", m.category === category ? "true" : "false");
+        if (m.category === category) filter.classList.add("on");
+        filter.onclick = () => {
+          m.category = m.category === category && category !== "all" ? "all" : category;
+          m.shown = MARKET_PAGE;
+          drawMarket(kind);
+        };
+        filters.append(filter);
+      }
+      box.append(filters);
+    }
     box.append(el("div", "mk-grid"));
     drawMarket(kind, box); // now, so the page keeps its scroll across a render
     if (!m.items && !m.loading) queueMicrotask(() => fetchMarket(kind));
@@ -7868,10 +7915,18 @@ jianmu.plugin("library", (ctx) => {
     if (!box) return;
     const m = market[kind];
     const q = m.q.trim();
+    const items = marketItems(kind, m);
     box.classList.toggle("loading", m.loading);
+    for (const filter of box.querySelectorAll(".mk-category")) {
+      const selected = filter.dataset.marketCategory === m.category;
+      filter.classList.toggle("on", selected);
+      filter.setAttribute("aria-pressed", selected ? "true" : "false");
+    }
     const note = box.querySelector(".mk-note");
-    note.textContent = q && m.items ? (m.items.length === 1 ? t("1 result") : t("{n} results", { n: m.items.length }))
-      : kind === "mcp" ? t("Featured, and the official MCP Registry") : kind === "pi" ? t("Most downloaded on npm") : t("Popular on skills.sh");
+    note.textContent = kind !== "pi" && m.category !== "all" && m.items
+      ? t("{n} matches in category", { n: items.length })
+      : q && m.items ? (items.length === 1 ? t("1 result") : t("{n} results", { n: items.length }))
+        : kind === "mcp" ? t("Featured, and the official MCP Registry") : kind === "pi" ? t("Most downloaded on npm") : t("Popular on skills.sh");
     const grid = box.querySelector(".mk-grid");
     grid.replaceChildren();
     if (!m.items) {
@@ -7897,12 +7952,24 @@ jianmu.plugin("library", (ctx) => {
         : kind === "pi" ? t("npm's search didn't answer ({error}), so these are only the matches among the most downloaded packages.", { error: m.failed.cause })
         : t("skills.sh's search didn't answer ({error}), so these are only the matches among jianmu's picks and the most installed skills.", { error: m.failed.cause })));
     } else if (m.error) grid.append(el("div", "mk-msg err", m.error));
-    if (kind === "mcp" && q && m.custom) grid.append(customAt(q, m.custom, m.items.length));
-    else if (!m.items.length && !m.error) {
+    const offeredCustom = kind === "mcp" && q && m.custom;
+    if (offeredCustom) grid.append(customAt(q, m.custom, m.items.length));
+    if (!m.items.length && !m.error && (kind === "pi" || m.category === "all") && !offeredCustom) {
       grid.append(el("div", "mk-msg", q ? t("Nothing matches “{q}”.", { q }) : t("Nothing to show.")));
       return;
     }
-    for (const x of m.items.slice(0, m.shown)) grid.append(cardOf(kind, x));
+    if (kind !== "pi" && m.category !== "all" && !items.length && (!m.error || m.items.length > 0)) {
+      const empty = el("div", "mk-msg mk-category-empty");
+      empty.append(el("span", "", t("No matches in this category.")));
+      empty.append(button(t("Show all categories"), "mk-category-reset", () => {
+        m.category = "all";
+        m.shown = MARKET_PAGE;
+        drawMarket(kind);
+      }));
+      grid.append(empty);
+      return;
+    }
+    for (const x of items.slice(0, m.shown)) grid.append(cardOf(kind, x));
     moreCards(kind, grid);
   }
 
@@ -7912,12 +7979,13 @@ jianmu.plugin("library", (ctx) => {
   // ones shown, which stay where they are.
   function moreCards(kind, grid) {
     const m = market[kind];
-    const left = m.items.length - m.shown;
+    const items = marketItems(kind, m);
+    const left = items.length - m.shown;
     if (left <= 0) return;
     const more = button(t("Show more ({n} left)", { n: left.toLocaleString(intlLang()) }), "mk-more", () => {
       const from = m.shown;
       m.shown += MARKET_PAGE;
-      more.before(...m.items.slice(from, m.shown).map((x) => cardOf(kind, x)));
+      more.before(...items.slice(from, m.shown).map((x) => cardOf(kind, x)));
       more.remove();
       moreCards(kind, grid);
       if (kind === "skills") describeSkills();

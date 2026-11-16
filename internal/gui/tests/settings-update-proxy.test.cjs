@@ -9,6 +9,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { reach } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 function server(lang, posts) {
@@ -88,6 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await mode(l.same).getAttribute("aria-pressed"), "true");
         assert.equal(await box.locator("input.proxy").count(), 0, "no address until Custom");
 
+        await reach(page, mode(l.custom));
         await mode(l.custom).click();
         const address = box.locator("input.proxy");
         await address.fill("http://127.0.0.1:7890");

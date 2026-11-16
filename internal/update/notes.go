@@ -166,7 +166,7 @@ func MostNotes() int {
 // Stable is whether Settings' Update channel is Stable: the update feed is
 // asked for a version a week, the newest that had been out three days as
 // the week began (Monday 00:00 UTC), or an urgent one (a security hole, a
-// ban risk, lost data) as soon as it is out. usejianmu.ai chooses it from
+// ban risk, lost data) as soon as it is out. toporeduce.cn chooses it from
 // the release list (site/worker.js, "The Stable channel"); a release is
 // urgent when a line of its notes starts with "**Urgent release:**".
 func Stable() bool { return settings.Load().UpdateChannel == settings.UpdateStable }
