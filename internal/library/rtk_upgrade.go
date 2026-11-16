@@ -955,6 +955,7 @@ var wingetSays = map[uint32]string{
 	0x8A150111:       "RTK is in use — close the agents running it and try again",
 	0x8A150052:       "winget couldn't put the new rtk.exe in place — if an agent is running rtk, close it and try again",
 	0x8A150107:       "winget couldn't reach the network",
+	0x80072EFD:       "winget couldn't connect to the network",
 	0x8A150008:       "winget couldn't download RTK",
 	0x8A150011:       "the download didn't match winget's checksum",
 	0x8A150045:       "winget couldn't open its package source",

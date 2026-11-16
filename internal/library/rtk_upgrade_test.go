@@ -191,6 +191,9 @@ func TestRTKUpgradeFailureSaid(t *testing.T) {
 	if msg := installFailed(winget, "", 0x8A15002B, nil).Error(); msg != "winget failed (exit code 0x8A15002B): winget has no newer RTK than this one yet" {
 		t.Fatalf("not applicable: %q", msg)
 	}
+	if msg := installFailed(winget, "", int(uint32(0x80072EFD)), nil).Error(); msg != "winget failed (exit code 0x80072EFD): winget couldn't connect to the network" {
+		t.Fatalf("network unavailable: %q", msg)
+	}
 	if msg := installFailed([]string{"sh", "-c", "curl … | sh"}, "curl: (6) Could not resolve host: raw.githubusercontent.com\n", 6, nil).Error(); msg != "RTK's install script failed (exit code 6) — curl: (6) Could not resolve host: raw.githubusercontent.com" {
 		t.Fatalf("script: %q", msg)
 	}
