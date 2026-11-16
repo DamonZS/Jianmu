@@ -20768,35 +20768,8 @@ function renderProxy(s, keep) {
     again: () => renderProxy(s, keep),
   });
   renderProxyCheck(s, row);
-  renderPluginProxy(s, keep);
-  renderUpdateProxy(s, keep);
 }
 const proxyState = { custom: false };
-// plugin downloads' proxy (JonahFu on X); plugins' vendor requests follow the one above
-const pluginProxyState = { custom: false };
-function renderPluginProxy(s, keep) {
-  const v = (s.pluginProxy || "").trim();
-  const cur = !v ? "auto" : v === "direct" ? "off" : v.startsWith("@") ? "saved" : "custom";
-  $("#pluginProxySub").textContent = cur === "auto" ? t("Plugins, npm and GitHub go through the proxy above")
-    : cur === "off" ? t("Plugins, npm and GitHub go direct") : t("Plugins, npm and GitHub go through {proxy}", { proxy: v.startsWith("@") ? savedProxyName(v) : proxyDisplay(v) });
-  proxyRow(s, keep, {
-    key: "pluginProxy", box: $("#pluginProxySegs"), cur, state: pluginProxyState,
-    modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], cur === "saved"),
-    again: () => renderPluginProxy(s, keep),
-  });
-}
-const updateProxyState = { custom: false };
-function renderUpdateProxy(s, keep) {
-  const v = (s.updateProxy || "").trim();
-  const cur = !v ? "auto" : v === "direct" ? "off" : v.startsWith("@") ? "saved" : "custom";
-  $("#updateProxySub").textContent = cur === "auto" ? t("Updates go through the proxy above")
-    : cur === "off" ? t("Updates go direct") : t("Updates go through {proxy}", { proxy: v.startsWith("@") ? savedProxyName(v) : proxyDisplay(v) });
-  proxyRow(s, keep, {
-    key: "updateProxy", box: $("#updateProxySegs"), cur, state: updateProxyState,
-    modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], cur === "saved"),
-    again: () => renderUpdateProxy(s, keep),
-  });
-}
 // proxyRow: o.key's modes, and Custom's address and login; o.state.custom is Custom not saved yet.
 function proxyRow(s, keep, o) {
   const mode = o.state.custom ? "custom" : o.cur;

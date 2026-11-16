@@ -1,9 +1,28 @@
-// Settings › Network's saved proxies: their rows, the test and the form.
+// Settings › Network's saved proxies and update proxy: their rows, the test and the form.
 // app.js imports this when Settings draws them, so it weighs nothing on the core.
 
 let proxyForm = null; // { id, name, url, user, hasPass, err } while one is added or edited
 const proxyChecks = {}; // id -> { busy, out }
+const pluginProxyState = { custom: false }, updateProxyState = { custom: false };
+function renderSettingsDownloadProxies(s) {
+  const keep = prefsKeep(s);
+  const plugin = (s.pluginProxy || "").trim();
+  const pluginMode = !plugin ? "auto" : plugin === "direct" ? "off" : plugin.startsWith("@") ? "saved" : "custom";
+  $("#pluginProxySub").textContent = pluginMode === "auto" ? t("Plugins, npm and GitHub go through the proxy above")
+    : pluginMode === "off" ? t("Plugins, npm and GitHub go direct") : t("Plugins, npm and GitHub go through {proxy}", { proxy: plugin.startsWith("@") ? savedProxyName(plugin) : proxyDisplay(plugin) });
+  proxyRow(s, keep, { key: "pluginProxy", box: $("#pluginProxySegs"), cur: pluginMode, state: pluginProxyState,
+    modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], pluginMode === "saved"),
+    again: () => renderSettingsDownloadProxies(s) });
+  const update = (s.updateProxy || "").trim();
+  const updateMode = !update ? "auto" : update === "direct" ? "off" : update.startsWith("@") ? "saved" : "custom";
+  $("#updateProxySub").textContent = updateMode === "auto" ? t("Updates go through the proxy above")
+    : updateMode === "off" ? t("Updates go direct") : t("Updates go through {proxy}", { proxy: update.startsWith("@") ? savedProxyName(update) : proxyDisplay(update) });
+  proxyRow(s, keep, { key: "updateProxy", box: $("#updateProxySegs"), cur: updateMode, state: updateProxyState,
+    modes: withSavedMode([["auto", t("Same as above")], ["off", t("Direct")], ["custom", t("Custom")]], updateMode === "saved"),
+    again: () => renderSettingsDownloadProxies(s) });
+}
 window.renderSavedProxies = function (s) {
+  renderSettingsDownloadProxies(s);
   const box = $("#proxiesList");
   box.replaceChildren();
   const done = (ns) => { prefs = ns; proxyForm = null; renderSettings(); };
