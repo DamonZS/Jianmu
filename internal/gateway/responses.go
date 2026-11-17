@@ -1491,6 +1491,13 @@ func buildResponses(r *Request, model, host string, rejectTemp bool) []byte {
 		decodeJSON(r.Text, &text)
 		if r.Format != nil {
 			text["format"] = r.Format.responses()
+		} else if len(r.Text) > 0 {
+			// A Responses client's text may say only its verbosity. An
+			// upstream that reads text.format.type (Baidu Qianfan's Token
+			// Plan: "Invalid value: , Supported values are: text, json_object,
+			// json_schema") turns a text without one away; plain text is what
+			// the field means when no format is given.
+			text["format"] = map[string]any{"type": "text"}
 		}
 		out["text"] = text
 	}

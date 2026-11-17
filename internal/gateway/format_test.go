@@ -205,6 +205,27 @@ func TestResponsesTextKeepsVerbosityBesideFormat(t *testing.T) {
 	}
 }
 
+// A Responses client's text may say only its verbosity. An upstream that
+// reads text.format.type (Baidu Qianfan's Token Plan: "Invalid value: ,
+// Supported values are: text, json_object, json_schema") turns a text
+// without one away; plain text is what the field means when no format is
+// given.
+func TestResponsesTextWithoutFormatGetsPlainText(t *testing.T) {
+	r, err := parseResponses([]byte(`{"model":"deepseek-v4.1-flash","input":"hi","text":{"verbosity":"low"}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var built struct {
+		Text map[string]json.RawMessage `json:"text"`
+	}
+	if err := json.Unmarshal(buildResponses(r, "deepseek-v4.1-flash", "qianfan.baidubce.com", false), &built); err != nil {
+		t.Fatal(err)
+	}
+	if string(built.Text["verbosity"]) != `"low"` || !sameFormat(t, string(built.Text["format"]), `{"type":"text"}`) {
+		t.Fatalf("text = %v", built.Text)
+	}
+}
+
 // An upstream that turns a schema away but takes any JSON object
 // (DeepSeek: "This response_format type is unavailable now"; Xiaomi MiMo's
 // Token Plan, #2126) is asked again for an object, the schema in the
