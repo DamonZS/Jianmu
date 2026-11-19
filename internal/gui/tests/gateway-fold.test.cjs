@@ -7,6 +7,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const reader = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -68,9 +69,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.equal((await page.locator("#connectNote code").textContent()).trim(), "http://127.0.0.1:3999/v1", "folded, the head shows the base URL");
     assert.equal(await page.locator("#connectNote .copy").count(), 1, "with a copy button");
 
-    // scrolled so the Connect head is well down the view, opening leaves it there
-    await page.locator(view).evaluate((v) => { v.scrollTop = 40; });
-    await page.waitForTimeout(300);
+    // scroll the Connect heading into the view before measuring its anchor;
+    // Recent calls now precedes setup and can push it below this short viewport.
+    await reader.reach(page, fold);
+    await page.waitForTimeout(100);
     const was = await top(page, "#foldConnect");
     await fold.click();
     await page.waitForTimeout(600);
@@ -90,7 +92,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     assert.equal(await page.locator("#foldConnect").getAttribute("aria-expanded"), "true", "the open fold is remembered");
 
-    // and folds again, the head where it was, and stays folded
+    // and folds again, with the open heading first brought into view
+    await reader.reach(page, page.locator("#foldConnect"));
     const before = await top(page, "#foldConnect");
     await page.locator("#foldConnect").click();
     await page.waitForTimeout(600);

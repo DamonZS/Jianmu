@@ -1,5 +1,5 @@
 /* Sessions: every session of an agent, by folder, to resume or delete (sessions.js) */
-.sm-head { gap: 8px; height: auto; min-height: 34px; }
+.sm-head { gap: var(--s2); height: auto; min-height: 34px; padding-block-end: var(--s2); border-bottom: 1px solid var(--line); }
 .sm-switch { min-width: 0; flex: 1; display: flex; align-items: center; }
 .sm-agents { min-width: 0; max-width: 100%; }
 .segs.sm-agents { background: var(--seg-track); }
@@ -74,8 +74,15 @@ body.window .sm-group .row.sm-sess { padding-left: 32px; }
 .row.sess .sm-del.off { opacity: .4; cursor: default; }
 .row.sess .sm-del.off:hover { color: var(--muted); background: none; }
 .pop.proto-menu.sess-carry-menu { width: min(300px, calc(100vw - 16px)); background: var(--card); }
-.sess-talk-btn, .sess-export { height: 22px; padding: 0 8px; font-size: 11.5px; }
-.sess-talk { max-height: min(560px, 70vh); overflow-y: auto; margin-top: 4px; padding: 8px 10px 4px; border-radius: 9px; border: 1px solid var(--line-2); background: var(--bg); }
+.sm-talk-tools { flex-wrap: wrap; gap: var(--s1) var(--s2); margin-block: var(--s1); }
+.sm-talk-tools h2.k { flex: 0 1 auto; margin: 0 auto 0 0; font-size: var(--fs-3); font-weight: 600; color: var(--fg); }
+.sess-talk-btn, .sess-export { min-height: 28px; padding: 0 var(--s2); font-size: var(--fs-2); }
+.sess-talk-btn { background: var(--accent-soft); color: var(--accent); }
+.sess-talk { max-height: min(560px, 70vh); overflow-y: auto; margin-block-end: var(--s2); padding: var(--s3); border-radius: var(--r2); border: 1px solid var(--line); background: var(--card-2); }
+.sess-talk .cx-part { margin-block-end: var(--s2); }
+.sess-talk .cx-h { flex-wrap: wrap; font-size: var(--fs-1); }
+.sess-talk .sm-talk-state { padding-block: var(--s2); }
+.sm-body .sm-error { color: var(--red); overflow-wrap: anywhere; }
 .sm-restore { display: inline-flex; align-items: center; gap: 5px; }
 .sm-ask-list { grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--fg); line-height: 1.6; }
 .sm-ask-list li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -172,7 +179,7 @@ body.window .row.sm-sub-row { min-height: 42px; padding-left: calc(14px + var(--
 /* the consent (RustCats on X): which agents' sessions may be read, asked
    before any is; a plain grouped list of switches, as System Settings */
 .sm-consent { display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 8px auto 16px; padding: 18px 18px 16px; border-radius: 12px; background: var(--card, var(--bg)); box-shadow: 0 0 0 0.5px var(--line); }
-.sm-consent-title { font-size: 14px; font-weight: 600; color: var(--fg); }
+.sm-consent-title { margin: 0; font-size: var(--fs-4); font-weight: 600; color: var(--fg); }
 .sm-consent-sub, .sm-consent-none { margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
 .sm-consent-list { margin: 2px 0 0; }
 .sm-consent-row { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 6px 12px; cursor: pointer; }

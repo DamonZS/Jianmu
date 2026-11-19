@@ -498,6 +498,7 @@ var notYet = map[string]string{
 	"GET /api/gateway/history":                   U,  // trace.go
 	"GET /api/gateway/route":                     U,  // trace.go
 	"GET /api/gateway/trace":                     U,  // trace.go
+	"GET /api/gateway/recent":                    U,  // metadata-only GUI refresh; trace.go
 	"POST /api/gateway/session-titles":           U,  // trace.go
 	"POST /api/gateway/unrest":                   U,  // trace.go
 	"GET /api/tune":                              U,  // tune.go

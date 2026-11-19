@@ -7,6 +7,37 @@ with no binding generator and no bundler. `jianmu web` serves the same page
 to a browser for a machine with no desktop. Package `internal/gui` hosts all
 three.
 
+## Monitoring UI refresh
+
+The Gateway page places Recent calls directly after gateway status, before
+connection setup and model configuration. While the page is visible it reads
+`GET /api/gateway/recent` two seconds after the preceding read finishes;
+failed reads retain the previous rows, show Retry, and wait ten seconds.
+Leaving the page or hiding the document cancels the read and its timer.
+Unchanged call metadata does not redraw expanded bodies. This path does not
+call `providersState` or trigger model discovery or quota refreshes.
+
+The handler reads the local gateway's recent-call ring, or the loopback-only
+`/v1/jianmu/recent` peer endpoint. Both omit request and response bodies.
+An older/unreachable peer is unavailable (503), not an empty history. Peer
+call rows are summary-only: their numeric IDs must not be used to fetch
+bodies from this process. The gateway ownership flag remains independent
+of whether peer metadata can be read. In Usage › Requests, selecting a row
+opens its existing detail in a modal right-side `<dialog>` drawer. The ledger
+remains mounted behind it; Escape, Cancel and Requests close it and restore
+focus to the row. The selected request text is read lazily as before. Where
+`showModal()` is unavailable, the pane falls back to the previous full-page
+detail presentation.
+
+Chinese product labels and native window titles use 建木 in zh/zh-TW;
+other languages retain jianmu. Translation parameters, commands, paths and
+protocol identifiers are not transformed by a global string replacement.
+The static installation manifest remains language-neutral.
+
+Tests: `gateway-monitor-refresh.test.cjs`, `brand.test.cjs`,
+`TestGatewayRecentCallsIsLoopbackOnlyAndOmitsBodies`, and
+`TestConsoleShowsTheServingJianmusRouting`.
+
 ## Responsibilities and sources of truth
 
 | Part | Responsibility | Source |

@@ -1,6 +1,21 @@
 /* Plugins: the market of provider plugins, and the ones installed. */
 #view-plugins { gap: 0; }
-.pm-head { gap: 10px; }
+#view-plugins .pm-head { gap: 10px; }
+.pm-statusline {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2);
+  margin: 0; padding: 0 0 var(--s1); font-size: var(--fs-2);
+}
+.pm-statusline > div {
+  display: flex; align-items: baseline; gap: var(--s2); padding: var(--s1) var(--s2);
+  border: 1px solid var(--line); border-radius: var(--r1); background: var(--card); color: var(--fg-2);
+}
+.pm-statusline dd { margin: 0; color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pm-statusline .installed { background: var(--accent-soft); border-color: transparent; }
+.pm-statusline .bad { background: var(--red-soft); border-color: transparent; }
+.pm-statusline .bad dt::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-inline-end: 5px;
+  border-radius: 50%; background: var(--red); vertical-align: 1px;
+}
 .pm-mirror { display: inline-flex; align-items: center; gap: 7px; padding: 2px 0; background: none; border: 0; font: inherit; font-size: 12px; color: var(--muted); cursor: pointer; white-space: nowrap; }
 .pm-mirror:hover, .pm-mirror.on { color: var(--fg); }
 .pm-mirror:disabled { opacity: .6; cursor: default; }
@@ -17,10 +32,12 @@
 .pm-find input { flex: 1; min-width: 0; border: 0; outline: none; background: none; color: var(--fg); font: inherit; font-size: 12.5px; }
 .pm-find input::placeholder { color: var(--faint); }
 .pm-find input::-webkit-search-cancel-button { cursor: default; }
-.pm-body { gap: 18px; padding: 10px 0 18px; }
+#view-plugins > .monitor-head { flex: none; }
+.pm-body { gap: var(--s4); padding: var(--s2) 0 var(--s4); }
+.pm-loading { display: flex; flex-direction: column; gap: var(--s2); }
 
 /* the week's picks: the day's plugin, the most downloaded, the most starred */
-.pm-recs { gap: 10px; }
+.pm-recs { gap: var(--s2); padding-top: var(--s3); border-top: 1px solid var(--line-2); }
 .pm-rectitle { display: flex; align-items: baseline; gap: 8px; padding: 0 2px; }
 .pm-rectitle h2 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
 .pm-rectitle span { font-size: 11.5px; color: var(--muted); }
@@ -61,8 +78,12 @@
 .pm-rec.ghost .sk:nth-child(2n) { width: 75%; }
 
 /* the strip of kinds, then where from and in which order */
-.pm-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.pm-bar .segs { flex: none; max-width: 100%; }
+.pm-bar {
+  display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+  padding: var(--s2) var(--s3); border: 1px solid var(--line);
+  border-radius: var(--r2); background: var(--card);
+}
+.pm-bar .segs { flex: none; max-width: 100%; flex-wrap: wrap; }
 .pm-bar .segs .opt em { margin-left: 5px; font-style: normal; font-size: 10.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
 .pm-bar .segs .opt.on em { color: var(--muted); }
 .pm-bar .grow { flex: 1; }
@@ -87,11 +108,11 @@
 }
 
 /* sections of cards */
-.pm-sec { display: flex; flex-direction: column; gap: 9px; }
-.pm-sechead { display: flex; align-items: baseline; gap: 8px; padding: 0 2px; flex-wrap: wrap; }
-.pm-sechead h3 { margin: 0; font-size: 12.5px; font-weight: 650; }
+.pm-sec { display: flex; flex-direction: column; gap: var(--s2); }
+.pm-sechead { display: flex; align-items: baseline; gap: var(--s2); padding: 0 2px; flex-wrap: wrap; }
+.pm-sechead h3 { margin: 0; font-size: var(--fs-3); font-weight: 600; }
 .pm-sechead span { font-size: 11.5px; color: var(--muted); }
-.pm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(262px, 1fr)); gap: 10px; }
+.pm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(262px, 100%), 1fr)); gap: var(--s3); }
 .pm-ghnone { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 12px; border-radius: 12px; border: 1px dashed var(--line); font-size: 12px; color: var(--muted); text-align: center; }
 /* what GitHub couldn't give, over the cards it could: a quiet line, its
    reason wrapping anywhere (a URL in it is one long word) */
@@ -111,7 +132,7 @@
   border-radius: 12px; border: 1px solid var(--line); background: var(--card); cursor: default; outline: none;
   transition: border-color .16s var(--ease), box-shadow .16s var(--ease), transform .16s var(--ease);
 }
-.pm-card:hover { border-color: color-mix(in srgb, var(--fg) 16%, var(--line)); box-shadow: 0 4px 14px rgba(20, 22, 30, .07); }
+.pm-card:hover { border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); }
 .pm-card:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); border-color: var(--accent); }
 .pm-top { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .pm-who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -231,6 +252,11 @@ button.pm-chip:disabled { cursor: default; opacity: .6; }
 .pm-note.warn { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border-radius: 8px; background: var(--amber-soft); color: var(--fg); line-height: 1.5; }
 .pm-note.warn svg { flex: none; margin-top: 2px; color: var(--amber); }
 .pm-empty { margin: 24px 4px; font-size: 12.5px; color: var(--red); }
+.pm-market-empty, .pm-load-error {
+  margin: 0; padding: var(--s3); border-radius: var(--r2); border: 1px solid var(--line);
+  background: var(--card); color: var(--muted); font-size: var(--fs-2); overflow-wrap: anywhere;
+}
+.pm-load-error { background: var(--red-soft); border-color: transparent; color: var(--fg); }
 
 /* a package the market doesn't list. It floats at the foot of the view
    while the cards scroll under it (0x3108 on X: with many plugins it was
@@ -261,7 +287,7 @@ body.window .pm-manual { --bleed-l: 16px; }
 /* Installed */
 .pm-listhead { margin: 0 0 -10px; padding: 0 2px; }
 /* the plugins with an update, above the list: the sidebar's dot, named */
-.pm-updates { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 9px 10px 9px 12px; border-radius: 10px; background: var(--accent-soft); font-size: 12px; line-height: 1.35; }
+.pm-updates { display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); border-radius: var(--r2); background: var(--accent-soft); font-size: var(--fs-2); line-height: 1.35; }
 .pm-updates .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .pm-updates .pm-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 .pm-updates .pm-up { flex: none; }

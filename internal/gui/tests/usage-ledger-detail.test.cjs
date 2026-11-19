@@ -152,7 +152,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           before = await top();
           await rows.nth(n).click();
           await p.locator("#ledReqPane .led-dl").waitFor();
-          assert(await p.locator("#ledgerPane").isHidden(), "the list gives way to the request");
+          assert(await p.locator("#ledgerPane").isVisible(), "the ledger remains visible behind the request drawer");
         };
         const back = async () => {
           await reader.click(p, p.locator("#ledReqPane .led-req-back"));
@@ -216,9 +216,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // a refresh of the list leaves the request's page as it is
         const n = refreshed.n;
-        await reader.click(p, p.locator("#usageReload"));
-        for (let i = 0; i < 60 && refreshed.n === n; i++) await p.waitForTimeout(40);
-        await p.waitForTimeout(150);
+        await p.evaluate(() => refreshUsage(true));
+        assert(refreshed.n > n, "the request list was read again");
         assert(await p.locator("#ledReqPane").isVisible(), "a refresh closed the request");
 
         // text selected on the page is the reader copying, nothing else

@@ -85,7 +85,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // a click opens the request, not Routing
         let d = await reader.openRequest(p, rows.nth(0));
-        assert(await p.locator("#ledgerPane").isHidden(), "the list gives way to the request");
+        assert(await p.locator("#ledgerPane").isVisible(), "the ledger stays mounted behind the drawer");
+        assert(await p.locator("#ledReqPane").evaluate((pane) => pane.matches(":modal")), "request details are modal");
+        const drawer = await p.locator("#ledReqPane").boundingBox();
+        assert.equal(drawer.width, 480, "desktop drawer width");
+        assert.equal(drawer.x + drawer.width, 1180, "drawer aligns with the right edge");
         assert(await p.locator("#view-routing").isHidden(), "Routing isn't opened");
         assert.equal((await p.locator(".led-req-title").textContent()).trim(), "gpt-6-sol");
         assert.equal(await value(d, w.ip), w.here + " · 127.0.0.1", "a loopback address is this computer");

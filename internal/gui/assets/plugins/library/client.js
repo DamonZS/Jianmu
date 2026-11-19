@@ -631,7 +631,11 @@ jianmu.plugin("library", (ctx) => {
       piView = null;
       render();
     } catch (e) {
-      status(e.message, "err");
+      if (lib) return status(e.message, "err");
+      const error = el("div", "lib-read-error");
+      error.setAttribute("role", "alert");
+      error.append(el("b", "", t("Error")), el("span", "", e.message));
+      page.querySelector(":scope > :is(.lib-read-error, .lib-skel)")?.replaceWith(error);
     }
   }
   // the library as the page shows it: what a change did is said once, not shown
@@ -854,14 +858,16 @@ jianmu.plugin("library", (ctx) => {
     else page.querySelector(":scope > .lib-head")?.after(card);
   }
 
-  // Until the library comes, the page is drawn as it will be: the real tabs
-  // (one can be picked already) and, for the tab open, its rows in outline,
-  // so nothing moves when they're filled in. The outline shows only if the
-  // wait is long enough to see it.
+  function libraryTitle() {
+    const head = el("header", "monitor-head");
+    head.append(el("h1", "", t("Library")));
+    return head;
+  }
+
+  // Until the library comes, the real tabs and the open tab's rows in outline.
   function renderLoading() {
-    page.replaceChildren();
     shown = "";
-    page.append(libHead(null), skeleton(tab));
+    page.replaceChildren(libraryTitle(), libHead(null), skeleton(tab));
   }
 
   function skeleton(which) {
@@ -892,9 +898,7 @@ jianmu.plugin("library", (ctx) => {
       rh.append(bar(w, 8));
       return rh;
     };
-    const intro = el("div", "lib-intro lib-sk-intro");
-    intro.append(bar("min(520px, 80%)", 9));
-    box.append(intro);
+    box.append(el("p", "lib-intro lib-sk-intro", t("Loading…")));
     if (which === "instructions") {
       const card = el("div", "list lib-list");
       const ch = el("div", "row lib-row");
@@ -1002,12 +1006,21 @@ jianmu.plugin("library", (ctx) => {
     // Pi's tab only while a Pi is here; the pick is kept for when one is
     else if (tab === "pi" && !hasPi()) tab = "instructions";
     const head = libHead({ mcp: lib.servers.length, skills: lib.skills.length, hooks: (lib.hooks || []).length, env: (lib.env || []).length, subagents: (lib.subagents || []).length, plugins: (lib.plugins || []).length });
-    page.append(head);
+    page.append(libraryTitle(), head);
     head.classList.toggle("stuck", top > 0);
-    // what changed in a tab is drawn in place: only another tab (or the
-    // first one after the skeleton) fades in
     const problems = problemsCard();
     if (problems) page.append(problems);
+    const facts = el("dl", "lib-inventory");
+    const counts = [[t("MCP servers"), lib.servers.length]];
+    if (!agentless()) counts.push([t("Skills"), lib.skills.length], [t("Agents"), shownAgents().length]);
+    for (const [label, n] of counts) {
+      const item = el("div");
+      item.append(el("dt", "", label), el("dd", "", n.toLocaleString(intlLang())));
+      facts.append(item);
+    }
+    page.append(facts);
+    // what changed in a tab is drawn in place: only another tab (or the
+    // first one after the skeleton) fades in
     const body = el("div", "lib-body" + (shown !== tab ? " enter" : ""));
     shown = tab;
     const fnote = followNote();
@@ -7860,8 +7873,9 @@ jianmu.plugin("library", (ctx) => {
     const box = el("section", "mk");
     box.dataset.market = kind;
     const rh = el("div", "row-head");
-    rh.append(el("span", "label", t("Discover")), el("span", "grow"));
+    rh.append(el("h2", "label", t("Discover")), el("span", "grow"));
     const note = el("span", "note mk-note");
+    note.setAttribute("role", "status");
     rh.append(note);
     box.append(rh);
     const find = el("div", "mk-find");
@@ -7869,6 +7883,7 @@ jianmu.plugin("library", (ctx) => {
     inp.type = "search";
     inp.dataset.lib = "market-" + kind;
     inp.placeholder = kind === "mcp" ? t("Search MCP servers — GitHub, Postgres, Figma…") : kind === "pi" ? t("Search Pi packages on npm — mcp, web, subagents…") : t("Search skills on skills.sh — react, pdf, testing…");
+    inp.setAttribute("aria-label", inp.placeholder);
     inp.spellcheck = false;
     inp.autocomplete = "off";
     inp.value = m.q;
@@ -7923,11 +7938,13 @@ jianmu.plugin("library", (ctx) => {
       filter.setAttribute("aria-pressed", selected ? "true" : "false");
     }
     const note = box.querySelector(".mk-note");
-    note.textContent = kind !== "pi" && m.category !== "all" && m.items
-      ? t("{n} matches in category", { n: items.length })
-      : q && m.items ? (items.length === 1 ? t("1 result") : t("{n} results", { n: items.length }))
-        : kind === "mcp" ? t("Featured, and the official MCP Registry") : kind === "pi" ? t("Most downloaded on npm") : t("Popular on skills.sh");
+    if (m.loading || !m.items) note.textContent = t("Loading…");
+    else if (m.error && !m.failed) note.textContent = t("Error");
+    else if (kind !== "pi" && m.category !== "all") note.textContent = t("{n} matches in category", { n: items.length });
+    else if (q) note.textContent = items.length === 1 ? t("1 result") : t("{n} results", { n: items.length });
+    else note.textContent = kind === "mcp" ? t("Featured, and the official MCP Registry") : kind === "pi" ? t("Most downloaded on npm") : t("Popular on skills.sh");
     const grid = box.querySelector(".mk-grid");
+    grid.setAttribute("aria-busy", m.loading || !m.items ? "true" : "false");
     grid.replaceChildren();
     if (!m.items) {
       for (let i = 0; i < 6; i++) {

@@ -11,6 +11,44 @@ import (
 // not serve the gateway reads it here to show the same Routing page (#2606).
 // It answers this computer alone: the trace names accounts and what they
 // served, and the jianmu that reads it is on the same machine.
+func TestGatewayRecentCallsIsLoopbackOnlyAndOmitsBodies(t *testing.T) {
+	s := New()
+	s.recent = []Call{{ID: 1, Agent: "Codex", Model: "m", Status: 200, RequestBody: "private request", ResponseBody: "private response"}}
+	h := s.Handler()
+	request := func(remote, forwarded string) *httptest.ResponseRecorder {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/v1/jianmu/recent", nil)
+		r.RemoteAddr = remote
+		if forwarded != "" {
+			r.Header.Set("X-Forwarded-For", forwarded)
+		}
+		h.ServeHTTP(w, r)
+		return w
+	}
+	w := request("127.0.0.1:50123", "")
+	if w.Code != 200 {
+		t.Fatalf("local: %d %s", w.Code, w.Body)
+	}
+	var got struct {
+		Object string `json:"object"`
+		Calls  []Call `json:"calls"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Object != "recent" || len(got.Calls) != 1 || got.Calls[0].RequestBody != "" || got.Calls[0].ResponseBody != "" {
+		t.Fatalf("recent calls: %+v", got)
+	}
+	for _, test := range []struct{ remote, forwarded string }{
+		{"192.168.0.9:50123", ""},
+		{"127.0.0.1:50123", "203.0.113.7"},
+	} {
+		if denied := request(test.remote, test.forwarded); denied.Code != 403 {
+			t.Errorf("remote=%s forwarded=%s: %d %s", test.remote, test.forwarded, denied.Code, denied.Body)
+		}
+	}
+}
+
 func TestGatewayTraceIsLoopbackOnly(t *testing.T) {
 	h := New().Handler()
 

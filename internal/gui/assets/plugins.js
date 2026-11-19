@@ -648,6 +648,20 @@
     return g;
   }
 
+  function loadingCards(n) {
+    const box = el("div", "pm-loading");
+    const label = el("p", "pm-note", t("Loading…"));
+    label.setAttribute("role", "status");
+    box.append(label, skeleton(n));
+    return box;
+  }
+
+  function loadError(message) {
+    const error = el("p", "pm-load-error", message);
+    error.setAttribute("role", "alert");
+    return error;
+  }
+
   function section(title, hint, list) {
     const box = el("section", "pm-sec");
     const h = el("div", "pm-sechead");
@@ -900,7 +914,7 @@
       out.push(shelf(k, list, !!kindPick));
       shown++;
     }
-    if (!shown && ghLooking() && srcPick === "gh") out.push(skeleton(3));
+    if (!shown && ghLooking() && (!srcPick || srcPick === "gh")) out.push(skeleton(3));
     else if (!shown && (kindPick || srcPick || onlyNew)) {
       const none = el("div", "pm-ghnone");
       const every = el("button", "text", t("Show all"));
@@ -908,6 +922,8 @@
       every.onclick = () => { kindPick = ""; srcPick = ""; onlyNew = false; drawBody(); };
       none.append(el("span", "", t("No plugin matches")), every);
       out.push(none);
+    } else if (!shown && !taggedErr) {
+      out.push(el("p", "pm-market-empty", t("No plugin matches")));
     }
     return out;
   }
@@ -1012,12 +1028,16 @@
 
   page.addEventListener("scroll", () => page.querySelector(".pm-head")?.classList.toggle("stuck", page.scrollTop > 0), { passive: true });
 
+  const title = el("header", "monitor-head");
+  const titleText = el("h1");
+  title.append(titleText);
   let body = null;
   function draw() {
     const scroll = page.scrollTop;
+    titleText.textContent = t("Plugins");
     // the body is made once, so the GitHub section's field stays in the page
     body = body || el("div", "lib-body pm-body");
-    replaceKeeping(page, [head(), body]);
+    replaceKeeping(page, [title, head(), body]);
     drawBody();
     page.scrollTop = scroll;
   }
@@ -1033,11 +1053,11 @@
     if (tab === "installed") return drawInstalled();
     if (tab === "builtin") return drawBuiltin();
     if (failedList && !listings) {
-      body.append(el("p", "pm-empty", t("Couldn't load the plugins: {error}", { error: failedList })));
+      body.append(loadError(t("Couldn't load the plugins: {error}", { error: failedList })));
       return;
     }
     if (!listings) {
-      body.append(skeleton(6));
+      body.append(loadingCards(6));
       return;
     }
     const f = query.trim().toLowerCase();
@@ -1045,9 +1065,9 @@
     const all = everything(match);
     const out = [];
     if (!f) {
+      out.push(...market(all));
       const rec = !kindPick && recSection(all);
       if (rec) out.push(rec);
-      out.push(...market(all));
       out.push(manual(), footer());
       if (mine?.registry) {
         out.push(regBox = regBox || el("div", "pm-registry"));
@@ -1077,8 +1097,8 @@
     h.append(el("h3", "", t("On npm")), el("span", "", t("OpenCode plugins and pi packages anyone published — read what one does before you install it")));
     box.append(h);
     if (!hits) box.append(el("p", "pm-note", t("Type two letters or more to search npm")));
-    else if (hits.loading) box.append(skeleton(2));
-    else if (hits.error) box.append(el("p", "pm-note bad", hits.error));
+    else if (hits.loading) box.append(loadingCards(2));
+    else if (hits.error) box.append(loadError(hits.error));
     else {
       const list = hits.list.filter((x) => !known.has(packageIdentity(x.package)));
       if (!list.length) box.append(el("p", "pm-note", ls.length ? t("Nothing else on npm") : t("No plugin called “{q}”", { q: query.trim() })));
@@ -1183,10 +1203,11 @@
 
   function drawInstalled() {
     if (failed && !mine) {
-      body.append(el("p", "pm-empty", t("Couldn't load the plugins: {error}", { error: failed })));
+      body.append(loadError(t("Couldn't load the plugins: {error}", { error: failed })));
       return;
     }
-    if (!mine) { body.append(skeleton(2)); return; }
+    if (!mine) { body.append(loadingCards(2)); return; }
+    if (failed) body.append(loadError(t("Couldn't load the plugins: {error}", { error: failed })));
     const es = mine.plugins || [];
     if (!es.length) {
       const none = el("div", "pm-none");
@@ -1197,6 +1218,18 @@
       body.append(none);
       return;
     }
+    const facts = el("dl", "pm-statusline");
+    for (const [kind, label, n] of [
+      ["installed", t("Installed"), es.length],
+      ["", t("Off"), es.filter((e) => e.off).length],
+      ["bad", t("Error"), es.filter((e) => !e.off && e.error).length],
+    ]) {
+      if (kind === "bad" && !n) continue;
+      const item = el("div", kind);
+      item.append(el("dt", "", label), el("dd", "", n.toLocaleString(intlLang())));
+      facts.append(item);
+    }
+    body.append(facts);
     // what the sidebar's dot is about, said where it's acted on: which
     // plugins have a newer version, and one press to update them all
     const outdated = es.filter((e) => (e.latest && e.version && newer(e.latest, e.version)) || (gitBehind(e) && !e.off));

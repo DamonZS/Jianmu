@@ -21,6 +21,7 @@ jianmu.plugin("routing", (ctx) => {
     key: "routing",
     title: "Routing",
     html: `
+    <header class="monitor-head"><h1 data-t>Routing</h1></header>
     <div class="row-head"><span class="label" data-t>Routing</span><span class="rt-livedot" aria-hidden="true"></span><span class="note" data-t>live, as the gateway decides</span><span class="grow"></span>
       <button class="text rt-togroups" type="button" id="rtToGroups" data-feature="groups"><span data-t>Routing groups</span> ›</button>
       <button class="text rt-toset" type="button" id="rtToSet"><span data-t>Settings</span> ›</button>
@@ -43,7 +44,7 @@ jianmu.plugin("routing", (ctx) => {
   ctx.slots.add("page", {
     key: "groups",
     title: "Routing groups",
-    html: `<div class="rt-gpage" id="rtGroups"></div>`,
+    html: `<div class="rt-gpage" id="rtGroups"><header class="monitor-head"><h1 data-t>Routing groups</h1></header></div>`,
     // Try again filled the page with its markup anew: the groups go back in
     mount(main) { window.routingGroupsHome?.(main); },
   });
@@ -265,7 +266,7 @@ function routingPage(part) {
   actUsage.onclick = () => window.openUsageOverview();
   actFoot.append(actMore, el("span", "grow"), actUsage);
   const hist = el("div", "rt-cols");
-  const colA = el("div", "rt-col"), colB = el("div", "rt-col");
+  const colA = el("div", "rt-col rt-history"), colB = el("div", "rt-col");
   const filters = el("div", "rt-filters");
   const purposeTools = el("div", "rt-purpose-tools");
   const purposePick = el("button", "text rt-purpose"), purposeLabel = el("span");
@@ -5507,7 +5508,13 @@ function routingPage(part) {
   // Below them, each provider with several keys or accounts on, which
   // routes over them already: how, and how long a conversation stays.
   const gsec = el("div", "rt-gsec");
-  const gHead = el("div", "row-head"), gList = el("div", "list rt-groups");
+  const gHead = el("div", "row-head rt-gtoolbar"), gList = el("div", "list rt-groups");
+  const gRead = el("div", "list rt-gread"), gReadText = el("span"), gRetry = el("button", "text");
+  gRead.hidden = true;
+  gReadText.setAttribute("role", "status");
+  gRetry.type = "button";
+  gRetry.onclick = () => loadGroups();
+  gRead.append(gReadText, gRetry);
   const pHead = el("div", "row-head"), pList = el("div", "list rt-pools");
   // the way back up to Routing, at the toolbar's leading edge as a Mac
   // app's back button (unscientific9 on Discord: a request's group opened
@@ -5591,7 +5598,7 @@ function routingPage(part) {
   const gSet = el("div", "list rt-gset");
   gSet.dataset.feature = "groups";
   gSet.append(gFound, gNames, ...gDefs);
-  gsec.append(gHead, gList, gOff, sHead, gSet, pHead, pList);
+  gsec.append(gHead, gRead, gList, gOff, sHead, gSet, pHead, pList);
   // on the Routing groups page, a page of their own; Try again on it puts
   // them back in its markup made anew. With the groups off, that page's
   // tab leaves the sidebar (yyddbds on Discord: it stayed), and what is
@@ -5765,12 +5772,32 @@ function routingPage(part) {
       models: refs(x.models), deciders: refs(x.deciders), pools: objs(x.pools), gatewayKeys: x.gatewayKeys == null ? null : refs(x.gatewayKeys),
       templates: objs(x.templates).filter((tp) => tp.group && typeof tp.group === "object").map((tp) => ({ ...tp, group: group(tp.group) })) };
   }
+  let initialGroupReads = 0;
   // quiet: the window focused again; the same groups aren't drawn again
   async function loadGroups(quiet) {
+    const initial = !groups;
+    if (initial && ++initialGroupReads === 1) {
+      gRead.hidden = false;
+      gRetry.hidden = true;
+      setText(gReadText, t("Loading…"));
+    }
     let next;
-    try { next = groupsFrom(await api("groups")); } catch { return; }
-    if (quiet === true && groups && JSON.stringify(next) === JSON.stringify(groups)) return;
+    try {
+      next = groupsFrom(await api("groups"));
+    } catch {
+      if (!groups && initialGroupReads === 1) {
+        setText(gReadText, t("Error"));
+        setText(gRetry, t("Try again"));
+        gRetry.hidden = false;
+      }
+      return;
+    } finally {
+      if (initial) initialGroupReads--;
+    }
+    const first = !groups;
+    if (quiet === true && !first && JSON.stringify(next) === JSON.stringify(groups)) return;
     groups = next;
+    gRead.hidden = true;
     if (pBox) renderPanel();
     if (headOf) header(...headOf);
     if (!gEdit && !gsec.contains(document.activeElement)) renderGroups(); // not under someone's hands

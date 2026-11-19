@@ -110,8 +110,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await d.locator(".led-route-link").click();
         for (let i = 0; i < 40 && !asked.length; i++) await p.waitForTimeout(25);
         assert.deepEqual(asked, ["502"], "the link asks for the row's route");
+        if (await p.locator("#ledReqPane").isVisible()) await reader.closeRequest(p);
         await p.locator('[data-view="usage"]').first().click();
-        await reader.closeRequest(p).catch(() => {});
         await wrap.waitFor();
 
         // a window wide enough for the table has no bar

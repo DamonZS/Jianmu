@@ -13,11 +13,11 @@ const { fixture } = require("./fixtures/caller-keys.cjs");
 // alone wasn't seen as a switch, so a key was removed and added again);
 // and Connect folded until it is opened.
 const WORDS = {
-  en: { share: "Share on local network", local: "This computer", lan: "Local network", more: "Key actions", off: "Disable key", on: "Enable key", readOnly: "Make read-only", rotate: "Rotate key", remove: "Remove" },
-  zh: { share: "局域网共享", local: "本机", lan: "局域网", more: "密钥操作", off: "停用密钥", on: "启用密钥", readOnly: "设为只读", rotate: "轮换密钥", remove: "移除" },
-  "zh-TW": { share: "區域網共享", local: "本機", lan: "區域網", more: "金鑰操作" },
-  ja: { share: "ローカルネットワークで共有", local: "このコンピュータ", lan: "ローカルネットワーク", more: "キーの操作" },
-  de: { share: "Im lokalen Netzwerk freigeben", local: "Dieser Computer", lan: "Lokales Netzwerk", more: "Schlüsselaktionen" },
+  en: { share: "Share on local network", local: "This computer", lan: "Local network", more: "Key actions", off: "Disable key", on: "Enable key", readOnly: "Make read-only", models: "Model names", keepOut: "Keep accounts out", mcp: "MCP servers", rotate: "Rotate key", remove: "Remove" },
+  zh: { share: "局域网共享", local: "本机", lan: "局域网", more: "密钥操作", off: "停用密钥", on: "启用密钥", readOnly: "设为只读", models: "模型名称", keepOut: "排除账号", mcp: "MCP 服务器", rotate: "轮换密钥", remove: "移除" },
+  "zh-TW": { share: "區域網共享", local: "本機", lan: "區域網", more: "金鑰操作", off: "停用金鑰", on: "啟用金鑰", readOnly: "設為唯讀", models: "模型名稱", keepOut: "排除帳戶", mcp: "MCP 伺服器", rotate: "輪換金鑰", remove: "移除" },
+  ja: { share: "ローカルネットワークで共有", local: "このコンピュータ", lan: "ローカルネットワーク", more: "キーの操作", off: "キーを無効化", on: "キーを有効化", readOnly: "読み取り専用", models: "モデル名", keepOut: "アカウントを除外", mcp: "MCP サーバー", rotate: "キーをローテーション", remove: "削除" },
+  de: { share: "Im lokalen Netzwerk freigeben", local: "Dieser Computer", lan: "Lokales Netzwerk", more: "Schlüsselaktionen", off: "Schlüssel deaktivieren", on: "Schlüssel aktivieren", readOnly: "Schreibgeschützt", models: "Modellnamen", keepOut: "Konten ausschließen", mcp: "MCP-Server", rotate: "Schlüssel rotieren", remove: "Entfernen" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -105,9 +105,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const menu = page.locator(".row-menu");
         await menu.waitFor();
         const items = (await menu.getByRole("menuitem").allTextContents()).map((s) => s.trim());
-        assert.equal(items.length, 6);
-        if (w.rotate) assert.deepEqual(items.filter((s) => !/MCP/.test(s)).filter((s, i) => i !== 2), [w.off, w.readOnly, w.rotate, w.remove]);
-        assert.deepEqual(items, await page.evaluate(() => [t("Disable key"), t("Make read-only"), t("MCP servers"), t("Keep accounts out"), t("Rotate key"), t("Remove")]));
+        assert.equal(items.length, 7);
+        assert.deepEqual(items, await page.evaluate(() => [t("Disable key"), t("Make read-only"), t("MCP servers"), t("Model names"), t("Keep accounts out"), t("Rotate key"), t("Remove")]));
         // off from the menu, then on again: the key stays, only its switch moves
         await menu.getByRole("menuitem").first().click();
         await menu.waitFor({ state: "detached" });

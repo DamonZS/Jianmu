@@ -143,8 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(tall > short * 2, `the whole is taller: ${short} → ${tall}`);
         assert.equal((await long.locator(".cx-more").textContent()).trim(), w.less);
         refreshed.input = 1;
-        await reader.click(p, p.locator("#usageReload"));
-        await p.waitForTimeout(350);
+        await p.evaluate(() => refreshUsage(true));
         await p.locator(".led-cx .cx-sec").first().waitFor();
         const collapsed = await long.evaluate(e => e.classList.contains("clamp"));
         t.diagnostic("After changed ledger refresh: long content collapsed=" + collapsed);
@@ -152,8 +151,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await long.locator(".cx-more").textContent()).trim(), w.less);
         await reader.click(p, long.locator(".cx-more"));
         refreshed.input = 2;
-        await reader.click(p, p.locator("#usageReload"));
-        await p.waitForTimeout(350);
+        await p.evaluate(() => refreshUsage(true));
         await p.locator(".led-cx .cx-sec").first().waitFor();
         assert(await long.evaluate(e => e.classList.contains("clamp")), "refresh also retains the reader's collapse choice");
         assert.equal((await long.locator(".cx-more").textContent()).trim(), w.more);

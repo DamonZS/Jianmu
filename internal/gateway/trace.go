@@ -970,6 +970,25 @@ func (t *trace) liveBytes(rt *Route, bytes, contentAt int64, est int) {
 	t.mu.Unlock()
 }
 
+// gatewayRecent returns summary metadata only; request and response bodies
+// stay behind the explicit call-detail route. It is restricted to this
+// computer, like gatewayTrace.
+func (s *Server) gatewayRecent(w http.ResponseWriter, r *http.Request) {
+	if !local(r) {
+		writeError(w, provider.Chat, http.StatusForbidden, "jianmu's recent calls are told to this computer alone")
+		return
+	}
+	if refuseHeld(w, r, heldRefused) {
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	calls := s.Recent()
+	for i := range calls {
+		calls[i].RequestBody, calls[i].ResponseBody = "", ""
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"object": "recent", "now": time.Now(), "calls": calls, "pid": os.Getpid(), "serves": Serves})
+}
+
 // gatewayTrace tells this gateway's routing to another jianmu on the same
 // computer, which does not serve the gateway and so has no trace of its own
 // (#2606, fatcutegg: the trace is the serving process's, and a second jianmu
@@ -1011,6 +1030,40 @@ func ownerURL() string {
 		return "http://" + net.JoinHostPort(ip.String(), p)
 	}
 	return ""
+}
+
+// OwnerRecent reads summary metadata from a local gateway. An unavailable
+// or older owner is unknown, not an empty call list.
+func OwnerRecent(ctx context.Context) ([]Call, bool) {
+	base := ownerURL()
+	if base == "" {
+		return nil, false
+	}
+	c := &http.Client{Timeout: 700 * time.Millisecond}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/v1/jianmu/recent", nil)
+	if err != nil {
+		return nil, false
+	}
+	res, err := c.Do(req)
+	if err != nil {
+		return nil, false
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return nil, false
+	}
+	b, err := io.ReadAll(io.LimitReader(res.Body, 8<<20))
+	if err != nil {
+		return nil, false
+	}
+	var out struct {
+		Object string `json:"object"`
+		Calls  []Call `json:"calls"`
+	}
+	if decodeJSON(b, &out) != nil || out.Object != "recent" || out.Calls == nil {
+		return nil, false
+	}
+	return out.Calls, true
 }
 
 // OwnerTrace reads the routing the jianmu serving the gateway's address has

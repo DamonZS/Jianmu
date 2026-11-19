@@ -1041,6 +1041,7 @@ func (s *Server) routes() *routeMux {
 	mux.HandleFunc("GET "+StatuslinePath, s.statusline)
 	mux.HandleFunc("POST "+StatuslinePath, s.statusline)
 	mux.HandleFunc("GET /v1/jianmu/trace", s.gatewayTrace)
+	mux.HandleFunc("GET /v1/jianmu/recent", s.gatewayRecent)
 	mux.HandleFunc("GET "+routeSnapshotPath, s.routeSnapshot)
 	mux.HandleFunc("GET "+routeEventsPath, s.routeEvents)
 	mux.HandleFunc("GET /v1/jianmu/concurrency", s.concurrency)

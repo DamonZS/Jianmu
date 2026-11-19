@@ -2,6 +2,8 @@
 // kernel adds them to i18n.js's (jianmu.strings).
 jianmu.strings({
   zh: {
+    "Masking records": "脱敏记录",
+    "Could not load the masking summary": "无法加载脱敏概览",
     "Turn on masking": "打开脱敏",
     "Nothing is masked yet": "还没有要脱敏的内容",
     "Turn off masking": "关闭脱敏",
@@ -114,6 +116,8 @@ jianmu.strings({
     "Sent as written in new messages; earlier ones stay masked, so the cache still holds": "新消息起按原样发送；之前的消息仍脱敏，缓存不受影响",
   },
   "zh-TW": {
+    "Masking records": "脫敏記錄",
+    "Could not load the masking summary": "無法載入脫敏總覽",
     "Turn on masking": "開啟脫敏",
     "Nothing is masked yet": "還沒有要脫敏的內容",
     "Turn off masking": "關閉脫敏",
@@ -226,6 +230,8 @@ jianmu.strings({
     "Sent as written in new messages; earlier ones stay masked, so the cache still holds": "新訊息起照原樣送出；之前的訊息仍脫敏，快取不受影響",
   },
   ja: {
+    "Masking records": "マスクの記録",
+    "Could not load the masking summary": "マスクの概要を読み込めませんでした",
     "Turn on masking": "マスクをオンにする",
     "Nothing is masked yet": "まだ何もマスクしていません",
     "Turn off masking": "マスクをオフにする",
@@ -338,6 +344,8 @@ jianmu.strings({
     "Sent as written in new messages; earlier ones stay masked, so the cache still holds": "新しいメッセージからそのまま送信します。以前のメッセージはマスクしたままなので、キャッシュは保たれます",
   },
   de: {
+    "Masking records": "Maskierungsprotokoll",
+    "Could not load the masking summary": "Maskierungsübersicht konnte nicht geladen werden",
     "Turn on masking": "Maskierung einschalten",
     "Nothing is masked yet": "Noch wird nichts maskiert",
     "Turn off masking": "Maskierung ausschalten",

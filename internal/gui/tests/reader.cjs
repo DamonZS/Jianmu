@@ -7,8 +7,9 @@
 // had moved the rows 4px down).
 async function inView(page, locator) {
   await locator.waitFor({state:"visible"});
-  if (await locator.evaluate(e => !e.closest("#view-usage"))) return;
-  const view = page.locator("#view-usage");
+  const scrollID = await locator.evaluate(e => e.closest("#ledReqPane[open], #view-usage")?.id);
+  if (!scrollID) return;
+  const view = page.locator("#" + scrollID);
   const v = await view.boundingBox();
   await page.mouse.move(v.x + v.width / 2, v.y + v.height / 2);
   for (let i = 0; i < 80; i++) {

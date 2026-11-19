@@ -32,6 +32,8 @@ func TestConsoleShowsTheServingJianmusRouting(t *testing.T) {
 			w.Write([]byte(`{"name":"jianmu","version":"0.1.1257","models":3,"window":true,"serves":"serve","pid":4321,"apis":[]}`))
 		case "/v1/jianmu/trace":
 			w.Write([]byte(`{"object":"trace","seq":7,"pid":4321,"serves":"serve","routes":[{"id":1,"model":"ollama/gemma4:e4b","provider":"ollama","status":200}]}`))
+		case "/v1/jianmu/recent":
+			w.Write([]byte(`{"object":"recent","calls":[{"id":9,"agent":"Codex","model":"m","status":200,"requestBody":"","responseBody":""}]}`))
 		default:
 			http.NotFound(w, r)
 		}
@@ -68,6 +70,26 @@ func TestConsoleShowsTheServingJianmusRouting(t *testing.T) {
 	// changes with the trace when another jianmu takes the gateway over
 	if got.By == nil || got.By.Pid != 4321 || got.By.Serves != "serve" {
 		t.Errorf("the trace doesn't name the jianmu it came from: %+v", got.By)
+	}
+
+	wRecent := httptest.NewRecorder()
+	mux.ServeHTTP(wRecent, httptest.NewRequest("GET", "/api/gateway/recent", nil))
+	if wRecent.Code != 200 {
+		t.Fatalf("recent: %d %s", wRecent.Code, wRecent.Body)
+	}
+	var recent struct {
+		Mine  bool `json:"mine"`
+		Calls []struct {
+			ID           uint64 `json:"id"`
+			RequestBody  string `json:"requestBody"`
+			ResponseBody string `json:"responseBody"`
+		} `json:"calls"`
+	}
+	if err := json.Unmarshal(wRecent.Body.Bytes(), &recent); err != nil {
+		t.Fatal(err)
+	}
+	if !recent.Mine || len(recent.Calls) != 1 || recent.Calls[0].ID != 9 || recent.Calls[0].RequestBody != "" || recent.Calls[0].ResponseBody != "" {
+		t.Fatalf("recent calls: mine %v calls %+v", recent.Mine, recent.Calls)
 	}
 
 	// the state names it, for the page's heading to say which one is routing

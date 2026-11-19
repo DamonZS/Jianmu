@@ -17,6 +17,7 @@ jianmu.plugin("redact", (ctx) => {
     key: "masking",
     title: "Masking",
     html: `
+  <header class="monitor-head"><h1 data-t>Masking</h1></header>
   <section class="msk-card" id="maskCard"></section>
   <section class="msk-demo" id="maskDemo" data-no-pii>
     <button type="button" class="md-row" id="mdRow" aria-expanded="false" aria-controls="mdBody">

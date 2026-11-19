@@ -521,6 +521,24 @@ func traceRoutes(mux *http.ServeMux) {
 		}
 		http.Error(rw, "route history is no longer available", http.StatusNotFound)
 	})
+	mux.HandleFunc("GET /api/gateway/recent", func(rw http.ResponseWriter, r *http.Request) {
+		var calls []gateway.Call
+		mine := false
+		if gw := served.Load(); gw != nil {
+			calls, mine = gw.Recent(), true
+		} else {
+			calls, mine = gateway.OwnerRecent(r.Context())
+		}
+		if calls == nil {
+			http.Error(rw, "recent calls are unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		rw.Header().Set("Cache-Control", "no-store")
+		for i := range calls {
+			calls[i].RequestBody, calls[i].ResponseBody = "", ""
+		}
+		writeJSON(rw, map[string]any{"calls": calls, "mine": mine, "local": served.Load() != nil, "now": time.Now()})
+	})
 	mux.HandleFunc("GET /api/gateway/trace", func(rw http.ResponseWriter, r *http.Request) {
 		gw := served.Load()
 		out := traceJSON{TraceState: gateway.TraceState{Routes: []gateway.Route{}}, Mine: gw != nil}

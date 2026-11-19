@@ -9,7 +9,7 @@
 .msk-head { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 12px; }
 /* its buttons go under the words before they squeeze them */
 .msk-title { flex: 1 1 16em; min-width: 0; }
-.msk-title h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--fg); }
+.msk-title h2 { margin: 0; font-size: var(--fs-4); font-weight: 600; color: var(--fg); }
 .msk-sub { display: block; margin-top: 3px; font-size: 12px; line-height: 1.4; color: var(--muted); }
 .msk-band { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 36px; align-items: center; margin-top: 12px; }
 .msk-sk-num { height: 92px; border-radius: 10px; }
@@ -87,8 +87,9 @@
 
 /* the list: a bar, facets that narrow it, a day at a time */
 .msk-list { margin-top: 14px; }
-.msk-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.msk-live { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); }
+.msk-bar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s2); padding-block: var(--s1) var(--s2); border-bottom: 1px solid var(--line); }
+.msk-bar h2 { margin: 0 var(--s1) 0 0; font-size: var(--fs-4); font-weight: 600; }
+.msk-live { display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; border-radius: 99px; background: var(--accent-soft); font-size: 11.5px; color: var(--accent); }
 .msk-live i { width: 6px; height: 6px; border-radius: 50%; background: var(--green, var(--accent)); animation: msk-live 2.4s ease-in-out; }
 @keyframes msk-live { 50% { opacity: .35; } }
 .msk-facets { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
@@ -125,12 +126,13 @@
 .msk-what { color: var(--muted); background: var(--pill); }
 .msk-n { flex: none; min-width: 22px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
 .msk-chev { flex: none; display: inline-flex; color: var(--faint); }
-.msk-none { padding: 26px 12px; text-align: center; font-size: 12.5px; color: var(--muted); }
-.msk-none.err { color: var(--red); }
+.msk-none { margin: 0; padding: var(--s5) var(--s3); text-align: center; font-size: var(--fs-3); color: var(--muted); }
+.msk-none.err { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--s2); color: var(--red); overflow-wrap: anywhere; }
+.msk-card > .msk-none { padding-block: var(--s3) 0; }
 .msk-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; padding: 0 2px; font-size: 11.5px; color: var(--muted); }
 .msk-foot > span { flex: 1; min-width: 0; }
 .msk-vhead { display: flex; align-items: baseline; gap: 10px; margin: 12px 2px 5px; font-size: 11.5px; color: var(--muted); }
-.msk-vhead span:first-child { font-weight: 600; }
+.msk-vhead h3 { margin: 0; font-size: var(--fs-2); font-weight: 600; color: var(--fg); }
 .msk-vals { overflow: hidden; }
 .msk-vrow { display: flex; align-items: center; gap: 12px; width: 100%; height: 38px; padding: 0 12px; border: 0; background: none; color: var(--fg); font: inherit; font-size: 12.5px; text-align: left; cursor: default; outline: none; }
 .msk-vrow + .msk-vrow { border-top: 1px solid var(--line); }
@@ -159,9 +161,10 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 .msk-crumb { color: var(--faint); }
 .msk-when { font-size: 12.5px; color: var(--fg-2); font-variant-numeric: tabular-nums; }
 .msk-req { margin-top: 8px; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); }
-.msk-who { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 14px; font-weight: 600; }
-.msk-chip { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 6px; background: var(--pill); font-size: 11.5px; font-weight: 400; color: var(--fg-2); }
-.msk-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 14px 0 0; padding: 0; list-style: none; counter-reset: none; }
+.msk-who { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0; font-size: var(--fs-4); font-weight: 600; overflow-wrap: anywhere; }
+.msk-chip { display: inline-flex; align-items: center; min-height: 20px; padding: 0 8px; border-radius: 6px; background: var(--pill); font-size: 11.5px; font-weight: 400; color: var(--fg-2); }
+.msk-timeline { margin: var(--s3) 0 var(--s2); padding-block-start: var(--s3); border-top: 1px solid var(--line); font-size: var(--fs-2); font-weight: 600; color: var(--fg-2); }
+.msk-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: none; }
 .msk-steps li { position: relative; min-width: 0; }
 /* the line runs from the step before's number to this one's, 6px clear of
    each: the columns are as wide as this one, 10px apart, numbers 20px */
@@ -178,10 +181,12 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 .msk-bhead h2 { margin: 0; font-size: 14px; font-weight: 600; color: var(--fg); }
 .msk-blocked p { margin: 8px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--fg-2); }
 .msk-btools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.msk-onegrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 280px); gap: 14px; align-items: start; margin-top: 12px; }
-.msk-content, .msk-how { min-width: 0; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); }
+.msk-onegrid { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: start; margin-top: var(--s3); }
+.msk-content { flex: 3 1 30rem; }
+.msk-how { flex: 1 1 17rem; }
+.msk-content, .msk-how { min-width: 0; padding: var(--s4); border-radius: 14px; border: 1px solid var(--line); background: var(--card); }
 .msk-chead { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 10px; }
-.msk-chead h2 { margin: 0; font-size: 13px; font-weight: 600; }
+.msk-chead h2 { margin: 0; font-size: var(--fs-4); font-weight: 600; }
 .msk-hint { font-size: 11.5px; color: var(--faint); }
 .msk-gone { margin: 0 0 10px; font-size: 12px; line-height: 1.55; color: var(--muted); }
 .msk-msgs { display: flex; flex-direction: column; gap: 8px; }
@@ -232,7 +237,13 @@ body.window .msk-onebar::before { inset: -6px calc(var(--bar, 0px) - 16px) -6px 
 .msk-note { margin: 2px 0 0; font-size: 11px; line-height: 1.5; color: var(--faint); }
 
 @container (max-width: 760px) {
-  .msk-onegrid { grid-template-columns: minmax(0, 1fr); }
+  .msk-card:not(.off) { padding: 8px 12px 6px; }
+  .msk-band { gap: 16px; margin-top: 4px; }
+  .msk-title h2 { font-size: var(--fs-3); }
+  .msk-sub { font-size: 11px; }
+  .msk-bar { gap: 6px 8px; padding-block: 0 4px; }
+  .msk-list { margin-top: 8px; }
+  .msk-facets { margin-top: 7px; }
   .msk-steps { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); row-gap: 12px; }
   .msk-steps li + li::before { display: none; }
 }

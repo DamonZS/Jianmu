@@ -571,8 +571,20 @@ func Run(version string, showMain bool, link string) error {
 			appQuit.SetLabel(l.quit)
 		}
 	}
-	onLang = func() { application.InvokeSync(relabel) }
-	onPaused = onLang
+	onLang = func() {
+		application.InvokeSync(func() {
+			relabel()
+			name := productName()
+			h.tray.SetTooltip(name)
+			if h.main != nil {
+				h.main.SetTitle(name)
+			}
+			if h.panel != nil {
+				h.panel.SetTitle(name)
+			}
+		})
+	}
+	onPaused = func() { application.InvokeSync(relabel) }
 	updates.onReady = func(v string) {
 		application.InvokeSync(func() {
 			ready = v
@@ -622,7 +634,7 @@ func Run(version string, showMain bool, link string) error {
 		h.tray.SetLabel("jianmu")
 		go dropTrayName()
 	}
-	h.tray.SetTooltip("jianmu")
+	h.tray.SetTooltip(productName())
 	if icon, template := trayIconFor(runtime.GOOS, traySchemeLight()); template {
 		h.tray.SetTemplateIcon(icon)
 	} else {
@@ -832,6 +844,15 @@ func (h *host) setBird(b []byte) {
 	}
 }
 
+func productName() string {
+	switch trayLang(settings.Load().Lang, systemLang) {
+	case "zh", "zh-TW":
+		return "建木"
+	default:
+		return "jianmu"
+	}
+}
+
 // panelOptions: the tray panel's window, frameless and (but on Linux)
 // see-through. On
 // Windows, Wails creates a frameless window as WS_OVERLAPPEDWINDOW with
@@ -853,7 +874,7 @@ func (h *host) setBird(b []byte) {
 func panelOptions(goos, theme string) application.WebviewWindowOptions {
 	o := application.WebviewWindowOptions{
 		Name:            "panel",
-		Title:           "jianmu",
+		Title:           productName(),
 		URL:             "/?mode=panel" + theme,
 		Width:           panelWidth,
 		Height:          520,

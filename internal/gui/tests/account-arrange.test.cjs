@@ -186,11 +186,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // Account text selection must not turn into a drag.
     await open(page, "antigravity");
     const name = await rows(page).first().locator(".n").boundingBox();
-    const prior = await ids(page), count = f.posted.length;
+    const prior = await ids(page), count = f.posted.filter(p => p.action === "/api/provider/arrange").length;
     await page.mouse.move(name.x + 2, name.y + name.height / 2); await page.mouse.down();
     await page.mouse.move(name.x + name.width - 2, name.y + name.height / 2, { steps: 10 }); await page.mouse.up();
     assert(await page.evaluate(() => getSelection().toString().length > 0));
-    assert.deepEqual(await ids(page), prior); assert.equal(f.posted.length, count);
+    assert.deepEqual(await ids(page), prior); assert.equal(f.posted.filter(p => p.action === "/api/provider/arrange").length, count);
     // Background quota refresh cannot replace a captured row; edge scroll
     // reaches rows below the fold without rebuilding during the drag.
     const a = await point(rows(page).first());

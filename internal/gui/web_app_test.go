@@ -99,8 +99,8 @@ func TestWebAppAddsToHomeScreen(t *testing.T) {
 	}
 	var raw map[string]any
 	json.Unmarshal(rec.Body.Bytes(), &raw)
-	if raw["name"] != "jianmu" || raw["display"] != "standalone" || m.StartURL == "" {
-		t.Errorf("manifest: name %v, display %v, start_url %q", raw["name"], raw["display"], m.StartURL)
+	if raw["name"] != "jianmu" || raw["short_name"] != "jianmu" || raw["display"] != "standalone" || m.StartURL == "" {
+		t.Errorf("manifest: name %v, short_name %v, display %v, start_url %q", raw["name"], raw["short_name"], raw["display"], m.StartURL)
 	}
 	big := false
 	for _, ic := range m.Icons {

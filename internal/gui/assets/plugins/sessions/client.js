@@ -300,7 +300,9 @@ jianmu.plugin("sessions", (ctx) => {
     fitObserver?.disconnect();
     if (page.querySelector(".sm-agent-pick.open")) closeProtoMenu();
     page.classList.toggle("loading", !data?.sessions && !failed);
-    page.replaceChildren(head(), body());
+    const title = el("header", "monitor-head");
+    title.append(el("h1", "", t("Sessions")));
+    page.replaceChildren(title, head(), body());
     const wrap = page.querySelector(".sm-switch");
     const tabs = wrap.querySelector(".sm-agents");
     const pick = wrap.querySelector(".sm-agent-pick");
@@ -417,7 +419,7 @@ jianmu.plugin("sessions", (ctx) => {
   function consentCard() {
     const found = data.reads.found || [];
     const card = el("div", "sm-consent");
-    const title = el("b", "sm-consent-title", t("Show your agents' sessions?"));
+    const title = el("h2", "sm-consent-title", t("Show your agents' sessions?"));
     title.id = "smConsentTitle";
     card.setAttribute("role", "group");
     card.setAttribute("aria-labelledby", title.id);
@@ -523,6 +525,7 @@ jianmu.plugin("sessions", (ctx) => {
     q.spellcheck = false;
     q.autocomplete = "off";
     q.placeholder = t("Search sessions");
+    q.setAttribute("aria-label", q.placeholder);
     q.value = query;
     q.hidden = trashOn;
     q.oninput = () => { query = q.value; drawnIn.clear(); searchSoon(); redrawList(); };
@@ -555,11 +558,24 @@ jianmu.plugin("sessions", (ctx) => {
 
   function body() {
     const box = el("div", "sm-body");
-    if (failed) { box.append(el("div", "empty-state", failed)); return box; }
+    if (failed) {
+      const notice = el("div", "empty-state sm-error");
+      const error = el("span", "", failed);
+      error.setAttribute("role", "alert");
+      const retry = el("button", "text", t("Try again"));
+      retry.type = "button";
+      retry.onclick = () => { retry.disabled = true; load(); };
+      notice.append(error, retry);
+      box.append(notice);
+      return box;
+    }
     if (!data || (!trashOn && !data.sessions)) {
+      const status = el("p", "usage-note sm-note", t("Loading…"));
+      status.setAttribute("role", "status");
       const l = el("div", "list sm-group");
+      l.setAttribute("aria-hidden", "true");
       for (let i = 0; i < 4; i++) { const r = el("div", "row"); r.append(el("span", "skeleton sk-line")); l.append(r); }
-      box.append(l);
+      box.append(status, l);
       return box;
     }
     if (trashOn) { box.append(...trash()); return box; }
@@ -1274,24 +1290,6 @@ jianmu.plugin("sessions", (ctx) => {
       if (extra) l.append(extra);
       d.append(l);
     };
-    line(t("Time"), stamp(s.start || s.last) + " – " + stamp(s.last));
-    if (s.wsl) line("WSL", s.wsl);
-    if (s.cwd) line(t("Folder"), s.cwd);
-    line(t("Session ID"), s.id, copyBtn(s.id, t("Session id")));
-    if (s.resume) line(t("Resume"), el("code", "", s.resume), copyBtn(s.resume, t("Resume command")));
-    for (const c of s.carry || []) {
-      const agent = agentOf(c.agent).name;
-      if (!c.convert) line(t("Continue in {agent}", { agent }), el("code", "", c.command), copyBtn(c.command, t("Command")));
-      else {
-        // made only when asked: a new session of that agent's, this one only read
-        const b = copyBtn("", t("Command"));
-        b.title = t("Convert, then copy the command");
-        b.onclick = (e) => { e.stopPropagation(); carryOver(s, c.agent, false, b); };
-        line(t("Continue in {agent}", { agent }), el("span", "v", t("A new {agent} session is made from this conversation", { agent })), b);
-      }
-    }
-    sessUsageDetail(d, s, line);
-    if (s.path) line(t("File"), s.path + (s.files > 1 ? " " + t("+{n} more", { n: s.files - 1 }) : ""));
     if (s.transcript) {
       const box = el("div", "sess-talk");
       box.dataset.talk = s.agent + "/" + s.id;
@@ -1310,10 +1308,29 @@ jianmu.plugin("sessions", (ctx) => {
         if (talkOpen.has(k)) talkOpen.delete(k); else talkOpen.add(k);
         show();
       };
-      line(t("Conversation"), b, exportBtn(s));
-      d.append(box);
+      const tools = el("div", "sess-line sm-talk-tools");
+      tools.append(el("h2", "k", t("Conversation")), b, exportBtn(s));
+      d.append(tools, box);
       show();
     }
+    line(t("Time"), stamp(s.start || s.last) + " – " + stamp(s.last));
+    if (s.wsl) line("WSL", s.wsl);
+    if (s.cwd) line(t("Folder"), s.cwd);
+    line(t("Session ID"), s.id, copyBtn(s.id, t("Session id")));
+    if (s.resume) line(t("Resume"), el("code", "", s.resume), copyBtn(s.resume, t("Resume command")));
+    for (const c of s.carry || []) {
+      const agent = agentOf(c.agent).name;
+      if (!c.convert) line(t("Continue in {agent}", { agent }), el("code", "", c.command), copyBtn(c.command, t("Command")));
+      else {
+        // made only when asked: a new session of that agent's, this one only read
+        const b = copyBtn("", t("Command"));
+        b.title = t("Convert, then copy the command");
+        b.onclick = (e) => { e.stopPropagation(); carryOver(s, c.agent, false, b); };
+        line(t("Continue in {agent}", { agent }), el("span", "v", t("A new {agent} session is made from this conversation", { agent })), b);
+      }
+    }
+    sessUsageDetail(d, s, line);
+    if (s.path) line(t("File"), s.path + (s.files > 1 ? " " + t("+{n} more", { n: s.files - 1 }) : ""));
     return d;
   }
 
@@ -1407,8 +1424,11 @@ jianmu.plugin("sessions", (ctx) => {
   function drawTalk(box, s, sub = "") {
     const k = s.agent + "/" + s.id + (sub ? "/" + sub : "");
     const got = talks.get(k);
-    if (!got) {
-      box.replaceChildren(el("p", "cx-none", t("Reading…")));
+    if (!got || got.busy) {
+      const note = el("p", "cx-none sm-talk-state", t("Reading…"));
+      note.setAttribute("role", "status");
+      box.replaceChildren(note);
+      if (got) return;
       const pending = { busy: true };
       talks.set(k, pending);
       const finish = (value) => {
@@ -1424,11 +1444,23 @@ jianmu.plugin("sessions", (ctx) => {
         .then((tr) => finish({ tr }), (err) => finish({ err: err.message }));
       return;
     }
-    if (got.busy) { box.replaceChildren(el("p", "cx-none", t("Reading…"))); return; }
-    if (got.err) { box.replaceChildren(el("p", "cx-none", got.err)); talks.delete(k); return; }
+    if (got.err) {
+      const note = el("p", "cx-none sm-talk-state sm-error", got.err);
+      note.setAttribute("role", "alert");
+      const retry = el("button", "text", t("Try again"));
+      retry.type = "button";
+      retry.onclick = () => drawTalk(box, s, sub);
+      box.replaceChildren(note, retry);
+      talks.delete(k);
+      return;
+    }
     const parts = got.tr?.parts || [];
     const out = [];
-    if (!parts.length) out.push(el("p", "cx-none", t(got.tr?.source === "gateway" ? "No saved gateway content for this session" : "Nothing was said here")));
+    if (!parts.length) {
+      const note = el("p", "cx-none sm-talk-state", t(got.tr?.source === "gateway" ? "No saved gateway content for this session" : "Nothing was said here"));
+      note.setAttribute("role", "status");
+      out.push(note);
+    }
     // each reply names its model once, at its first part, and again
     // only where the model changes inside it (#2253): the model its own
     // line in the agent's file names, so none where the file names none

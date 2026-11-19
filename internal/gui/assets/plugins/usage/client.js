@@ -16,6 +16,7 @@ jianmu.plugin("usage", (ctx) => {
     key: "usage",
     title: "Usage",
     html: `
+  <header class="monitor-head"><h1 data-t>Usage</h1></header>
   <div class="usage-head">
     <div class="segs" id="usageTab"></div>
     <div class="segs" id="period"></div>
@@ -108,7 +109,7 @@ jianmu.plugin("usage", (ctx) => {
     <div class="led-pager" id="ledPager" hidden></div>
     <p class="usage-note" id="ledNote"></p>
   </div>
-  <div class="usage-pane led-req" id="ledReqPane" hidden></div>
+  <dialog class="usage-pane led-req" id="ledReqPane" aria-labelledby="ledReqTitle" hidden></dialog>
   <div class="usage-pane ctx-pane" id="contextPane" hidden></div>
   <div class="usage-pane sess-pane" id="sessionsPane" hidden>
     <div class="sess-tools">

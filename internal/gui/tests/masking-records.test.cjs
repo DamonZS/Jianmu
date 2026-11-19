@@ -256,7 +256,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.match(await card.locator(".mo-cap").textContent(), /jianmu/);
         assert.equal(await page.evaluate(() => [...document.querySelectorAll("#maskCard, #maskCard *")].some((n) => /gradient/.test(getComputedStyle(n).backgroundImage))), false, "flat: no gradient");
         // short: the list starts in the first screen
-        assert((await list.locator(".msk-row").first().boundingBox()).y < 760, "the requests show without a scroll");
+        const firstRequestY = (await list.locator(".msk-row").first().boundingBox()).y;
+        assert(firstRequestY < 760, `the requests show without a scroll (y=${firstRequestY})`);
 
         // the requests, by day, the held one red
         await list.locator(".msk-row").first().waitFor();

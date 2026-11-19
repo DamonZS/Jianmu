@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>jianmu</title>
+<title data-t>jianmu</title>
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <!-- added to a phone's home screen, jianmu web opens as an app of its own,
      with no browser bars (ninja_s6114 on Discord); webGuard serves these
@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="jianmu">
+<meta name="apple-mobile-web-app-title" content="jianmu" data-tc="jianmu">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" media="(display-mode: standalone) and (prefers-color-scheme: light)" content="#f4f4f6">
 <meta name="theme-color" media="(display-mode: standalone) and (prefers-color-scheme: dark)" content="#1a1a1e">
@@ -60,7 +60,7 @@
   </button>
   <div class="brand">
     <span class="logo" aria-hidden="true"><svg viewBox="0 0 44 44" width="18" height="18"><defs><g id="bird"><path fill="#ED9834" fill-rule="evenodd" d="M42.500 22.000C42.500 33.322 33.322 42.500 22.000 42.500C10.678 42.500 1.500 33.322 1.500 22.000C1.500 10.678 10.678 1.500 22.000 1.500C33.322 1.500 42.500 10.678 42.500 22.000ZM40.100 22.000C40.100 31.996 31.996 40.100 22.000 40.100C12.004 40.100 3.900 31.996 3.900 22.000C3.900 12.004 12.004 3.900 22.000 3.900C31.996 3.900 40.100 12.004 40.100 22.000Z"/><path fill="#66C2CE" fill-rule="evenodd" d="M34.276 22.000C34.276 28.780 28.780 34.276 22.000 34.276C15.220 34.276 9.724 28.780 9.724 22.000C9.724 15.220 15.220 9.724 22.000 9.724C28.780 9.724 34.276 15.220 34.276 22.000ZM31.876 22.000C31.876 27.454 27.454 31.876 22.000 31.876C16.546 31.876 12.124 27.454 12.124 22.000C12.124 16.546 16.546 12.124 22.000 12.124C27.454 12.124 31.876 16.546 31.876 22.000Z"/></g></defs><use href="#bird"/></svg></span>
-    <span>jianmu</span>
+    <span data-t>jianmu</span>
   </div>
   <h1 class="sr-only" id="pageTitle" data-t>Agents</h1>
   <!-- back to the page a link into a setting came from (app.js jumpFrom) -->
@@ -115,6 +115,7 @@
 </nav>
 
 <main class="view" id="view-agents">
+  <header class="monitor-head"><h1 data-t>Agents</h1></header>
   <div class="list" id="agents"></div>
   <section class="profiles">
     <span class="label" data-t>Profiles</span>
@@ -128,6 +129,7 @@
 </main>
 
 <main class="view" id="view-providers" hidden>
+  <header class="monitor-head"><h1 data-t>Providers</h1></header>
   <div id="fileError" hidden></div>
   <div id="movable" hidden></div>
   <aside class="provider-discovery" id="providerDiscovery" hidden>
@@ -155,6 +157,7 @@
 <main class="view" id="view-plugins" hidden></main>
 
 <main class="view" id="view-settings" hidden>
+  <header class="monitor-head"><h1 data-t>Settings</h1></header>
   <div class="row-head set-head"><div class="warm-tabs set-tabs" id="setTabs" role="tablist" aria-label="Settings">
     <button type="button" role="tab" id="setTab-general" data-set="general" aria-controls="setPage-general" data-t>General</button>
     <button type="button" role="tab" id="setTab-usage" data-set="usage" aria-controls="setPage-usage" data-t>Allowances</button>

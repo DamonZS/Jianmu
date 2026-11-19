@@ -41,7 +41,7 @@ function maskDayName(when) {
 }
 
 // ---- the summary: over 7 or 30 days, kept per machine ----
-let maskSumDays = 0, maskAt = 0, maskBusy = null, maskBusyDays = 0;
+let maskSumDays = 0, maskAt = 0, maskBusy = null, maskBusyDays = 0, maskFailedDays = 0;
 let maskDays = 7;
 try { if (localStorage.getItem("jianmu.maskDays") === "30") maskDays = 30; } catch {}
 let maskDrawn = "";   // what the card says, so a redraw that changes nothing is skipped
@@ -62,7 +62,9 @@ function maskLoad(force) {
     maskSum = { days: [], kinds: [], agents: [], providers: [], values: [], by: {}, n: 0, distinct: 0, requests: 0, ...(sum || {}) };
     maskSumDays = days;
     maskAt = Date.now();
-  }).catch(() => {}).finally(() => { if (maskBusy === p) maskBusy = null; });
+    maskFailedDays = 0;
+  }).catch(() => { if (days === maskDays) maskFailedDays = days; })
+    .finally(() => { if (maskBusy === p) maskBusy = null; });
   return p;
 }
 const maskSettings = () => prefs || state?.settings || {};
@@ -112,7 +114,8 @@ function drawMaskCard() {
   if (!box) return;
   // until the window's state is read, agents would show as their ids
   const on = maskOn(), sum = maskSumDays === maskDays && load.done ? maskSum : null;
-  const key = JSON.stringify([document.documentElement.lang, maskDays, on, !!maskSettings().redactWords?.length, sum, state?.agents?.length, (providers || maskProv)?.providers?.length]);
+  const failed = maskFailedDays === maskDays;
+  const key = JSON.stringify([document.documentElement.lang, maskDays, on, !!maskSettings().redactWords?.length, sum, failed, state?.agents?.length, (providers || maskProv)?.providers?.length]);
   if (key === maskDrawn && box.firstChild) return;
   maskDrawn = key;
   // it moves when it first has numbers to say, and for other days: not
@@ -122,7 +125,7 @@ function drawMaskCard() {
   maskTipOff();
   box.replaceChildren();
   box.classList.remove("off");
-  if (sum && !sum.requests && !on) return maskOffCard(box);
+  if (!failed && sum && !sum.requests && !on) return maskOffCard(box);
 
   const head = el("div", "msk-head"), words = el("div", "msk-title");
   words.append(el("h2", "", t("Kept from vendors")),
@@ -143,18 +146,25 @@ function drawMaskCard() {
     }
     head.append(maskOffButton());
   }
-  if (sum?.requests || maskDays === 30) head.append(segs([["7", t("7 days")], ["30", t("30 days")]], String(maskDays), (v) => {
+  if (maskSum?.requests || maskDays === 30) head.append(segs([["7", t("7 days")], ["30", t("30 days")]], String(maskDays), (v) => {
     maskDays = +v;
     try { localStorage.setItem("jianmu.maskDays", v); } catch {}
+    drawMaskCard();
+    drawMaskList();
     maskLoad(true)?.then(() => { drawMaskCard(); drawMaskList(); });
   }));
   box.append(head);
+  if (failed) box.append(maskReadError(t("Could not load the masking summary"), () =>
+    maskLoad(true)?.then(() => { drawMaskCard(); drawMaskList(); })));
+  if (!sum && failed) return;
   const band = el("div", "msk-band");
-  box.append(band);
   if (!sum) {
+    band.setAttribute("aria-hidden", "true");
+    box.append(maskReadState(t("Loading…")), band);
     band.append(el("span", "skeleton msk-sk-num"), el("span", "skeleton msk-sk-flow"));
     return;
   }
+  box.append(band);
 
   // the number, what makes it up, and the days
   const nums = el("div", "msk-nums");
@@ -451,14 +461,37 @@ function maskRefresh() {
   }).catch(() => {});
 }
 
+function maskReadState(message) {
+  const p = el("p", "msk-none", message);
+  p.setAttribute("role", "status");
+  return p;
+}
+
+function maskReadError(message, read) {
+  const box = el("div", "msk-none err");
+  const error = el("span", "", message);
+  error.setAttribute("role", "alert");
+  const retry = el("button", "text", t("Try again"));
+  retry.type = "button";
+  retry.onclick = async () => {
+    retry.disabled = true;
+    try { await read(); } finally { retry.disabled = false; }
+  };
+  box.append(error, retry);
+  return box;
+}
+
 function drawMaskList() {
   const box = $("#maskList");
   if (!box) return;
   const sum = (maskSumDays === maskDays && maskSum) || null;
   maskTipOff();
   box.replaceChildren();
-  const bar = el("div", "msk-bar");
-  bar.append(segs([["req", t("By request")], ["val", t("By value")]], maskL.mode, (v) => { maskL.mode = v; drawMaskList(); }));
+  const bar = el("header", "msk-bar");
+  const title = el("h2", "", t("Masking records"));
+  title.id = "maskListTitle";
+  box.setAttribute("aria-labelledby", title.id);
+  bar.append(title, segs([["req", t("By request")], ["val", t("By value")]], maskL.mode, (v) => { maskL.mode = v; drawMaskList(); }));
   const live = el("span", "msk-live");
   live.title = t("Read again every 15 seconds while this page is open");
   live.append(el("i"), el("span", "", t("Live")));
@@ -549,15 +582,15 @@ async function maskClear() {
 
 function maskRequestList(box) {
   const filtered = maskL.facet || maskL.kind || maskL.agent || maskL.provider;
-  if (maskL.error) return void box.append(el("div", "msk-none err", t(maskL.error)));
-  if (!maskL.records.length) return void box.append(el("div", "msk-none", maskL.busy || !maskL.read ? t("Loading…") : filtered ? t("Nothing masked matches these filters") : t("Nothing masked yet")));
+  if (maskL.error) return void box.append(maskReadError(t(maskL.error), () => maskFetch()));
+  if (!maskL.records.length) return void box.append(maskReadState(maskL.busy || !maskL.read ? t("Loading…") : filtered ? t("Nothing masked matches these filters") : t("Nothing masked yet")));
   let day = "", list = null;
   for (const r of maskL.records) {
     const d = new Date(r.t).toDateString();
     if (d !== day) {
       day = d;
-      const g = el("div", "msk-group");
-      g.append(el("div", "msk-gday", maskDayName(r.t)));
+      const g = el("section", "msk-group");
+      g.append(el("h3", "msk-gday", maskDayName(r.t)));
       list = el("div", "list");
       g.append(list);
       box.append(g);
@@ -611,10 +644,10 @@ function maskRecordRow(r) {
 function maskValueList(box, sum) {
   const f = maskL.facet;
   const vs = (sum?.values || []).filter((v) => (!maskL.kind || v.kind === maskL.kind) && (f !== "secret" || MASK_SECRET_KINDS.includes(v.kind)) && (f !== "rule" && f !== "model" || v.by === f) && f !== "blocked");
-  if (!sum) return void box.append(el("div", "msk-none", t("Loading…")));
-  if (!vs.length) return void box.append(el("div", "msk-none", sum.values?.length ? t("Nothing masked matches these filters") : t("Nothing masked yet")));
+  if (!sum) return void box.append(maskReadState(maskFailedDays === maskDays ? t("Could not load the masking summary") : t("Loading…")));
+  if (!vs.length) return void box.append(maskReadState(sum.values?.length ? t("Nothing masked matches these filters") : t("Nothing masked yet")));
   const head = el("div", "msk-vhead");
-  head.append(el("span", "", t("Masked most")), el("span", "grow"), el("span", "", t("Point at one to see what it was")));
+  head.append(el("h3", "", t("Masked most")), el("span", "grow"), el("span", "", t("Point at one to see what it was")));
   const list = el("div", "list msk-vals"), max = vs[0].n || 1;
   for (const [i, v] of vs.entries()) {
     const c = el("button", "msk-vrow"), sh = maskShape(v.head, v.len), bar = el("span", "bar"), fill = el("i");
@@ -720,16 +753,16 @@ function drawMaskOne() {
   step(1, "Older request", "M3.5 6.5 8 11l4.5-4.5");
   box.append(bar);
   if (r === false) return void box.append(el("div", "msk-none", t("This request's record is gone: records are kept for 30 days")));
-  if (!r) return void box.append(el("div", "msk-none", t("Loading…")));
+  if (!r) return void box.append(maskReadState(t("Loading…")));
 
   const info = new Map((r.values || []).map((x) => [x.p, x]));
   // the request: who to whom, and what happened to it in order
   const card = el("section", "msk-req");
-  const who = el("div", "msk-who");
+  const who = el("h2", "msk-who");
   maskRoute(who, r);
   if (r.model) who.append(el("span", "msk-chip", r.model));
   if (r.what && r.what !== "chat") who.append(el("span", "msk-chip", MASK_WHAT[r.what] ? t(MASK_WHAT[r.what]) : r.what));
-  card.append(who, maskSteps(r, o));
+  card.append(who, el("h3", "msk-timeline", t("What happened")), maskSteps(r, o));
   box.append(card);
   if (r.blocked) box.append(maskBlocked(r));
 

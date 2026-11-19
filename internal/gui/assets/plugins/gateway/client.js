@@ -26,6 +26,69 @@ const wireOpen = new Set(); // recent-call ids whose HTTP headers are open
 // says (callsPage)
 let callsPage = 20;
 let callsShown = callsPage;
+let gatewayCallsTimer = 0;
+let gatewayCallsAbort = null;
+let gatewayCallsBusy = false;
+let gatewayCallsGeneration = 0;
+let gatewayCallsAt = 0;
+let gatewayCallsFailed = false;
+let gatewayCallsLocal = null;
+
+function stopGatewayCalls() {
+  gatewayCallsGeneration++;
+  clearTimeout(gatewayCallsTimer);
+  gatewayCallsTimer = 0;
+  const hadRequest = !!gatewayCallsAbort;
+  gatewayCallsAbort?.abort();
+  gatewayCallsAbort = null;
+  if (!hadRequest) gatewayCallsBusy = false;
+}
+
+function scheduleGatewayCalls(delay = 2000) {
+  clearTimeout(gatewayCallsTimer);
+  gatewayCallsTimer = setTimeout(refreshGatewayCalls, delay);
+}
+
+function startGatewayCalls() {
+  stopGatewayCalls();
+  if (view === "gateway" && !document.hidden) refreshGatewayCalls();
+}
+
+async function refreshGatewayCalls() {
+  if (view !== "gateway" || document.hidden || $("#view-gateway")?.hidden) return stopGatewayCalls();
+  if (gatewayCallsBusy) return scheduleGatewayCalls(500);
+  gatewayCallsBusy = true;
+  const generation = gatewayCallsGeneration;
+  const controller = new AbortController();
+  gatewayCallsAbort?.abort();
+  gatewayCallsAbort = controller;
+  try {
+    const out = await api("gateway/recent", undefined, undefined, controller.signal);
+    if (!Array.isArray(out?.calls)) throw new Error("invalid recent calls response");
+    if (generation !== gatewayCallsGeneration || view !== "gateway") return;
+    if (!providers?.gateway) return;
+    const changed = gatewayCallsLocal !== out.local || JSON.stringify(providers.gateway.calls) !== JSON.stringify(out.calls);
+    if (gatewayCallsLocal !== out.local) { expandedCalls.clear(); callBodies.clear(); wireOpen.clear(); }
+    gatewayCallsLocal = out.local;
+    providers.gateway.calls = out.calls;
+    gatewayCallsAt = Date.now();
+    gatewayCallsFailed = false;
+    if (changed) renderActivity();
+    renderGatewayCallsNote();
+  } catch (e) {
+    if (e.name !== "AbortError" && generation === gatewayCallsGeneration && view === "gateway") {
+      gatewayCallsFailed = true;
+      renderGatewayCallsNote();
+    }
+  } finally {
+    const current = generation === gatewayCallsGeneration && gatewayCallsAbort === controller;
+    if (gatewayCallsAbort === controller) gatewayCallsAbort = null;
+    // A stopped fetch still owns the in-flight slot until it settles; release
+    // it only when no newer controller has taken ownership.
+    if (current || gatewayCallsAbort === null) gatewayCallsBusy = false;
+    if (current && view === "gateway" && !document.hidden && !$("#view-gateway")?.hidden) scheduleGatewayCalls(gatewayCallsFailed ? 10000 : 2000);
+  }
+}
 
 function renderGatewayLoading() {
   const page = $("#view-gateway");
@@ -606,6 +669,7 @@ function renderConnect() {
   box.hidden = connectFolded;
   // folded, the head keeps the one thing reached for: the address, to copy
   const note = $("#connectNote");
+  if (!note) return;
   note.replaceChildren();
   note.classList.toggle("brief", connectFolded);
   if (connectFolded) note.append(el("code", "", base), copyBtn(base, "Base URL"));
@@ -759,6 +823,26 @@ function loadCallBodies(c, id) {
 // one agent to one model can come in the same instant
 const callRow = (c) => (c.id ? `#${c.id}` : `${c.time}|${c.agent}|${c.model}`);
 
+function renderGatewayCallsNote() {
+  const note = $("#callsNote");
+  if (!note) return; // the plugin page may have been removed while reading
+  note.replaceChildren();
+  const empty = $("#activity .monitor-empty .none");
+  if (empty) empty.textContent = gatewayCallsFailed ? t("Calls temporarily unavailable") : t("No requests yet. Point an agent at a model, or run the example above; every call shows up here as it happens.");
+  note.title = gatewayCallsAt ? new Date(gatewayCallsAt).toLocaleTimeString(intlLang()) : "";
+  if (gatewayCallsFailed) {
+    note.append(el("span", "", t("Calls temporarily unavailable")));
+    const retry = el("button", "text", t("Try again"));
+    retry.type = "button";
+    retry.onclick = () => refreshGatewayCalls();
+    note.append(retry);
+  } else if (gatewayCallsAt) {
+    note.textContent = t("Updated {when}", { when: ago(gatewayCallsAt) });
+  } else if (providers?.gateway.running && !providers.gateway.mine) {
+    note.textContent = t("shown by the jianmu that serves the gateway");
+  }
+}
+
 function renderActivity() {
   const g = providers.gateway;
   // what calls left the ring keep, they let go of
@@ -771,9 +855,23 @@ function renderActivity() {
   const kept = new Map();
   for (const item of box.querySelectorAll(".call-item[data-id]")) kept.set(item.dataset.id, [...item.querySelectorAll("pre")].map((p) => p.scrollTop));
   box.replaceChildren();
-  $("#callsNote").textContent = g.running && !g.mine ? t("shown by the jianmu that serves the gateway") : "";
+  renderGatewayCallsNote();
   const calls = g.calls.slice(0, callsShown);
-  if (!calls.length) { box.append(el("div", "none", t("No requests yet. Point an agent at a model, or run the example above; every call shows up here as it happens."))); return; }
+  if (!calls.length) {
+    const empty = el("div", "monitor-empty");
+    empty.append(el("div", "none", gatewayCallsFailed ? t("Calls temporarily unavailable") : t("No requests yet. Point an agent at a model, or run the example above; every call shows up here as it happens.")));
+    const open = el("button", "text primary", t("Open Connect examples"));
+    open.type = "button";
+    open.onclick = (event) => {
+      connectFolded = false;
+      renderConnect();
+      if (scrollOnPurpose(event)) $("#foldConnect").scrollIntoView({ block: "start" });
+      $("#foldConnect").focus(NO_SCROLL);
+    };
+    empty.append(open);
+    box.append(empty);
+    return;
+  }
   for (const c of calls) {
     const id = callRow(c);
     const open = expandedCalls.has(id);
@@ -795,6 +893,16 @@ function renderActivity() {
     if (c.masked?.n || c.masked?.warned) r.append(maskedBadge(c.masked));
     r.append(el("span", "grow"));
     r.append(el("span", "st", c.error ? `${c.status} ${c.error}` : `${c.status} · ${ledTook(c.ms)}` + (c.ttft ? " · " + t("TTFT {ms}", { ms: ledTook(c.ttft) }) : "")));
+    if (gatewayCallsLocal === false) {
+      r.removeAttribute("role");
+      r.removeAttribute("tabindex");
+      r.removeAttribute("aria-expanded");
+      r.title = t("shown by the jianmu that serves the gateway");
+      chev.hidden = true;
+      item.append(r);
+      box.append(item);
+      continue;
+    }
     r.title = open ? t("Hide request and response bodies") : t("Show request and response bodies");
     const toggle = () => {
       if (expandedCalls.has(id)) expandedCalls.delete(id); else expandedCalls.add(id);
@@ -861,10 +969,13 @@ jianmu.plugin("gateway", (ctx) => {
     // what the page draws from: the shell reads /api/providers for it
     loads: "providers",
     html: `
+<header class="monitor-head"><h1 data-t>Gateway</h1></header>
 <div class="list gwcard">
   <div class="row gw" id="gateway"></div>
   <div id="gatewayLan"></div>
 </div>
+<div class="row-head"><h2 class="label" data-t>Recent calls</h2><span class="grow"></span><span class="note" id="callsNote"></span></div>
+<div class="list activity" id="activity"></div>
 <section id="gatewayKeysBlock" hidden>
   <div class="row-head"><span class="label" data-t>Gateway keys</span><span class="grow"></span><button class="text" id="accountGroups" data-t>Account groups</button><button class="text" id="addGatewayKey" data-t>Add gateway key</button></div>
   <p class="usage-note" data-t>Create a gateway key for each client. Usage is counted separately for each key.</p>
@@ -875,8 +986,6 @@ jianmu.plugin("gateway", (ctx) => {
 <section class="list connect" id="connect"></section>
 <div class="row-head"><button class="fold" id="foldModels" aria-expanded="true" aria-controls="gwModels"><span class="label" data-t>Models</span><span class="note" id="modelsCount"></span></button><span class="grow"></span><button class="text" id="copyModels" data-t>Copy all ids</button></div>
 <div class="list" id="gwModels"></div>
-<div class="row-head"><span class="label" data-t>Recent calls</span><span class="grow"></span><span class="note" id="callsNote"></span></div>
-<div class="list activity" id="activity"></div>
 <div class="row-head" id="gwOwnHead" hidden><span class="label" data-t>Settings</span></div>
 <div class="list prefs gw-own" id="gwOwn"></div>
 `,
@@ -896,7 +1005,11 @@ jianmu.plugin("gateway", (ctx) => {
         backToReader($("#view-gateway"));
       };
       new MutationObserver(gatewayKeysTicks).observe($("#view-gateway"), { attributes: true, attributeFilter: ["hidden"] });
-      document.addEventListener("visibilitychange", gatewayKeysTicks);
+      document.addEventListener("visibilitychange", () => {
+        gatewayKeysTicks();
+        if (document.hidden) stopGatewayCalls();
+        else if (view === "gateway") refreshGatewayCalls();
+      });
       gatewayKeysTicks();
     },
     // nothing read yet: the page's skeleton (#123)
@@ -922,7 +1035,11 @@ jianmu.plugin("gateway", (ctx) => {
     calls() {
       if (view === "gateway" && providers && !$("#view-gateway").classList.contains("loading")) renderActivity();
     },
-    open: loadGatewayKeys,
+    open() {
+      loadGatewayKeys();
+      startGatewayCalls();
+    },
+    leave: stopGatewayCalls,
   });
 });
 

@@ -1566,53 +1566,50 @@ const ledKey = (r) => [r.t, r.agent, r.model, r.rid, r.session, r.computer || ""
 const ledFromHere = (ip) => /^(127\.|::1$|::ffff:127\.)/.test(ip);
 const ledSource = (ip) => ledFromHere(ip) ? t("This computer") + " · " + ip : ip;
 
-// One request on a page of its own (geesehowardt7 on X: a click on a
-// request took them to Routing, which wasn't what they asked; they wanted
-// that request's own record, and where it came from). A row's click or
-// Enter pushes the page over the list, as a Mac app's list pushes an
-// item's, with Requests ‹ (or Escape) back to the list where it was left.
-// Routing is a link inside it. It lasts across a refresh, and goes with
-// the Requests (ledLeave).
+// Routing remains an explicit link. Older WebKit without showModal keeps
+// the full-page detail view; a modal drawer leaves the ledger mounted and inert.
 let ledReq = null; // { key, r }
-let ledReqAt = 0; // where the page was scrolled in the list
+let ledReqAt = 0; // scroll position for the full-page fallback
 function ledReqShown() {
   const on = usageTab === "requests" && !!ledReq;
-  $("#ledgerPane").hidden = usageTab !== "requests" || on;
-  $("#ledReqPane").hidden = !on;
-  $("#view-usage").classList.toggle("led-req-on", on);
-  if (usageTab === "requests") $("#period").hidden = on;
-  // the list's sideways scrollbar at once, not a frame later: the room
-  // it takes is in the place the list goes back to
+  const pane = $("#ledReqPane");
+  const drawer = typeof pane.showModal === "function";
+  $("#ledgerPane").hidden = usageTab !== "requests" || (on && !drawer);
+  if (!on && pane.open) pane.close();
+  pane.hidden = !on;
+  if (on && drawer && !pane.open) pane.showModal();
+  if (usageTab === "requests") $("#period").hidden = on && !drawer;
   if (usageTab === "requests" && !on) ledHScroll();
 }
 function ledReqOpen(r, e) {
-  const v = $("#view-usage");
+  const v = $("#view-usage"), pane = $("#ledReqPane");
   ledReqAt = v.scrollTop;
   ledReq = { key: ledKey(r), r };
+  pane.oncancel = (event) => { event.preventDefault(); ledReqClose(event); };
   renderLedReq();
   ledReqShown();
-  // the page starts at its top, the list's place kept for the way back
-  if (window.scrollOnPurpose?.(e)) { v.scrollTop = 0; window.arrived?.(v); }
+  if (!pane.open && window.scrollOnPurpose?.(e)) { v.scrollTop = 0; window.arrived?.(v); }
+  pane.scrollTop = 0;
   $("#ledReqPane .led-req-back")?.focus({ preventScroll: true });
 }
 function ledReqClose(e) {
   if (!ledReq) return;
-  const key = ledReq.key;
+  const pane = $("#ledReqPane"), drawer = pane.open, key = ledReq.key;
   ledReq = null;
-  $("#ledReqPane").replaceChildren();
   ledReqShown();
+  pane.replaceChildren();
   const v = $("#view-usage");
-  if (e && window.scrollOnPurpose?.(e)) {
+  if (!drawer && e && window.scrollOnPurpose?.(e)) {
     v.scrollTop = ledReqAt;
     window.arrived?.(v);
   }
-  // the row it was opened from has the keyboard again
+  // a refresh can replace the original row, so find the current one by key
   const row = [...document.querySelectorAll("#ledWrap .led-row")].find((x) => x.dataset.key === key);
-  row?.focus({ preventScroll: true });
+  (row || $("#ledQ"))?.focus({ preventScroll: true });
 }
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || e.defaultPrevented || e.repeat || !ledReq || $("#view-usage").hidden || $("#ledReqPane").hidden) return;
-  // a menu, a dialog or a field takes its own Escape first
+  const pane = $("#ledReqPane");
+  if (e.key !== "Escape" || e.defaultPrevented || e.repeat || !ledReq || $("#view-usage").hidden || pane.hidden || pane.open) return;
   if (document.querySelector(".proto-menu, dialog[open]") || e.target.closest?.("input, textarea, [contenteditable]")) return;
   e.preventDefault();
   ledReqClose(e);
@@ -1629,6 +1626,7 @@ function renderLedReq() {
   bar.append(back);
   const head = el("div", "led-req-head");
   const title = el("h2", "led-req-title", r.served || r.model || r.req || t(r.agentName || r.agent || "—"));
+  title.id = "ledReqTitle";
   const bad = ledFailed_(r);
   head.classList.toggle("bad", bad);
   head.classList.toggle("gone", !bad && !!r.canceled);

@@ -308,7 +308,26 @@ body.side-nav #view-groups:not(.rt-gfrom) .rt-gback { display: none; }
 .pii { filter: blur(2.2px); opacity: .5; user-select: none; }
 .masking .pii { animation: rtpii .35s ease-out backwards; }
 @keyframes rtpii { from { filter: blur(0); opacity: 1; } }
-#view-routing .rt { margin: 0; }
+#view-routing .rt { margin: 0; padding: clamp(12px, 2vw, 20px); border-radius: 12px; }
+#view-routing .rt-top { padding-bottom: 12px; }
+#view-routing .rt-what b { font-size: 15px; }
+#view-routing .rt-stage.shared > .pr-stage { background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line); }
+#view-routing .rt-foot { margin-top: 12px; }
+#view-routing .rt-stats { flex-wrap: wrap; gap: 6px; }
+#view-routing .rt-stats > span { padding: 6px 10px; border-radius: 8px; background: var(--card-2); }
+#view-routing .rt-stats > :first-child b { color: var(--accent); }
+#view-routing .rt-log-head { font-size: 13px; }
+#view-routing .rt-steps:not(:empty) {
+  gap: 0; margin-top: 10px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--card-2);
+}
+#view-routing .rt-steps > li { padding-left: 24px; overflow-wrap: anywhere; }
+#view-routing .rt-steps > li:not(:last-child) {
+  padding-bottom: 7px;
+  background: linear-gradient(var(--line), var(--line)) no-repeat 7.5px .5em / 1px 100%;
+}
+#view-routing .rt-steps > li.aside::before { background: var(--card-2); }
+#view-routing .rt-steps > li.why::before { background: var(--accent); }
 .rt-more { padding-bottom: 12px; }
 .rt-cols { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 16px; }
 /* side by side, the accounts end where the requests do and scroll like
@@ -327,6 +346,10 @@ body.side-nav #view-groups:not(.rt-gfrom) .rt-gback { display: none; }
    the list's width, not the page's (#273: in two columns of ~470px the
    rows kept to one line, and the reasoning was drawn over the numbers) */
 .rt-col { min-width: 0; }
+#view-routing .rt-history > .row-head { gap: 4px; }
+#view-routing .rt-history .rt-day.on { color: var(--fg); border-color: var(--accent); background: var(--accent-soft); }
+#view-routing .rt-history .rt-req[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+#view-routing .rt-history .rt-req:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 /* the model that answered keeps room of its own (at least 14em, or 30%
    of a narrower list) and the metrics wrap in theirs, up to 40%: an auto
    column took the widest row's metrics for every row, and the model went
@@ -582,6 +605,16 @@ button.rt-session { cursor: pointer; }
 /* the groups filtered by name and model, beside Select and New group */
 .rt-gsec .rt-gfilter { width: 190px; min-width: 0; flex: 0 1 190px; height: 24px; margin: 0 6px 0 4px; }
 .rt-gsec .rt-pools { margin-bottom: 0; }
+.rt-gread:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px; color: var(--muted); font-size: 13px; }
+.rt-groups:empty { display: none; }
+#view-groups .rt-gtoolbar { gap: 4px; }
+#view-groups .rt-gtoolbar .rt-gcount { color: var(--muted); font-variant-numeric: tabular-nums; }
+#view-groups .rt-groups > .rt-group { min-height: 50px; }
+#view-groups .rt-group .nm { flex-wrap: wrap; gap: 2px 8px; }
+#view-groups .rt-group .nm code.mdl { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#view-groups .rt-group .tag.rt-groute { border-radius: 6px; color: var(--fg); background: var(--accent-soft); }
+#view-groups .rt-group .tag.rt-groute:is(:hover, .open) { background: var(--sel); }
+#view-groups .rt-group .tag.bad { background: var(--red-soft); }
 .rt-gsec .row-head + .list + .row-head { margin-top: 8px; }
 .rt-groups > *, .rt-pools > * { border-top: 1px solid var(--line-2); }
 .rt-groups > :first-child, .rt-pools > :first-child { border-top: 0; }
