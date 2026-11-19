@@ -932,7 +932,7 @@ func Icon(spec, id string) string {
 	}
 	pkg := Name(spec)
 	for _, x := range l {
-		if x.Package == pkg && x.Icon != "" {
+		if SamePackage(x.Package, pkg) && x.Icon != "" {
 			return x.Icon
 		}
 	}

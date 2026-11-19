@@ -526,7 +526,7 @@ var (
 		// name would replace either with <pkg>@latest
 		found, older := pkg, false
 		for _, e := range plugin.Load().Plugins {
-			if plugin.PackageName(e.Spec) != pkg {
+			if !plugin.SamePackage(plugin.PackageName(e.Spec), pkg) {
 				continue
 			}
 			if e.Off {
@@ -637,7 +637,7 @@ func Adopt(ctx context.Context, id string) error {
 		return installFailed(mv.pkg, err)
 	}
 	pps, err := pluginProviders(ctx)
-	if err == nil && !slices.ContainsFunc(pps, func(p plugin.Provider) bool { return p.ID == id && plugin.PackageName(p.Spec) == mv.pkg }) {
+	if err == nil && !slices.ContainsFunc(pps, func(p plugin.Provider) bool { return p.ID == id && plugin.SamePackage(plugin.PackageName(p.Spec), mv.pkg) }) {
 		err = fmt.Errorf("%s doesn't serve %s", mv.pkg, id)
 	}
 	if err == nil {
@@ -693,7 +693,7 @@ func move(ctx context.Context, id string, mv *mover) (err error) {
 	var pp plugin.Provider
 	for _, p := range pps {
 		if p.ID == id {
-			if plugin.PackageName(p.Spec) != mv.pkg {
+			if !plugin.SamePackage(plugin.PackageName(p.Spec), mv.pkg) {
 				return fmt.Errorf("%s is served by another plugin, %s", id, p.Spec)
 			}
 			pp = p
@@ -758,7 +758,7 @@ func refused(u *plugin.Usage) bool {
 
 // pluginListed is whether the package is in the plugin list already.
 func pluginListed(pkg string) bool {
-	return slices.ContainsFunc(plugin.Load().Plugins, func(e plugin.Entry) bool { return plugin.PackageName(e.Spec) == pkg })
+	return slices.ContainsFunc(plugin.Load().Plugins, func(e plugin.Entry) bool { return plugin.SamePackage(plugin.PackageName(e.Spec), pkg) })
 }
 
 // keepOrder lists the accounts moved as the built-in had them: the one in
@@ -1074,7 +1074,7 @@ func HandOver(ctx context.Context, accounts bool) map[string]error {
 			}
 			asked = true
 		}
-		i := slices.IndexFunc(pps, func(p plugin.Provider) bool { return p.ID == id && plugin.PackageName(p.Spec) == mv.pkg })
+		i := slices.IndexFunc(pps, func(p plugin.Provider) bool { return p.ID == id && plugin.SamePackage(plugin.PackageName(p.Spec), mv.pkg) })
 		if i < 0 || pps[i].SignedIn || len(pps[i].Accounts) > 0 {
 			continue
 		}
@@ -1094,7 +1094,7 @@ func HandOver(ctx context.Context, accounts bool) map[string]error {
 // at the version its move needs.
 func pluginReady(mv *mover) bool {
 	for _, e := range plugin.Load().Plugins {
-		if plugin.PackageName(e.Spec) == mv.pkg {
+		if plugin.SamePackage(plugin.PackageName(e.Spec), mv.pkg) {
 			return !e.Off && (mv.min == "" || !update.Newer(mv.min, plugin.Version(e.Spec)))
 		}
 	}
@@ -1173,7 +1173,7 @@ func MovedOnto(name string) []string {
 		}
 		pkg := plugin.PackageName(e.Spec)
 		for _, id := range OnPlugins() {
-			if m, _ := MigrationOf(id); m.Package == pkg && !slices.Contains(out, id) {
+			if m, _ := MigrationOf(id); plugin.SamePackage(m.Package, pkg) && !slices.Contains(out, id) {
 				out = append(out, id)
 			}
 		}

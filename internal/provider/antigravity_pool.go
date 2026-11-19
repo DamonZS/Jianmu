@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): Antigravity ("antigravity") is a
 // deprecated built-in subscription served by its plugin,
-// @magpie-community/opencode-antigravity-auth, once moved onto it
+// @jianmu-plugins/opencode-antigravity-auth, once moved onto it
 // (provider.Moved). A moved one's sign-ins, models, requests and usage are
 // all the plugin's, never this code's (only the move, in migrate*.go, still
 // reads its accounts). A fix here alone doesn't reach those users; fix the

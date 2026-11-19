@@ -20,7 +20,7 @@ import (
 
 // agentMovers are the built-in agents a community plugin serves, by id:
 // the plugin's npm package. A var so tests can name their own.
-var agentMovers = map[string]string{"agy": "@magpie-community/agent-agy"}
+var agentMovers = map[string]string{"agy": "@jianmu-plugins/agent-agy"}
 
 // movedAgent is the plugin listed that serves the built-in agent id, nil
 // for none.
@@ -31,7 +31,7 @@ func movedAgent(id string) *agentplug.Agent {
 	}
 	list, _ := agentplug.List()
 	for _, p := range list {
-		if movesTo(id, p) && plugin.Name(p.Spec) == pkg {
+		if movesTo(id, p) && plugin.SamePackage(plugin.Name(p.Spec), pkg) {
 			return p
 		}
 	}
@@ -42,7 +42,7 @@ func movedAgent(id string) *agentplug.Agent {
 // the built-in's, and agentMovers names its package.
 func movesTo(id string, p *agentplug.Agent) bool {
 	pkg, ok := agentMovers[id]
-	return ok && p.Desc.ID == id && plugin.Name(p.Spec) == pkg
+	return ok && p.Desc.ID == id && plugin.SamePackage(plugin.Name(p.Spec), pkg)
 }
 
 // dropMoved is list without the built-ins a plugin listed serves.

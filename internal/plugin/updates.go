@@ -73,8 +73,12 @@ const (
 )
 
 // Official is whether the package is the community's, jianmu's own,
-// which jianmu keeps up to date by itself.
-func Official(pkg string) bool { return strings.HasPrefix(pkg, "@magpie-community/") }
+// which jianmu keeps up to date by itself. The community publishes under
+// magpie-community's scope and, since the community's plugins moved here,
+// jianmu-plugins'; an install of either is kept up to date.
+func Official(pkg string) bool {
+	return strings.HasPrefix(pkg, "@magpie-community/") || strings.HasPrefix(pkg, "@jianmu-plugins/")
+}
 
 // Pinned is whether spec names a version (or a range or a tag other than
 // latest): the user chose it, and it stays. A git one's version is its
@@ -197,7 +201,7 @@ func PendingUpdates() Updates {
 func LastUpdated(pkg string, since time.Time) (Updated, bool) {
 	u := PendingUpdates()
 	for i := len(u.Updated) - 1; i >= 0; i-- {
-		if x := u.Updated[i]; x.Package == pkg && x.At.After(since) {
+		if x := u.Updated[i]; SamePackage(x.Package, pkg) && x.At.After(since) {
 			return x, true
 		}
 	}

@@ -72,7 +72,9 @@
   // names it (github:owner/repo, its page's or a git URL), never by its
   // package's name, which another repository can give too (#3685)
   const ghRepo = (spec) => { const m = /^(?:github:|(?:git\+)?(?:https?|ssh|git):\/\/(?:[^@/\s]+@)?(?:www\.|ssh\.)?github\.com(?::\d+(?=\/))?[/:])([^/#\s]+\/[^/#\s]+?)(?:\.git)?(?:[/#].*)?$/i.exec(spec) || (isGit(spec) && /^([^:/#]+\/[^:/#]+)(?:#.*)?$/.exec(spec)); return m ? m[1].toLowerCase() : ""; };
-  const packageIdentity = (pkg) => typeof pkg === "string" ? pkg.replace(/^@magpie-community\//, "@jianmu/") : "";
+  // the community publishes under magpie-community's scope and jianmu-plugins':
+  // an install of either is the same plugin
+  const packageIdentity = (pkg) => typeof pkg === "string" ? pkg.replace(/^@(?:magpie-community|jianmu-plugins)\//, "@jianmu/") : "";
   const samePackage = (a, b) => !!packageIdentity(a) && packageIdentity(a) === packageIdentity(b);
   const entryOf = (pkg) => {
     const g = (tagged || []).find((x) => samePackage(x.package, pkg))?.github;
@@ -470,7 +472,7 @@
     if (npm) {
       b.title = t("Update to {v}", { v: "v" + e.latest });
       // the community's would come by itself: Update brings it now
-      if ((pkg.startsWith("@jianmu/") || pkg.startsWith("@magpie-community/")) && !/@(?!latest$)[^@/]+$/.test(e.spec.slice(pkg.length))) b.title += "\n" + t("jianmu updates it by itself within the hour; Update does it now");
+      if ((pkg.startsWith("@jianmu/") || pkg.startsWith("@magpie-community/") || pkg.startsWith("@jianmu-plugins/")) && !/@(?!latest$)[^@/]+$/.test(e.spec.slice(pkg.length))) b.title += "\n" + t("jianmu updates it by itself within the hour; Update does it now");
     } else b.title = t("Fetches it from {repo} again", { repo: e.spec }) + "\n" + t("{have} installed, {repo} is at {head}", { have: e.commit, repo: e.spec, head: e.head });
     b.onclick = (ev) => {
       ev.stopPropagation();

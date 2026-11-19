@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): Grok ("grok") is a retired built-in
 // subscription, served by its plugin alone,
-// @magpie-community/opencode-grok-auth (provider.BuiltinRetired). Its
+// @jianmu-plugins/opencode-grok-auth (provider.BuiltinRetired). Its
 // sign-in, models, requests and usage are the plugin's; what is left here
 // reads the accounts signed in to the built-in for the move onto the plugin
 // (migrate_side.go), installs and finds the Grok CLI the plugin signs in
@@ -186,7 +186,7 @@ func grokBody(body []byte) []byte { return grokShaped(body, false) }
 // plugin reads stays: a lone "none" (a request that turned tools off says
 // so to the plugin, which reads it before adding a tool of its own
 // (x_search) and leaves a lone tool_choice out before the request goes to
-// Grok; @magpie-community/opencode-grok-auth 0.1.18, #3110), and an object
+// Grok; @jianmu-plugins/opencode-grok-auth 0.1.18, #3110), and an object
 // of a type Grok's backend doesn't take, an allowed_tools naming the
 // client's own tools among them, which the plugin reads the same way and
 // leaves out before Grok (#3153).
@@ -282,7 +282,7 @@ func grokShaped(body []byte, forPlugin bool) []byte {
 // (encrypted_content on it or on a part), empty, or with a part of another
 // kind is left as it is: jianmu reads no sealed task, and the gateway's
 // guard for one (hasSealedAgentMessage) still sees it. The plugin does the
-// same (@magpie-community/opencode-grok-auth 0.1.11, plugins#61).
+// same (@jianmu-plugins/opencode-grok-auth 0.1.11, plugins#61).
 func grokAgentMessage(it any) (map[string]any, bool) {
 	im, ok := it.(map[string]any)
 	if !ok || im["type"] != "agent_message" {

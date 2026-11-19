@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): WorkBuddy ("workbuddy") and WorkBuddy AI
 // ("workbuddy-ai") are retired built-in subscriptions served by their
-// plugin, @magpie-community/opencode-workbuddy-auth, moved or not. Their
+// plugin, @jianmu-plugins/opencode-workbuddy-auth, moved or not. Their
 // built-in sign-in, models, requests and usage are gone; what is left here
 // reads the built-in accounts for the move (migrate_workbuddy.go), checks
 // the plugin's accounts in (workbuddy_checkin.go), and tells a restricted

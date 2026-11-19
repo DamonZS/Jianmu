@@ -121,7 +121,7 @@ func TestResolveListUnread(t *testing.T) {
 		t.Fatalf("list down: %v, want it refused, saying why and npm:", err)
 	}
 	// the copy built in names WorkBuddy
-	if got, err := resolve(ctx, "WorkBuddy"); err != nil || got != "@magpie-community/opencode-workbuddy-auth" {
+	if got, err := resolve(ctx, "WorkBuddy"); err != nil || got != "@jianmu-plugins/opencode-workbuddy-auth" {
 		t.Fatalf("list down, WorkBuddy: %q, %v", got, err)
 	}
 	if got, err := resolve(ctx, "npm:opencode-gemini-auth"); err != nil || got != "opencode-gemini-auth" {

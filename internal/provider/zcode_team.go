@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): ZCode ("zcode") is a retired built-in
 // subscription, served by its plugin alone,
-// @magpie-community/opencode-zcode-auth (provider.BuiltinRetired). What is
+// @jianmu-plugins/opencode-zcode-auth (provider.BuiltinRetired). What is
 // left here are the readers of a team's seat that zcodeOwn and the Zhipu
 // plan card (planquota.go) still use. A fix belongs in the plugin
 // (github.com/magpie-community/plugins, packages/zcode), with the mover's

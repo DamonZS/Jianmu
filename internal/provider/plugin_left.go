@@ -108,13 +108,13 @@ func takeBackLeft(spec string) error {
 	if err != nil {
 		return err
 	}
-	if !slices.ContainsFunc(f.PluginLeft, func(l LeftRecord) bool { return l.Package == pkg }) {
+	if !slices.ContainsFunc(f.PluginLeft, func(l LeftRecord) bool { return plugin.SamePackage(l.Package, pkg) }) {
 		return nil
 	}
 	left := f.PluginLeft[:0]
 	changed := false
 	for _, l := range f.PluginLeft {
-		if l.Package == pkg && !slices.ContainsFunc(f.Providers, func(p Provider) bool { return p.ID == l.Provider.ID }) {
+		if plugin.SamePackage(l.Package, pkg) && !slices.ContainsFunc(f.Providers, func(p Provider) bool { return p.ID == l.Provider.ID }) {
 			f.Providers = append(f.Providers, l.Provider)
 			changed = true
 			continue

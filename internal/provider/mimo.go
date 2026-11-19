@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): Xiaomi MiMo ("mimo-app") is a retired
 // built-in subscription, served by its plugin alone,
-// @magpie-community/opencode-mimo-auth (provider.BuiltinRetired). Its
+// @jianmu-plugins/opencode-mimo-auth (provider.BuiltinRetired). Its
 // sign-in, models, requests and usage are the plugin's; all that is left
 // here is reading the accounts signed in to the built-in, for the move onto
 // the plugin (migrate_mimo.go). A fix belongs in the plugin

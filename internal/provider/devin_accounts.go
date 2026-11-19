@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): Devin ("devin") is a retired built-in
 // subscription, served by its plugin alone,
-// @magpie-community/opencode-devin-auth (provider.BuiltinRetired). Its
+// @jianmu-plugins/opencode-devin-auth (provider.BuiltinRetired). Its
 // sign-in, requests and usage are the plugin's; what is left here reads
 // the accounts signed in to the built-in for the move onto the plugin
 // (migrate_side.go), installs and runs the Devin CLI the plugin and the

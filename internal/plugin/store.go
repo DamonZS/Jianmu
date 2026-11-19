@@ -1054,3 +1054,27 @@ func PackageName(spec string) string {
 	}
 	return spec
 }
+
+// SamePackage is whether two package names are one plugin: the community's
+// packages are published under two scopes, magpie-community's and
+// jianmu-plugins'. An install made before the scope moved and one made
+// after it are the same plugin, so a move, a listing and an update find
+// either one.
+func SamePackage(a, b string) bool {
+	ia, oka := communityShort(a)
+	ib, okb := communityShort(b)
+	if oka || okb {
+		return oka && okb && ia == ib
+	}
+	return a == b
+}
+
+// communityShort is name without whichever of the two scopes it carries,
+// and whether it carried one; CutPrefix shares the string, so a lookup of
+// a row's icon allocates nothing.
+func communityShort(name string) (string, bool) {
+	if n, ok := strings.CutPrefix(name, "@magpie-community/"); ok {
+		return n, true
+	}
+	return strings.CutPrefix(name, "@jianmu-plugins/")
+}

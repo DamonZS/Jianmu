@@ -30,7 +30,7 @@ import (
 // image costs the plan's credits, so AutoDrawer never picks one.
 //
 // It is the same for the built-in and for a WorkBuddy moved onto its
-// plugin (@magpie-community/opencode-workbuddy-auth): jianmu shapes the
+// plugin (@jianmu-plugins/opencode-workbuddy-auth): jianmu shapes the
 // request, the plugin's fetch signs and sends it.
 
 // wbImagesFor is how long a plan's image models are kept before its config

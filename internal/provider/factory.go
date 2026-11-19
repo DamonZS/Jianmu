@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): Factory ("factory") is a retired built-in
 // subscription, served by its plugin alone,
-// @magpie-community/opencode-factory-auth (provider.BuiltinRetired). Its
+// @jianmu-plugins/opencode-factory-auth (provider.BuiltinRetired). Its
 // sign-in, models, requests and usage are the plugin's. What is left here:
 // reading the accounts signed in to the built-in, for the move onto the
 // plugin (migrate_factory.go); whoami, which names an API key's account

@@ -2,7 +2,7 @@ package provider
 
 // PLUGIN-SERVED (see AGENTS.md): Command Code's plan ("commandcode-plan")
 // is a retired built-in subscription, served by its plugin alone,
-// @magpie-community/opencode-commandcode-auth (provider.BuiltinRetired).
+// @jianmu-plugins/opencode-commandcode-auth (provider.BuiltinRetired).
 // Its sign-in, models, requests and usage are the plugin's; what is left
 // here reads the accounts signed in to the built-in for the move onto the
 // plugin (migrate_side.go), and reads a Command Code key's plan and

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Antigravity's accounts on @magpie-community/opencode-antigravity-auth:
+// Antigravity's accounts on @jianmu-plugins/opencode-antigravity-auth:
 // the plugin keeps a Google sign-in as an oauth entry whose refresh is
 // "<refresh token>|<project>", with the access token and its expiry beside
 // it and the email as its accountId. An account the built-in had no
@@ -15,7 +15,7 @@ import (
 // (loadCodeAssist, onboardUser) as the built-in did.
 func init() {
 	movers["antigravity"] = &mover{
-		pkg:    "@magpie-community/opencode-antigravity-auth",
+		pkg:    "@jianmu-plugins/opencode-antigravity-auth",
 		min:    "0.1.0", // the built-in's sign-in, project, models, request shaping, errors and usage pools, ported
 		agents: []string{"antigravity"},
 		out: func() ([]Moving, error) {

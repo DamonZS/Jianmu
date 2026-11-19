@@ -1589,7 +1589,7 @@ jianmu plugin options model-map off   # clears them
 ```
 
 The name can be a package's short name (`model-map` for
-`@magpie-community/middleware-model-map`). A package's
+`@jianmu-plugins/middleware-model-map`). A package's
 `"jianmu": { "options": {…} }` is the example the editor starts from.
 A key that a provider plugin declares as a switch for its provider (the
 editor's Plugin options, such as Cursor's `wire_trace`) goes where the
@@ -1598,7 +1598,7 @@ options cursor '{"wire_trace": true}'` turns it on, and `off` puts every
 switch back to the plugin's default.
 
 Ready-made middleware, under Plugins › Discover › Gateway middleware
-(`@magpie-community/middleware-<name>`), mostly New API's channel settings
+(`@jianmu-plugins/middleware-<name>`), mostly New API's channel settings
 with the same JSON: `param-override` (`param_override`), `model-map`
 (`model_mapping`), `system-prompt`, `word-guard` (sensitive words) and
 `think-tags` (strip `<think>…</think>`, or `thinking_to_content`), and
@@ -1674,11 +1674,11 @@ shell profile. Beside `launch`:
   distros too; `aliases`, other names `jianmu <name>` takes.
 
 An id jianmu's own agents use is refused, except a built-in's that moves
-onto a community plugin: with `@magpie-community/agent-agy` installed and
+onto a community plugin: with `@jianmu-plugins/agent-agy` installed and
 on, `agy` is the plugin's, and what the built-in had wired is handed over
 as the plugin's, so nothing changes for the user; with it off or removed,
 agy is connected no more and the built-in is back. In the market an agent's entry has
-`"kind": "agent"` (`@magpie-community/agent-<name>`). An agent that needs a
+`"kind": "agent"` (`@jianmu-plugins/agent-<name>`). An agent that needs a
 runtime (a timer, a file watched) keeps its agent file in moejs and adds a
 Bun module as the package's `main`; a package that declares `jianmu.agent`
 is an agent in the market and on GitHub's list either way, and its
